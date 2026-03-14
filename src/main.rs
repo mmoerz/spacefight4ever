@@ -50,7 +50,7 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(Update, trigger_exit_dialog)
 
-        //.add_systems(Update, debug_print_ui_tree)
+        .add_systems(Update, debug_print_ui_tree)
         .run();
 }
 

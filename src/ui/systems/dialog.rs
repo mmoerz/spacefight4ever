@@ -13,7 +13,7 @@ pub fn dialog_button_system(
             &DialogButton,
             &mut BackgroundColor
         ),
-        (Changed<Interaction>),
+        Changed<Interaction>,
     >,
     mut commands: Commands,
     dialog_query: Query<Entity, With<DialogEntity>>,

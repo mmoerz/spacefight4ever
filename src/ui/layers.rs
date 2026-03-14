@@ -6,6 +6,7 @@
 use bevy::prelude::*;
 
 use super::bundle::UiNode;
+use super::state::*;
 
 #[derive(Component)]
 pub struct UiRoot;
@@ -32,7 +33,10 @@ pub struct UiLayers {
 }
 
 /// creates a layered node structure for ui
-pub fn spawn_ui_roots(mut commands: Commands) {
+pub fn spawn_ui_roots(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<UiInitState>>,
+) {
     // Spawn UiRoot first
     let ui_root = commands.spawn((
         UiRoot, UiNode::default(), Name::new("UiRoot"))).id();
@@ -58,6 +62,7 @@ pub fn spawn_ui_roots(mut commands: Commands) {
         dialog_root,
         overlay_root,
     });
+    next_state.set(UiInitState::Ready)
 }
 
 /// spawn the ui camera

@@ -4,6 +4,15 @@ use super::dialog_stack::DialogStack;
 /// This file contains the state of the UI, such as whether the pause menu is open,
 /// whether the inventory is open, and the stack of dialogs that are currently open.
 
+/// The `UiInitState` is responsible to block further initialization until the ui 
+/// basics are initialized
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum UiInitState {
+    #[default]
+    Loading,
+    Ready,
+}
+
 /// The `UiState` resource is used to track the current state of the UI,
 /// including the input mode and the dialog stack.
 #[derive(Resource, Default)]

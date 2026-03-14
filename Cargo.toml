@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 bevy = { version = "0.18.0", features = [ "dynamic_linking", "debug" ] }
+bevy_prototype_lyon = "0.16.0"
 bevy_ui = "0.18.1"
 bevy_ui_widgets = "0.18.1"
 

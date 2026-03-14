@@ -1,0 +1,226 @@
+use bevy::{color::palettes::css::{BLACK,DARK_CYAN}, prelude::*};
+use bevy_prototype_lyon::prelude::*;
+
+#[derive(Component)]
+pub struct ShipModuleBar;
+
+#[derive(Message)]
+pub enum HealthChanged {
+    Health(i64)
+}
+
+pub fn ship_module_bar(asset_server: &AssetServer) -> impl Bundle {
+    let shape = shapes::RegularPolygon {
+        sides: 6,
+        feature: shapes::RegularPolygonFeature::Radius(25.0),
+        ..shapes::RegularPolygon::default()
+    };
+    (
+        Name::new("ModuleBar"),
+        Node {
+            width: px(150),
+            height: px(150),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        Visibility::Inherited,
+        children!(
+            Text::new("mbar"),
+            TextFont {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 20.0,
+                ..default()
+            },
+            ShapeBuilder::with(&shape)
+                .fill(DARK_CYAN)
+                .stroke((BLACK, 3.0))
+                .build()
+        )
+    )
+}
+
+#[derive(Component)]
+pub struct HexGrid;
+
+#[derive(Component)]
+pub struct HexCell {
+    pub row: usize,
+    pub col: usize,
+}
+
+#[derive(Resource, Clone)]
+pub struct HexGridConfig {
+    pub rows: usize,
+    pub cols: usize,
+    pub hex_radius: f32,
+}
+
+pub fn setup_hex_grid(
+    parent : Entity,
+    mut commands: Commands,
+    asset_server: &Res<AssetServer>,
+//    config: Res<HexGridConfig>,
+) {
+    // Load SVG image
+    let hex_image: Handle<Image> = asset_server.load("hex.svg");
+
+    // Config
+    let config = HexGridConfig {
+        rows: 3,
+        cols: 10,
+        hex_radius: 25.0,
+    };
+
+    // this borrows the config forever
+    commands.insert_resource(config.clone());
+
+    let hex_w = config.hex_radius * 2.0;
+    let hex_h = (3.0_f32).sqrt() * config.hex_radius;
+    let size = hex_w;
+
+    // Spawn parent node for the HUD
+    commands.entity(parent)
+    .with_children(|parent| {
+        parent.spawn((
+            Node {
+                width: px(600.0),
+                height: px(200.0),
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::FlexStart,
+                position_type: PositionType::Relative,
+                ..default()
+            },
+            HexGrid,
+        ))
+        .with_children(|parent| {
+
+            for row in 0..config.rows {
+                for col in 0..config.cols {
+                    // Offset every other row
+                    let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
+                    let x = col as f32 * hex_w + x_offset;
+                    let y = row as f32 * (hex_h * 0.75); // vertical spacing
+                    parent.spawn(
+                        hex_image_button(hex_image.clone(), size, x, y, row, col)
+                    );
+                }
+            }
+        });
+    });
+}
+
+/// Returns a single hex node with an image child
+pub fn hex_image_button(
+    hex_image: Handle<Image>,
+    size: f32,
+    x: f32,
+    y: f32,
+    row: usize,
+    col: usize
+) -> impl Bundle {
+    (
+        Node {
+            width: px(size),
+            height: px(size),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            position_type: PositionType::Absolute,
+            left: px(x),
+            top: px(y),
+            ..default()
+        },
+        Visibility::Visible,
+        HexCell {
+            row,
+            col
+        },
+        ImageNode::new(hex_image),
+    )
+}
+
+// fn hex_grid(
+//     config: HexGridConfig,
+//     hex_image: Handle<Image>,
+// ) -> impl Bundle {
+//     let hex_w = config.hex_radius * 2.0;
+//     let hex_h = (3.0_f32).sqrt() * config.hex_radius;
+
+//     for row in 0..config.rows {
+//         for col in 0..config.cols {
+//             // Offset every other row
+//             let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
+//             let x = col as f32 * hex_w + x_offset;
+//             let y = row as f32 * (hex_h * 0.75); // vertical spacing
+
+//                 commands.entity(parent).with_children(|parent| {
+//                     parent.spawn((
+//                         Node {
+//                             width: px(hex_w),
+//                             height: px(hex_h),
+//                             position_type: PositionType::Absolute,
+//                             left: Val::Px(x),
+//                             top: Val::Px(y),
+//                             justify_content: JustifyContent::Center,
+//                             align_items: AlignItems::Center,
+//                             ..default()
+//                         },
+//                         BackgroundColor(Color::NONE),
+//                         Hex { row, col },
+//                         Interaction::None, // clickable
+//                     ))
+//                     .with_children(|parent| {
+//                         parent.spawn(Image {
+//                             image: UiImage(config.hex_image.clone()),
+//                             style: Style {
+//                                 size: Size::new(Val::Px(hex_w), Val::Px(hex_h)),
+//                                 ..default()
+//                             },
+//                             ..default()
+//                         });
+//                     });
+//                 });
+//             }
+//         }
+//     }
+// }
+
+// fn hex_click_system(
+//     mouse_input: Input<MouseButton>,
+//     windows: Res<Window>,
+//     q_hexes: Query<(&GlobalTransform, &Hex)>,
+// ) {
+//     if mouse_input.just_pressed(MouseButton::Left) {
+//         let window = windows.get_primary().unwrap();
+//         if let Some(pos) = window.cursor_position() {
+//             for (transform, hex) in &q_hexes {
+//                 let translation = transform.translation();
+//                 // simple bounding box check
+//                 let size = Vec2::new(50.0, 50.0); // or hex radius * sqrt(3)
+//                 if pos.x >= translation.x
+//                     && pos.x <= translation.x + size.x
+//                     && pos.y >= translation.y
+//                     && pos.y <= translation.y + size.y
+//                 {
+//                     println!("Clicked hex at row {}, col {}", hex.row, hex.col);
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+// pub fn health_system(
+//     mut messages: MessageReader<HealthChanged>,
+//     mut query: Query<&mut Text, With<HealthBar>>,
+// ) {
+//     for msg in messages.read() {
+//         match(msg) {
+//             HealthChanged::Health(health) => {
+//                 let mut text = query.single_mut().unwrap();
+//                 *text = Text::new(format!("Health: {}", health))
+//             }
+//         }
+//     }
+// }
