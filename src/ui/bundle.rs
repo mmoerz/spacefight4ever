@@ -54,10 +54,12 @@ impl Default for UiNode {
 /// A simple button bundle wrapper, ready for interaction.
 #[derive(Bundle)]
 pub struct UiButtonBundle {
+    pub button: Button,
     pub node: Node,
     pub background_color: bevy::ui::BackgroundColor,
     pub interaction: bevy::ui::Interaction,
     pub visibility: Visibility,
+
     //pub transform: Transform,
     //pub global_transform: GlobalTransform,
 }
@@ -65,6 +67,7 @@ pub struct UiButtonBundle {
 impl Default for UiButtonBundle {
     fn default() -> Self {
          Self {
+            button: Button,
             node: Node {
                 width: px(110.0),
                 height: px(40.0),
@@ -90,6 +93,7 @@ impl UiButtonBundle {
     ) -> Self
     {
         Self {
+            button: Button,
             node: Node {
                 width: width,
                 height: height,

@@ -8,6 +8,12 @@ use super::dialogs::message::*;
 #[derive(Component)]
 pub struct DialogEntity;
 
+#[derive(Component)]
+pub enum DialogButton {
+    ConfirmExitYes,
+    ConfirmExitNo,
+}
+
 pub fn dialog_request_system(
     mut requests: MessageReader<DialogRequest>,
     mut stack: ResMut<DialogStack>,
@@ -58,34 +64,14 @@ pub fn dialog_spawn_system(
     }
 }
 
-pub fn dialog_button_system(
-    mut interactions: Query<
-        (&Interaction, &DialogButton),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut commands: Commands,
-    mut stack: ResMut<DialogStack>,
-    dialog_query: Query<Entity, With<DialogEntity>>,
-    mut results: MessageWriter<DialogResult>,
+pub fn exit_on_confirm(
+    mut events: MessageReader<DialogResult>,
+    mut app_exit: MessageWriter<AppExit>,
 ) {
-    for (interaction, button) in &mut interactions {
-        if *interaction == Interaction::Pressed {
-            match button {
-                DialogButton::ConfirmExitYes => {
-                    results.write(DialogResult::ConfirmExit(true));
-                }
-                DialogButton::ConfirmExitNo => {
-                    results.write(DialogResult::ConfirmExit(false));
-                }
-            }
-
-            if let Some(dialog_entity) = dialog_query.iter().last() {
-                //despawn_recursive(&mut commands, dialog_entity, &children_query);
-                // should be sufficient and despawn child components
-                commands.entity(dialog_entity).despawn();
-            }
-
-            stack.pop();
+    for result in events.read() {
+        if let DialogResult::ConfirmExit(true) = result {
+            println!("Exiting app!");
+            app_exit.write(AppExit::Success);
         }
     }
 }
@@ -103,9 +89,3 @@ pub fn dialog_button_system(
 //     }
 //     commands.entity(entity).despawn();
 // }
-
-#[derive(Component)]
-pub enum DialogButton {
-    ConfirmExitYes,
-    ConfirmExitNo,
-}

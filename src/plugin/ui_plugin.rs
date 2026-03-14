@@ -18,10 +18,11 @@ impl Plugin for UiPlugin {
             .add_systems(Update, (
                 ui::dialog_manager::dialog_request_system,
                 ui::dialog_manager::dialog_spawn_system,
-                ui::dialog_manager::dialog_button_system
+                ui::systems::dialog::dialog_button_system
             ))
             .add_systems(Update, ui::systems::button::button_system)
             //.add_systems(Update, ui::animation::animate_ui)
-            .add_systems(Update, ui::state::input_routing_system);
+            .add_systems(Update, ui::state::input_routing_system)
+            .add_systems(Update, ui::dialog_manager::exit_on_confirm);
     }
 }

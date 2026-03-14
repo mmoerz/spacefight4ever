@@ -5,13 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug executable 'slavemaster'",
+            "name": "Debug executable 'spacefight4ever'",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "run",
-                    "--bin=slavemaster"
+                    "--bin=spacefight4ever"
                 ]
             },
             "args": []

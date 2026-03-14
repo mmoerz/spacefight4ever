@@ -20,4 +20,5 @@ pub mod dialogs {
 
 pub mod systems {
     pub mod button;
+    pub mod dialog;
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::ui::bundle::UiButtonBundle;
-use crate::ui::dialog_manager::DialogEntity;
+use crate::ui::dialog_manager::{DialogButton, DialogEntity};
 
 /// Spawns a "Confirm Exit" dialog under the DialogRoot layer
 pub fn spawn_confirm_exit_dialog(
@@ -56,6 +56,7 @@ pub fn spawn_confirm_exit_dialog(
                         UiButtonBundle {
                             ..Default::default()
                         },
+                        DialogButton::ConfirmExitYes,
                         children![(
                             Text::new("Yes"),
                             TextColor::BLACK,
@@ -71,6 +72,7 @@ pub fn spawn_confirm_exit_dialog(
                         UiButtonBundle {
                             ..Default::default()
                         },
+                        DialogButton::ConfirmExitNo,
                         children![(
                             Text::new("No"),
                             TextColor::BLACK,

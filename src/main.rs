@@ -50,7 +50,7 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(Update, trigger_exit_dialog)
 
-        .add_systems(Update, debug_print_ui_tree)
+        //.add_systems(Update, debug_print_ui_tree)
         .run();
 }
 
@@ -62,6 +62,8 @@ fn trigger_exit_dialog(
         events.write(ui::messages::DialogRequest::ConfirmExit);
     }
 }
+
+
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn( (
