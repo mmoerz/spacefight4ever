@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::{BLACK,DARK_CYAN}, prelude::*};
+use bevy::{color::palettes::css::{BLACK,DARK_CYAN,DARK_RED}, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 
 #[derive(Component)]
@@ -9,7 +9,7 @@ pub enum HealthChanged {
     Health(i64)
 }
 
-pub fn ship_module_bar(asset_server: &AssetServer) -> impl Bundle {
+pub fn ship_module_bars(asset_server: &AssetServer) -> impl Bundle {
     let shape = shapes::RegularPolygon {
         sides: 6,
         feature: shapes::RegularPolygonFeature::Radius(25.0),
@@ -92,31 +92,92 @@ pub fn setup_hex_grid(
                 //height: px(150.0),
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
-                align_items: AlignItems::FlexEnd,
+                //align_items: AlignItems::FlexStart,
                 position_type: PositionType::Relative,
                 //position_type: PositionType::Absolute,
                 //bottom: px(0),
                 ..default()
             },
             HexGrid,
-            BackgroundColor(Color::BLACK),
+            //BackgroundColor(Color::BLACK),
             //BorderColor::all(BLACK),
         ))
         .with_children(|parent| {
+            // debug stuff for checking size (height)
+            // parent.spawn((
+            //     Node {
+            //         width: px(size),
+            //         height: px(size),
+            //         ..default()
+            //     },
+            //     BackgroundColor(DARK_RED.into())
+            // ));
 
             for row in 0..config.rows {
-                for col in 0..config.cols {
-                    // Offset every other row
-                    let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
-                    let x = col as f32 * hex_w + x_offset;
-                    let y = row as f32 * hex_h * 1.1; // vertical spacing
-                    parent.spawn(
-                        hex_image_button(hex_image.clone(), size, x, y, row, col)
-                    );
-                }
+                parent.spawn((
+                    Node {
+                        flex_direction: FlexDirection::Row,
+                        position_type: PositionType::Relative,
+                        align_items: AlignItems::FlexStart,
+                        ..default()
+                    },
+                ))
+                .with_children(|row_node|{
+                    if row  % 2  == 1 {
+                        row_node.spawn(Node {
+                            width: px(hex_w * 0.5),
+                            ..default()
+                        });
+                    }
+                    for col in 0..config.cols {
+                        // Offset every other row
+                        // let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
+                        // let x = col as f32 * hex_w + x_offset;
+                        // let y = row as f32 * hex_h * 1.1; // vertical spacing
+                        row_node.spawn(
+                            hex_image_button(
+                                hex_image.clone(),
+                                hex_w,
+                                hex_h,
+                                row,
+                                col)
+                        );
+                    }
+                });
             }
         });
     });
+}
+
+
+#[derive(Component)]
+pub struct HexRow;
+
+/// Returns a single hex node with an image child
+pub fn hex_image_button(
+    hex_image: Handle<Image>,
+    hex_width: f32,
+    height: f32,
+    row: usize,
+    col: usize
+) -> impl Bundle {
+    (
+        Name::new("HexButton"),
+        Node {
+            width: px(hex_width),
+            height: px(height),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            position_type: PositionType::Relative,
+            ..default()
+        },
+        Visibility::Visible,
+        HexCell {
+            row,
+            col
+        },
+        ImageNode::new(hex_image),
+    )
 }
 
 // pub fn hex_grid(
@@ -157,35 +218,36 @@ pub fn setup_hex_grid(
 //     )
 // }
 
-/// Returns a single hex node with an image child
-pub fn hex_image_button(
-    hex_image: Handle<Image>,
-    size: f32,
-    x: f32,
-    y: f32,
-    row: usize,
-    col: usize
-) -> impl Bundle {
-    (
-        Name::new("HexButton"),
-        Node {
-            width: px(size),
-            height: px(size),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            position_type: PositionType::Absolute,
-            left: px(x),
-            top: px(y),
-            ..default()
-        },
-        Visibility::Visible,
-        HexCell {
-            row,
-            col
-        },
-        ImageNode::new(hex_image),
-    )
-}
+// Returns a single hex node with an image child
+// pub fn hex_image_button(
+//     hex_image: Handle<Image>,
+//     width: f32,
+//     height: f32,
+//     x: f32,
+//     y: f32,
+//     row: usize,
+//     col: usize
+// ) -> impl Bundle {
+//     (
+//         Name::new("HexButton"),
+//         Node {
+//             width: px(width),
+//             height: px(height),
+//             justify_content: JustifyContent::Center,
+//             align_items: AlignItems::Center,
+//             position_type: PositionType::Absolute,
+//             left: px(x),
+//             top: px(y),
+//             ..default()
+//         },
+//         Visibility::Visible,
+//         HexCell {
+//             row,
+//             col
+//         },
+//         ImageNode::new(hex_image),
+//     )
+// }
 
 // fn hex_grid(
 //     config: HexGridConfig,

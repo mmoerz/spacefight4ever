@@ -40,9 +40,9 @@ impl Default for UiNode {
                 width: percent(100.0),
                 height: percent(100.0),
                 //flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::FlexStart,
-                position_type: PositionType::Relative,
+                // justify_content: JustifyContent::FlexStart,
+                // align_items: AlignItems::FlexStart,
+                // position_type: PositionType::Relative,
                 ..Default::default()
             },
             background_color: BackgroundColor(Color::srgba(0.,0.,0., 0.)),
