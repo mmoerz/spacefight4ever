@@ -63,17 +63,17 @@ pub fn setup_hex_grid(
 //    config: Res<HexGridConfig>,
 ) {
     // Load SVG image
-    let hex_image: Handle<Image> = asset_server.load("hex.svg");
+    let hex_image: Handle<Image> = asset_server.load("ui/yel_hex.png");
 
     // Config
     let config = HexGridConfig {
         rows: 3,
         cols: 10,
-        hex_radius: 25.0,
+        hex_radius: 20.0,
     };
 
     // this borrows the config forever
-    commands.insert_resource(config.clone());
+    //commands.insert_resource(config.clone());
 
     let hex_w = config.hex_radius * 2.0;
     let hex_h = (3.0_f32).sqrt() * config.hex_radius;
@@ -83,16 +83,24 @@ pub fn setup_hex_grid(
     commands.entity(parent)
     .with_children(|parent| {
         parent.spawn((
+            Name::new("HexGrid"),
             Node {
-                width: px(600.0),
-                height: px(200.0),
+                //width: px(500.0),
+                //width: percent(100.0),
+                width: px((config.cols as f32 + 0.5) * hex_w),
+                height: percent(100.0),
+                //height: px(150.0),
                 flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::FlexStart,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::FlexEnd,
                 position_type: PositionType::Relative,
+                //position_type: PositionType::Absolute,
+                //bottom: px(0),
                 ..default()
             },
             HexGrid,
+            BackgroundColor(Color::BLACK),
+            //BorderColor::all(BLACK),
         ))
         .with_children(|parent| {
 
@@ -101,7 +109,7 @@ pub fn setup_hex_grid(
                     // Offset every other row
                     let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
                     let x = col as f32 * hex_w + x_offset;
-                    let y = row as f32 * (hex_h * 0.75); // vertical spacing
+                    let y = row as f32 * hex_h * 1.1; // vertical spacing
                     parent.spawn(
                         hex_image_button(hex_image.clone(), size, x, y, row, col)
                     );
@@ -110,6 +118,44 @@ pub fn setup_hex_grid(
         });
     });
 }
+
+// pub fn hex_grid(
+//     hex_image: Handle<Image>,
+//     size: f32,
+//     rows: usize,
+//     cols: usize
+// ) -> impl Bundle {
+//     let hex_w = size;
+//     let hex_h = (3.0_f32).sqrt() / 2.0 * size;
+
+//     let mut children_vec = Vec::new();
+
+//     for row in 0..rows {
+//         for col in 0..cols {
+//             // Offset every other row
+//             let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
+//             let x = col as f32 * hex_w + x_offset;
+//             let y = row as f32 * (hex_h * 0.75); // vertical spacing
+//             children_vec.push(
+//                 hex_image_button(hex_image.clone(), size, x, y, row, col)
+//             );
+//         }
+//     }
+//     (
+//         Node {
+//             width: Val::Px(cols as f32 * hex_w),
+//             height: Val::Px(rows as f32 * hex_h),
+//             flex_direction: FlexDirection::Column,
+//             justify_content: JustifyContent::FlexStart,
+//             align_items: AlignItems::FlexStart,
+//             position_type: PositionType::Relative,
+//             ..default()
+//         },
+//         Visibility::Visible,
+//         HexGrid,
+//         children!(children_vec),
+//     )
+// }
 
 /// Returns a single hex node with an image child
 pub fn hex_image_button(
@@ -121,6 +167,7 @@ pub fn hex_image_button(
     col: usize
 ) -> impl Bundle {
     (
+        Name::new("HexButton"),
         Node {
             width: px(size),
             height: px(size),
