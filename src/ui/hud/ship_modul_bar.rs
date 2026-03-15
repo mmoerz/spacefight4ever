@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::{BLACK,DARK_CYAN,DARK_RED}, prelude::*};
+use bevy::{color::palettes::css::*, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 
 #[derive(Component)]
@@ -58,7 +58,7 @@ pub struct HexGridConfig {
 
 pub fn setup_hex_grid(
     parent : Entity,
-    mut commands: Commands,
+    commands: &mut Commands,
     asset_server: &Res<AssetServer>,
 //    config: Res<HexGridConfig>,
 ) {
@@ -77,7 +77,6 @@ pub fn setup_hex_grid(
 
     let hex_w = config.hex_radius * 2.0;
     let hex_h = (3.0_f32).sqrt() * config.hex_radius;
-    let size = hex_w;
 
     // Spawn parent node for the HUD
     commands.entity(parent)
@@ -314,21 +313,6 @@ pub fn hex_image_button(
 //                 {
 //                     println!("Clicked hex at row {}, col {}", hex.row, hex.col);
 //                 }
-//             }
-//         }
-//     }
-// }
-
-
-// pub fn health_system(
-//     mut messages: MessageReader<HealthChanged>,
-//     mut query: Query<&mut Text, With<HealthBar>>,
-// ) {
-//     for msg in messages.read() {
-//         match(msg) {
-//             HealthChanged::Health(health) => {
-//                 let mut text = query.single_mut().unwrap();
-//                 *text = Text::new(format!("Health: {}", health))
 //             }
 //         }
 //     }

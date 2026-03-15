@@ -11,7 +11,7 @@ pub mod debug;
 
 pub mod hud {
     pub mod hud_root;
-    pub mod health_bar;
+    pub mod health_display;
     pub mod ship_modul_bar;
 }
 

@@ -1,7 +1,7 @@
-use bevy::{ecs::system::command, prelude::*};
+use bevy::prelude::*;
 use crate::ui::{hud::ship_modul_bar::setup_hex_grid, layers::*};
 
-use super::health_bar::*;
+use super::health_display::*;
 
 pub fn spawn_hud(
     mut commands: Commands,
@@ -57,11 +57,9 @@ pub fn spawn_hud(
                 },
                 //BackgroundColor(Color::WHITE),
             ));
-            bottom.spawn(health_display(&asset_server));
+            
         });
     
-            //parent.spawn(setup_hex_grid(commands, asset_server))
-            //parent.spawn(ship_module_bar(&asset_server));
-
-    setup_hex_grid(bottom_hud, commands, &asset_server)
+    health_display(bottom_hud, &mut commands, &asset_server);
+    setup_hex_grid(bottom_hud, &mut commands, &asset_server);
 }
