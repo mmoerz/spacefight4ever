@@ -27,7 +27,8 @@ impl Plugin for UiPlugin {
                 ui::dialog_manager::dialog_spawn_system,
                 ui::systems::dialog::dialog_button_system
             ))
-            .add_systems(Update, ui::systems::button::button_system)
+            //.add_systems(Update, ui::systems::button::button_system)
+            .add_systems(Update, ui::hud::ship_modul_bar::ship_module_button_system)
             //.add_systems(Update, ui::animation::animate_ui)
             .add_systems(Update, ui::state::input_routing_system)
             .add_systems(Update, ui::dialog_manager::exit_on_confirm);

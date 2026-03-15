@@ -9,3 +9,4 @@ pub struct ShipHealth {
     pub hull: i32,
     pub hull_max: i32,
 }
+

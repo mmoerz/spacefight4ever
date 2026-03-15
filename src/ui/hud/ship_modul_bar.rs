@@ -176,123 +176,27 @@ pub fn hex_image_button(
             col
         },
         ImageNode::new(hex_image),
+        Button
     )
 }
 
-// pub fn hex_grid(
-//     hex_image: Handle<Image>,
-//     size: f32,
-//     rows: usize,
-//     cols: usize
-// ) -> impl Bundle {
-//     let hex_w = size;
-//     let hex_h = (3.0_f32).sqrt() / 2.0 * size;
-
-//     let mut children_vec = Vec::new();
-
-//     for row in 0..rows {
-//         for col in 0..cols {
-//             // Offset every other row
-//             let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
-//             let x = col as f32 * hex_w + x_offset;
-//             let y = row as f32 * (hex_h * 0.75); // vertical spacing
-//             children_vec.push(
-//                 hex_image_button(hex_image.clone(), size, x, y, row, col)
-//             );
-//         }
-//     }
-//     (
-//         Node {
-//             width: Val::Px(cols as f32 * hex_w),
-//             height: Val::Px(rows as f32 * hex_h),
-//             flex_direction: FlexDirection::Column,
-//             justify_content: JustifyContent::FlexStart,
-//             align_items: AlignItems::FlexStart,
-//             position_type: PositionType::Relative,
-//             ..default()
-//         },
-//         Visibility::Visible,
-//         HexGrid,
-//         children!(children_vec),
-//     )
-// }
-
-// Returns a single hex node with an image child
-// pub fn hex_image_button(
-//     hex_image: Handle<Image>,
-//     width: f32,
-//     height: f32,
-//     x: f32,
-//     y: f32,
-//     row: usize,
-//     col: usize
-// ) -> impl Bundle {
-//     (
-//         Name::new("HexButton"),
-//         Node {
-//             width: px(width),
-//             height: px(height),
-//             justify_content: JustifyContent::Center,
-//             align_items: AlignItems::Center,
-//             position_type: PositionType::Absolute,
-//             left: px(x),
-//             top: px(y),
-//             ..default()
-//         },
-//         Visibility::Visible,
-//         HexCell {
-//             row,
-//             col
-//         },
-//         ImageNode::new(hex_image),
-//     )
-// }
-
-// fn hex_grid(
-//     config: HexGridConfig,
-//     hex_image: Handle<Image>,
-// ) -> impl Bundle {
-//     let hex_w = config.hex_radius * 2.0;
-//     let hex_h = (3.0_f32).sqrt() * config.hex_radius;
-
-//     for row in 0..config.rows {
-//         for col in 0..config.cols {
-//             // Offset every other row
-//             let x_offset = if row % 2 == 0 { 0.0 } else { hex_w * 0.5 };
-//             let x = col as f32 * hex_w + x_offset;
-//             let y = row as f32 * (hex_h * 0.75); // vertical spacing
-
-//                 commands.entity(parent).with_children(|parent| {
-//                     parent.spawn((
-//                         Node {
-//                             width: px(hex_w),
-//                             height: px(hex_h),
-//                             position_type: PositionType::Absolute,
-//                             left: Val::Px(x),
-//                             top: Val::Px(y),
-//                             justify_content: JustifyContent::Center,
-//                             align_items: AlignItems::Center,
-//                             ..default()
-//                         },
-//                         BackgroundColor(Color::NONE),
-//                         Hex { row, col },
-//                         Interaction::None, // clickable
-//                     ))
-//                     .with_children(|parent| {
-//                         parent.spawn(Image {
-//                             image: UiImage(config.hex_image.clone()),
-//                             style: Style {
-//                                 size: Size::new(Val::Px(hex_w), Val::Px(hex_h)),
-//                                 ..default()
-//                             },
-//                             ..default()
-//                         });
-//                     });
-//                 });
-//             }
-//         }
-//     }
-// }
+pub fn ship_module_button_system(
+    mut query: Query<(&Interaction, &HexCell), (Changed<Interaction>, With<Button>)>,
+) {
+    for (interaction, hex) in &mut query {
+        match *interaction {
+            Interaction::Pressed => {
+                println!("Hex clicked at row {}, col {}", hex.row, hex.col);
+            }
+            Interaction::Hovered => {
+                // optional: highlight the hex
+            }
+            Interaction::None => {
+                // optional: remove highlight
+            }
+        }
+    }
+}
 
 // fn hex_click_system(
 //     mouse_input: Input<MouseButton>,
