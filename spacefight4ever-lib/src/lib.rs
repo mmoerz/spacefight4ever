@@ -4,7 +4,11 @@ pub mod plugin;
 pub mod ui;
 pub mod game;
 
-use plugin::UiPlugin;
+pub mod prelude {
+    pub use crate::plugin::*;
+    pub use crate::ui::*;
+    pub use crate::game::*;
+}
 
 #[derive(Component)]
 struct Person;
@@ -41,19 +45,9 @@ impl Plugin for HelloPlugin {
     }
 }
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(UiPlugin)
 
-        .add_systems(Startup, setup)
-        .add_systems(Update, trigger_exit_dialog)
 
-        //.add_systems(Update, crate::ui::debug::debug_print_ui_tree)
-        .run();
-}
-
-fn trigger_exit_dialog(
+pub fn trigger_exit_dialog(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut events: MessageWriter<ui::messages::DialogRequest>,
 ) {
@@ -64,7 +58,7 @@ fn trigger_exit_dialog(
 
 
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn( (
         Text::new("hello foo"),
         Underline,

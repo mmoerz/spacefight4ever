@@ -1,9 +1,12 @@
-[package]
-name = "spacefight4ever"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "2"
+members = [
+    "spacefight4ever-bin",
+    "spacefight4ever-lib",
+    "spacefight4ever-test"
+]
 
-[dependencies]
+[workspace.dependencies]
 bevy = { version = "0.18.0", features = [ "dynamic_linking", "debug" ] }
 bevy_prototype_lyon = "0.16.0"
 bevy_ui = "0.18.1"
@@ -36,8 +39,3 @@ inherits = "release"
 opt-level = "s"
 # Strip all debugging information from the binary to slightly reduce file size.
 strip = "debuginfo"
-
-# for Linux
-[target.x86_64-unknown-linux-gnu]
-linker = "clang"
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]

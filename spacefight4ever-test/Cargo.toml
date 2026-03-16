@@ -1,5 +1,5 @@
 [package]
-name = "spacefight4ever-bin"
+name = "spacefight4ever-test"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,9 @@ edition = "2021"
 spacefight4ever-lib = { path = "../spacefight4ever-lib" }
 
 bevy = { workspace = true }
+bevy_prototype_lyon = { workspace = true }
+bevy_ui = { workspace = true }
+bevy_ui_widgets = { workspace = true }
 
 # for Linux
 [target.x86_64-unknown-linux-gnu]
