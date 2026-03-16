@@ -6,12 +6,12 @@ use crate::game::player::ship::*;
 #[derive(Component)]
 pub struct HealthBar;
 
-#[derive(Message)]
-pub enum HealthChanged {
-    Shield(i32),
-    Armor(i32),
-    Hull(i32),
-}
+// #[derive(Message)]
+// pub enum HealthChanged {
+//     Shield(i32),
+//     Armor(i32),
+//     Hull(i32),
+// }
 
 #[derive(Component)]
 pub struct UiArmor {
