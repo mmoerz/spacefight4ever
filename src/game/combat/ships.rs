@@ -1,4 +1,8 @@
+use std::ops::{Deref, DerefMut};
 use bevy::prelude::*;
+
+use crate::game::combat::health_basetypes::*;
+
 
 #[derive(Component)]
 pub struct EnemyShip;
@@ -6,16 +10,15 @@ pub struct EnemyShip;
 #[derive(Component)]
 pub struct NeutralShip;
 
-pub struct Resistances {
-    kinetic: f32,
-    thermal: f32,
-    explosive: f32,
-    electromagnetic: f32,
+
+#[derive(Component, Debug, Default, Clone, Copy)]
+pub struct ShipResistances(pub Layered<HealthPercents>);
+
+impl Deref for ShipResistances {
+    type Target = Layered<HealthPercents>;
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
-#[derive(Component)]
-pub struct ShipResistances {
-    pub shield_resistances : Resistances,
-    pub armor_resistances : Resistances,
-    pub hull_resistances : Resistances,    
+impl DerefMut for ShipResistances {
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
 }

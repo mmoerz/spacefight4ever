@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::combat::health::*;
+use crate::game::combat::health_basetypes::HealthLayerType;
 use crate::game::player::ship::*;
 
 #[derive(Component)]
@@ -145,12 +146,12 @@ pub fn update_health_ui(
     let shield_steps_max = shields.iter().len();
     let armor_steps_max = armors.iter().len();
     let hull_steps_max = hulls.iter().len();
-    let shield_step_amount = health.shield_max / shield_steps_max as i32;
-    let armor_step_amount = health.armor_max / armor_steps_max as i32;
-    let hull_step_amount = health.hull_max / hull_steps_max as i32;
+    let shield_step_amount = health.values_max[HealthLayerType::Shield] / shield_steps_max as i32;
+    let armor_step_amount = health.values_max[HealthLayerType::Armor] / armor_steps_max as i32;
+    let hull_step_amount = health.values_max[HealthLayerType::Hull] / hull_steps_max as i32;
 
     for (layer, mut vis) in &mut shields {
-        *vis = if layer.step * shield_step_amount <= health.shield {
+        *vis = if layer.step * shield_step_amount <= health.values[HealthLayerType::Shield] {
             Visibility::Visible
         } else {
             Visibility::Hidden
@@ -158,7 +159,7 @@ pub fn update_health_ui(
     }
 
     for (layer, mut vis) in &mut armors {
-        *vis = if layer.step * armor_step_amount <= health.armor {
+        *vis = if layer.step * armor_step_amount <= health.values[HealthLayerType::Armor] {
             Visibility::Visible
         } else {
             Visibility::Hidden
@@ -166,7 +167,7 @@ pub fn update_health_ui(
     }
 
     for (layer, mut vis) in &mut hulls {
-        *vis = if layer.step * hull_step_amount <= health.hull {
+        *vis = if layer.step * hull_step_amount <= health.values[HealthLayerType::Hull] {
             Visibility::Visible
         } else {
             Visibility::Hidden

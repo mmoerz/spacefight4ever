@@ -1,68 +1,49 @@
-use std::ops::RemAssign;
 
 use bevy::prelude::*;
-use crate::game::combat::ships::*;
 
+use crate::game::combat::health_basetypes::*;
+use crate::game::combat::ships::*;
 
 #[derive(Component)]
 pub struct ShipHealth {
-    pub shield: i32,
-    pub shield_max: i32,
-    pub armor: i32,
-    pub armor_max: i32,
-    pub hull: i32,
-    pub hull_max: i32,
+    pub values: Layered<i32>,
+    pub values_max: Layered<i32>
 }
 
-#[derive(Clone, Copy)]
-pub enum HealthType {
-    Shield,
-    Armor,
-    Hull
-}
+pub type DamageEfficiency = Layered<HealthPercents>;
 
-#[derive(Clone, Copy, Debug)]
-pub enum DamageType {
-    None,
-    Kinetic,
-    Thermal,
-    Explosiv,
-    Electromagnetic,
-    Allround
-}
+// #[derive(Debug, Default)]
+// pub struct HealthLayerPercents {
+//     pub values: [HealthPercents; 3],
+// }
 
-#[derive(Debug, Default)]
-pub struct DamageProfile {
-    kinetic: f32,
-    thermal: f32,
-    explosiv: f32,
-    electromagnetic: f32,
-}
+// impl Index<HealthLayerType> for HealthLayerPercents {
+//     type Output = HealthPercents;
 
-#[derive(Debug, Default)]
-pub struct DamageEffectivity {
-    kinetic: f32,
-    thermal: f32,
-    explosiv: f32,
-    electromagnetic: f32,
-}
+//     fn index(&self, t: HealthLayerType) -> &Self::Output {
+//         &self.values[t.index()]
+//     }
+// }
 
-#[derive(Debug, Default)]
-pub struct ProfiledAmount {
-    kinetic: i32,
-    thermal: i32,
-    explosiv: i32,
-    electromagnetic: i32,
-}
+// impl IndexMut<HealthLayerType> for HealthLayerPercents {
+//     fn index_mut(&mut self, t: HealthLayerType) -> &mut Self::Output {
+//         &mut self.values[t.index()]
+//     }
+// }
+
+
+// messages start here
+//
+//
 
 #[derive(Message, Debug)]
 pub struct HealthDamageReceived {
     pub entity: Entity,
     pub damage: i32,
-    pub damage_profile: DamageProfile,
-    pub damage_shield_effect: DamageEffectivity,
-    pub damage_armor_effect: DamageEffectivity,
-    pub damage_hull_effect: DamageEffectivity,
+    pub damage_profile: HealthPercents,
+    pub damage_shield_effect: HealthPercents,
+    pub damage_armor_effect: HealthPercents,
+    pub damage_hull_effect: HealthPercents,
 }
 
 impl Default for HealthDamageReceived {
@@ -70,10 +51,10 @@ impl Default for HealthDamageReceived {
         Self {
             entity: Entity::PLACEHOLDER,
             damage: 0,
-            damage_profile: DamageProfile { ..default() },
-            damage_shield_effect: DamageEffectivity { ..default() },
-            damage_armor_effect: DamageEffectivity { ..default() },
-            damage_hull_effect: DamageEffectivity { ..default() },
+            damage_profile: HealthPercents { ..default() },
+            damage_shield_effect: HealthPercents { ..default() },
+            damage_armor_effect: HealthPercents { ..default() },
+            damage_hull_effect: HealthPercents { ..default() },
         }
     }
 }
@@ -97,65 +78,50 @@ impl Default for HealReceived {
     }
 }
 
+
+fn apply_damage_vector(
+    mut damage: HealthPercents,
+    ship_health: &mut ShipHealth,
+    layer_resistence: &ShipResistances,
+) {
+    for layer in HealthLayerType::ALL {
+        // Calculate effective damage per type
+        let mut applied = HealthPercents::default();
+        let mut total = 0.0;
+        for dmg_type in HealthChangeType::ALL_DAMAGE_TYPES {
+            applied[dmg_type] = damage[dmg_type] * (1.0 - layer_resistence[layer][dmg_type]);
+            total += applied[dmg_type];
+        }
+
+        let absorbed = total.min(ship_health.values[layer] as f32);
+        ship_health.values[layer] -= absorbed as i32;
+
+        // Scale applied damage to remaining fraction
+        let fraction_remaining = if total > 0.0 { 1.0 - absorbed / total } else { 0.0 };
+        for dmg_type in HealthChangeType::ALL_DAMAGE_TYPES {
+            damage[dmg_type] = if layer_resistence[layer][dmg_type] < 1.0 {
+                applied[dmg_type] * fraction_remaining / (1.0 - layer_resistence[layer][dmg_type])
+            } else {
+                0.0
+            };
+        }
+    }
+}
+
+
+
+// Todo: Testcases
+// Todo: add health max ceiling (for heal) / only necessary in apply function
+// Todo: think about using i32 or i64 with fixed comma (= multiply with 1024) instead of f32 
 pub fn apply_damage_system(
     mut events: MessageReader<HealthDamageReceived>,
     mut query: Query<(&mut ShipHealth, &ShipResistances)>,
 ) {
     for event in events.read() {
         if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
-            // incoming damage application that uses
-            // the resistence profil of the ship to apply the damage
-            let damage = event.damage;
-
-            let mut remaining = apply_profile_to_damage(
-                event.damage, 
-                event.damage_profile, 
-                event.damage_shield_effect
-            );
-
-            // Shield absorbs first
-            let shield_profiled = split_health_according_to_profile(health.shield, event.damage_profile);
-            
-            let shield_absorb = remaining.min(health.shield);
-            health.shield -= shield_absorb;
-            remaining -= shield_absorb;
-
-            // Armor absorbs second
-            let armor_absorb = remaining.min(health.armor);
-            health.armor -= armor_absorb;
-            remaining -= armor_absorb;
-
-            // Remaining damage hits hull
-            health.hull -= remaining;
-            if health.hull < 0 {
-                health.hull = 0;
-            }
+            let damage = HealthPercents::split_value_by_percentages(event.damage, event.damage_profile);
+            apply_damage_vector(damage, &mut health, resistances);
         }
-    }
-}
-
-pub fn apply_profile_to_damage(
-    damage: i32,
-    damage_profile: DamageProfile,
-    effectivity: DamageEffectivity
-) -> ProfiledAmount {
-    ProfiledAmount { 
-        kinetic: (damage as f32 * damage_profile.kinetic * effectivity.kinetic) as i32,
-        thermal: (damage as f32 * damage_profile.thermal * effectivity.thermal) as i32,
-        explosiv: (damage as f32 * damage_profile.explosiv * effectivity.explosiv) as i32,
-        electromagnetic: (damage as f32 * damage_profile.electromagnetic * effectivity.electromagnetic) as i32,
-    }
-}
-
-pub fn split_health_according_to_profile(
-    health: i32,
-    damage_profile: DamageProfile
-) -> ProfiledAmount {
-    ProfiledAmount {
-        kinetic: (health as f32 * damage_profile.kinetic) as i32,
-        thermal: (health as f32 * damage_profile.thermal) as i32,
-        explosiv: (health as f32 * damage_profile.explosiv) as i32,
-        electromagnetic: (health as f32 * damage_profile.electromagnetic) as i32,
     }
 }
 
@@ -165,9 +131,9 @@ pub fn apply_heal_system(
 ) {
     for event in events.read() {
         if let Ok(mut health) = query.get_mut(event.entity) {
-            health.shield = (health.shield + event.shield).clamp(0, health.shield_max);
-            health.armor = (health.armor + event.armor).clamp(0, health.armor_max);
-            health.hull = (health.hull + event.hull).clamp(0, health.hull_max);
+            // health.shield = (health.shield + event.shield).clamp(0, health.shield_max);
+            // health.armor = (health.armor + event.armor).clamp(0, health.armor_max);
+            // health.hull = (health.hull + event.hull).clamp(0, health.hull_max);
         }
     }
 }
