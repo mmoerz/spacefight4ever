@@ -1,3 +1,5 @@
+// Todo: think about using i32 or i64 with fixed comma (= multiply with 1024) instead of f32 
+// Todo: when implementing networking i32 might come in handy (f32 is tricky to transport)
 
 use bevy::prelude::*;
 
@@ -12,26 +14,6 @@ pub struct ShipHealth {
 
 pub type DamageEfficiency = Layered<HealthPercents>;
 
-// #[derive(Debug, Default)]
-// pub struct HealthLayerPercents {
-//     pub values: [HealthPercents; 3],
-// }
-
-// impl Index<HealthLayerType> for HealthLayerPercents {
-//     type Output = HealthPercents;
-
-//     fn index(&self, t: HealthLayerType) -> &Self::Output {
-//         &self.values[t.index()]
-//     }
-// }
-
-// impl IndexMut<HealthLayerType> for HealthLayerPercents {
-//     fn index_mut(&mut self, t: HealthLayerType) -> &mut Self::Output {
-//         &mut self.values[t.index()]
-//     }
-// }
-
-
 // messages start here
 //
 //
@@ -41,9 +23,7 @@ pub struct HealthDamageReceived {
     pub entity: Entity,
     pub damage: i32,
     pub damage_profile: HealthPercents,
-    pub damage_shield_effect: HealthPercents,
-    pub damage_armor_effect: HealthPercents,
-    pub damage_hull_effect: HealthPercents,
+    pub damage_efficiency: DamageEfficiency,
 }
 
 impl Default for HealthDamageReceived {
@@ -52,9 +32,7 @@ impl Default for HealthDamageReceived {
             entity: Entity::PLACEHOLDER,
             damage: 0,
             damage_profile: HealthPercents { ..default() },
-            damage_shield_effect: HealthPercents { ..default() },
-            damage_armor_effect: HealthPercents { ..default() },
-            damage_hull_effect: HealthPercents { ..default() },
+            damage_efficiency: DamageEfficiency { ..default() },
         }
     }
 }
@@ -78,9 +56,55 @@ impl Default for HealReceived {
     }
 }
 
-
+/// Applies a damage vector to a ship's layered health, taking into account
+/// resistances and damage efficiencies per layer and per damage type.
+///
+/// This function iterates over each health layer (shield, armor, hull) and:
+/// 1. Computes the effective damage per damage type using:
+///      applied_damage = incoming_damage * damage_efficiency * (1 - layer_resistance)
+/// 2. Applies the total effective damage to the layer, capping at the current health.
+/// 3. Computes any remaining damage that could overflow to the next layer,
+///    scaling it back into a damage vector with resistances and efficiencies reversed.
+///
+/// # Damage Flow Diagram
+/// ```text
+/// Incoming Damage ──▶ Shield ──▶ Armor ──▶ Hull
+///       │                │          │
+///       │      (absorbs up to current health)
+///       │                │          │
+///       └─> Remaining ──> Remaining ──> Remaining applied to next layer
+/// ```
+/// Each arrow represents the propagation of remaining damage to the next layer.
+///
+/// # Parameters
+/// - `damage`: The incoming damage as `HealthPercents`, representing damage amounts per type.
+///             This vector will be **mutated** to hold remaining damage after each layer.
+/// - `damage_efficiency`: The `DamageEfficiency` matrix defining how effective each damage type
+///                        is against each health layer.
+/// - `ship_health`: Mutable reference to the `ShipHealth` struct, storing current and max health
+///                  for each layer. Health is reduced based on the applied damage.
+/// - `layer_resistence`: The `ShipResistances` struct, storing resistances per layer and per
+///                       damage type. Resistances reduce incoming damage.
+///
+/// # Behavior
+/// - Damage is applied in the order: shield → armor → hull.
+/// - Damage is capped by the current health of the layer (`ship_health.values[layer]`).
+/// - Any remaining damage after one layer is scaled and propagated to the next layer.
+/// - The `damage` vector is updated to represent the portion of damage still to be applied.
+///
+/// # Notes
+/// - Health values are `i32`, while damage, resistances, and efficiencies are `f32`.
+/// - The function assumes `damage_efficiency` and `layer_resistence` values are in `[0.0, 1.0]`.
+/// - Fractional damage is truncated to integer health when applied.
+///
+/// # Example
+/// ```rust
+/// let mut damage = HealthPercents::from_array([10.0, 5.0, 0.0, 2.0]);
+/// apply_damage_vector(damage, ship_efficiency, &mut ship_health, &ship_resistances);
+/// ```
 fn apply_damage_vector(
     mut damage: HealthPercents,
+    damage_efficiency: DamageEfficiency,
     ship_health: &mut ShipHealth,
     layer_resistence: &ShipResistances,
 ) {
@@ -88,17 +112,17 @@ fn apply_damage_vector(
         // Calculate effective damage per type
         let mut applied = HealthPercents::default();
         let mut total = 0.0;
-        for dmg_type in HealthChangeType::ALL_DAMAGE_TYPES {
-            applied[dmg_type] = damage[dmg_type] * (1.0 - layer_resistence[layer][dmg_type]);
+        for dmg_type in HealthChangeType::ALL {
+            applied[dmg_type] = damage[dmg_type] * damage_efficiency[layer][dmg_type] * (1.0 - layer_resistence[layer][dmg_type]);
             total += applied[dmg_type];
         }
 
         let absorbed = total.min(ship_health.values[layer] as f32);
-        ship_health.values[layer] -= absorbed as i32;
+        ship_health.values[layer] = (ship_health.values[layer] - absorbed as i32).min(ship_health.values_max[layer]);
 
         // Scale applied damage to remaining fraction
         let fraction_remaining = if total > 0.0 { 1.0 - absorbed / total } else { 0.0 };
-        for dmg_type in HealthChangeType::ALL_DAMAGE_TYPES {
+        for dmg_type in HealthChangeType::ALL {
             damage[dmg_type] = if layer_resistence[layer][dmg_type] < 1.0 {
                 applied[dmg_type] * fraction_remaining / (1.0 - layer_resistence[layer][dmg_type])
             } else {
@@ -108,11 +132,35 @@ fn apply_damage_vector(
     }
 }
 
-
-
-// Todo: Testcases
-// Todo: add health max ceiling (for heal) / only necessary in apply function
-// Todo: think about using i32 or i64 with fixed comma (= multiply with 1024) instead of f32 
+/// Processes all pending damage events for ships and applies them to their health layers.
+///
+/// This system reads `HealthDamageReceived` messages for the current frame and applies each
+/// damage instance to the corresponding ship entity. It splits the raw damage amount into
+/// a `HealthPercents` vector according to the damage profile, then calls
+/// `apply_damage_vector` to reduce health across shield, armor, and hull layers while
+/// respecting resistances and damage efficiencies.
+///
+/// # Parameters
+/// - `events`: A `MessageReader` for `HealthDamageReceived` messages. Each message contains
+///   the target entity, raw damage amount, damage profile (distribution per damage type),
+///   and damage efficiency modifiers.
+/// - `query`: A `Query` to access mutable `ShipHealth` and `ShipResistances` components for
+///   the entities targeted by the damage events.
+///
+/// # Behavior
+/// - For each damage event, the system:
+///     1. Splits the total damage into per-type values based on `damage_profile`.
+///     2. Calls `apply_damage_vector` to reduce the ship's health layers in order:
+///        shield → armor → hull.
+///     3. Automatically propagates any remaining damage from one layer to the next, scaled
+///        according to resistances and efficiencies.
+/// - This system only applies **damage**; healing should be handled in a separate system.
+///
+/// # Notes
+/// - Health values are integers (`i32`), while damage, resistances, and efficiencies are
+///   floating-point (`f32`).
+/// - All damage events for the frame are processed sequentially, ensuring proper overflow
+///   from shields to armor to hull.
 pub fn apply_damage_system(
     mut events: MessageReader<HealthDamageReceived>,
     mut query: Query<(&mut ShipHealth, &ShipResistances)>,
@@ -120,7 +168,8 @@ pub fn apply_damage_system(
     for event in events.read() {
         if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
             let damage = HealthPercents::split_value_by_percentages(event.damage, event.damage_profile);
-            apply_damage_vector(damage, &mut health, resistances);
+
+            apply_damage_vector(damage, event.damage_efficiency, &mut health, resistances);
         }
     }
 }

@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use std::ops::{Index, IndexMut};
 
-// Todo: figure out if Type postfix is really necessary
+/// contains the diffent possible damage types
+/// 
+/// **Usage notes:** - You can iterate over `HealthChangeType::ALL` when applying or calculating damage for each type
 #[derive(Clone, Copy, Debug)]
 pub enum HealthChangeType {
     Kinetic,
@@ -19,7 +21,7 @@ impl HealthChangeType {
             HealthChangeType::Electromagnetic => 3,
         }
     }
-    pub const ALL_DAMAGE_TYPES: [HealthChangeType; 4] = [
+    pub const ALL: [HealthChangeType; 4] = [
         HealthChangeType::Kinetic,
         HealthChangeType::Thermal,
         HealthChangeType::Explosive,
@@ -50,7 +52,7 @@ impl HealthPercents {
     pub fn split_value_by_percentages(value: i32, percentages: HealthPercents) -> HealthPercents {
         let mut res = HealthPercents { ..default() };
 
-        for changetype in HealthChangeType::ALL_DAMAGE_TYPES {
+        for changetype in HealthChangeType::ALL {
             res[changetype] = value as f32 * percentages[changetype];
         }
 
@@ -98,4 +100,26 @@ impl<T: Default + Copy> IndexMut<HealthLayerType> for Layered<T> {
     fn index_mut(&mut self, layer: HealthLayerType) -> &mut Self::Output {
         &mut self.values[layer.index()] 
     } 
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_split_value_by_percentages() {
+        let total_value = 100;
+        let mut percentages = HealthPercents::default();
+        percentages[HealthChangeType::Kinetic] = 0.25;
+        percentages[HealthChangeType::Thermal] = 0.25;
+        percentages[HealthChangeType::Explosive] = 0.25;
+        percentages[HealthChangeType::Electromagnetic] = 0.25;
+
+        let result = HealthPercents::split_value_by_percentages(total_value, percentages);
+
+        assert_eq!(result[HealthChangeType::Kinetic], 25.0);
+        assert_eq!(result[HealthChangeType::Thermal], 25.0);
+        assert_eq!(result[HealthChangeType::Explosive], 25.0);
+        assert_eq!(result[HealthChangeType::Electromagnetic], 25.0);
+    }
 }

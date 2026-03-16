@@ -79,3 +79,12 @@ assets/dialogs/
  ├─ confirm_exit.svg
  ├─ confirm_exit_buttons.svg
  ├─ message_dialog.svg
+
+
+ # ui editors
+
+ https://github.com/jakobhellermann/bevy_editor_pls
+
+
+ # testing 
+ https://chadnauseam.com/coding/gamedev/automated-testing-in-bevy
