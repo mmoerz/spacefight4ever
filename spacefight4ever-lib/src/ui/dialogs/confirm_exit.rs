@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use bevy::prelude::*;
 use crate::ui::bundle::UiButtonBundle;
 use crate::ui::dialog_manager::{DialogButton, DialogEntity};
@@ -9,6 +11,12 @@ pub fn spawn_confirm_exit_dialog(
     asset_server: &Res<AssetServer>,
 ) {
     let font_handle = asset_server.load("fonts/FiraSans-Bold.ttf");
+
+    match asset_server.get_load_state(&font_handle) {
+        Some(bevy::asset::LoadState::Loaded) => println!("Loaded"),
+        Some(bevy::asset::LoadState::Failed(e)) => println!("FAILED: {:?}", e),
+        _ => println!("Loading..."),
+    }
 
     // Spawn dialog panel under DialogRoot
     commands

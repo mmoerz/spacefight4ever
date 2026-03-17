@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo build bin",
+            "type": "shell",
+            "command": "cargo build --package spacefight4ever-bin",
+            "problemMatcher": ["$rustc"]
+        },
+        {
+            "label": "cargo build test",
+            "type": "shell",
+            "command": "cargo build --package spacefight4ever-test",
+            "problemMatcher": ["$rustc"]
+        },
+        {
+            "label": "cargo build bin (release)",
+            "type": "shell",
+            "command": "cargo build --package spacefight4ever-bin --release",
+            "problemMatcher": ["$rustc"]
+        },
+        {
+            "label": "cargo build test (release)",
+            "type": "shell",
+            "command": "cargo build --package spacefight4ever-test --release",
+            "problemMatcher": ["$rustc"]
+        }
+    ]
+}

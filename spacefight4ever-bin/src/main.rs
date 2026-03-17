@@ -2,15 +2,21 @@ use bevy::prelude::*;
 use spacefight4ever_lib::prelude::*;
 
 use spacefight4ever_lib::{ setup, trigger_exit_dialog };
+use spacefight4ever_lib::config::environment::*;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+
+        .add_plugins(DefaultPlugins.set(
+            bevy::asset::AssetPlugin {
+            file_path: get_s4fe_config().asset_path.into(),
+            ..default()
+        }))
         .add_plugins(UiPlugin)
 
         .add_systems(Startup, setup)
         .add_systems(Update, trigger_exit_dialog)
 
-        //.add_systems(Update, crate::ui::debug::debug_print_ui_tree)
+        //.add_systems(Update, spacefight4ever_lib::ui::debug::debug_print_ui_tree)
         .run();
 }

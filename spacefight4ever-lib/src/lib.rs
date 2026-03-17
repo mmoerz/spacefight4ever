@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+pub mod config;
 pub mod plugin;
 pub mod ui;
 pub mod game;

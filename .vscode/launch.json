@@ -5,27 +5,47 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug executable 'spacefight4ever'",
+            "name": "Debug executable 'SF4E'",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "run",
-                    "--bin=spacefight4ever"
+                    "--package",
+                    "spacefight4ever-bin"
                 ]
             },
-            "args": []
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Debug unit tests in executable 'slavemaster'",
+            "name": "Debug integration tests for 'SF4E'",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "test",
-                    "--bin=slavemaster"
+                    "--package",
+                    "spacefight4ever-test",
+                    "--no-run"
                 ]
-            }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Release SF4E-bin",
+            "type": "lldb",
+            "request": "launch",
+            "preLaunchTask": "cargo build bin (release)",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--package", "spacefight4ever-bin",
+                    "--release"
+                ]
+            },
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
