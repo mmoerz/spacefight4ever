@@ -1,14 +1,9 @@
 [package]
 name = "spacefight4ever-bin"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-spacefight4ever-lib = { path = "../spacefight4ever-lib" }
+spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "dynamic_linking", "debug" ] }
 
-bevy = { workspace = true }
-
-# for Linux
-[target.x86_64-unknown-linux-gnu]
-linker = "clang"
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+bevy = { workspace = true, features = [ "dynamic_linking", "debug" ] }

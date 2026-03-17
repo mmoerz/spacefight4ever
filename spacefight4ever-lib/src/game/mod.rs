@@ -10,3 +10,7 @@ pub mod player {
     pub mod player;
     pub mod ship;
 }
+
+pub mod ships {
+    pub mod modules;
+}

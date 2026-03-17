@@ -4487,8 +4487,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_prototype_lyon",
- "bevy_ui",
- "bevy_ui_widgets",
  "spacefight4ever-lib",
 ]
 

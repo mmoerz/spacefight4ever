@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.dependencies]
-bevy = { version = "0.18.0", features = [ "dynamic_linking", "debug" ] }
+bevy = "0.18.0"
 bevy_prototype_lyon = "0.16.0"
 bevy_ui = "0.18.1"
 bevy_ui_widgets = "0.18.1"
@@ -20,6 +20,12 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
+[profile.test]
+inherits = "dev"
+lto = false
+codegen-units = 1
+opt-level = 1
+
 # Enable more optimization in the release profile at the cost of compile time.
 [profile.release]
 # Compile the entire crate as one unit.
@@ -27,8 +33,12 @@ opt-level = 3
 codegen-units = 1
 # Do a second optimization pass over the entire program, including dependencies.
 # Slows compile times, marginal improvements.
-lto = "thin"
+# false, thin, fat [fast compile vs. more optimization]
+lto = "fat"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+# opt-level = "s" ->  it allows slightly more inlining and also the vectorization of loops
+# compared to "z" 
+opt-level = "s"
 
 # Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
 [profile.wasm-release]

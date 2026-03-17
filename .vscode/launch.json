@@ -20,20 +20,16 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Debug integration tests for 'SF4E'",
+            "name": "Debug 'SF4E' integration tests",
             "type": "lldb",
             "request": "launch",
-            "preLaunchTask": "cargo test package",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--package",
-                    "spacefight4ever-test",
-                    "--no-run"
-                ]
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
+            "preLaunchTask": "build SF4E integration tests",
+            "program": "${workspaceFolder}/target/debug/deps/spacefight4ever_test-3b8beee0aa0b1a08",
+            "args": ["--nocapture"],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "LD_LIBRARY_PATH": "${workspaceFolder}/target/debug/deps"
+            }
         },
         {
             "name": "Release SF4E-bin",

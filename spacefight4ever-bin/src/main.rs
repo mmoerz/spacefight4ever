@@ -1,3 +1,18 @@
+
+
+// #[cfg(target_os = "linux")]
+// unsafe fn configure_linker() {
+//     std::env::set_var("RUSTFLAGS", "-C link-arg=-fuse-ld=lld -C target-cpu=native");
+//     std::env::set_var("CC", "clang");
+// }
+
+
+// #[cfg(not(target_os = "linux"))]
+// fn configure_linker() {
+//     // No-op for non-Linux targets
+// }
+
+
 use bevy::prelude::*;
 use spacefight4ever_lib::prelude::*;
 

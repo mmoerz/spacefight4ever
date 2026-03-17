@@ -23,6 +23,12 @@
             "problemMatcher": ["$rustc"]
         },
         {
+            "label": "build SF4E integration tests",
+            "type": "shell",
+            "command": "cargo test -p spacefight4ever-test --target x86_64-unknown-linux-gnu --no-run",
+            "problemMatcher": ["$rustc"]
+        },
+        {
             "label": "cargo build package",
             "type": "shell",
             "command": "cargo build --package ${input:package}${input:releaseFlag}",
