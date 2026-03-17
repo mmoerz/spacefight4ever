@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-spacefight4ever-lib = { path = "../spacefight4ever-lib" }
+spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "debug" ] }
 
 bevy = { workspace = true, features = [ "debug" ] }
 bevy_prototype_lyon = { workspace = true, features = [] }
