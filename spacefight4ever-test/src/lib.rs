@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use spacefight4ever_lib::game::combat::health::*;
 use spacefight4ever_lib::game::combat::health_basetypes::{HealthLayerType, HealthPercents};
+use spacefight4ever_lib::game::combat::ships::ShipResistances;
 use spacefight4ever_lib::prelude::combat::health_basetypes::Layered;
 
 #[test]
@@ -16,6 +17,13 @@ fn test_apply_damage_system() {
             values: Layered { values: [10,5,20] },
             values_max: Layered { values: [10,5,20] }
         },
+        ShipResistances(Layered {
+            values: [
+                HealthPercents { values: [0., 0., 0., 0.] }, // shield
+                HealthPercents { values: [0., 0., 0., 0.] }, // armor
+                HealthPercents { values: [0., 0., 0., 0.] }, // hull
+            ],
+        }),
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {

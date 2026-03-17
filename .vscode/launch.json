@@ -24,7 +24,7 @@
             "type": "lldb",
             "request": "launch",
             "preLaunchTask": "build SF4E integration tests",
-            "program": "${workspaceFolder}/target/debug/deps/spacefight4ever_test-3b8beee0aa0b1a08",
+            "program": "${workspaceFolder}/target/x86_64-unknown-linux-gnu/debug/deps/spacefight4ever_test-b29a6c539a6e6383",
             "args": ["--nocapture"],
             "cwd": "${workspaceFolder}",
             "env": {
