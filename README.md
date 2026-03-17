@@ -20,6 +20,12 @@ Either install all local rust version (*cleaner*) or set PATH:
 export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
+## libraries needed
+ubuntu/mint>
+```
+apt-get install librust-wayland-client-dev libasound2-dev libudev-dev
+```
+
 # additional tools to look into
 https://ast-grep.github.io/blog/migrate-bevy.html
 ```
