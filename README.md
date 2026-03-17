@@ -1,6 +1,19 @@
 # spacefight4ever
 a bevy based space shooter
 
+# Development environment
+I'm running vscode, therefore I included configuration files for vscode in order to setup several different build and debug
+configurations.
+
+You can start debugging by pressing F5.
+
+You can select which of the lauch options to start with F5 by:
+    1) looking at *Run and Debug* panel (press ``Ctrl+Shift+D``).
+    2) select one of the configurations
+    3) Press *F5* to launch it.
+
+launching tasks directly you can press ``Ctrl+Shift+B`` and input the cargo container name and debug or release build.
+
 # setting up your rust
 if cargo run fails complaining about a missing rust 1.89, check if there are not two toolchains in use:
 ```

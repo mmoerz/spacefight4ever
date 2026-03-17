@@ -5,15 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug selected package",
+            "name": "Debug 'SF4E' bin",
             "type": "lldb",
             "request": "launch",
-            "preLaunchTask": "cargo build package",
+            "preLaunchTask": "cargo build SF4E debug",
             "cargo": {
                 "args": [
                     "run",
                     "--package",
-                    "${input:mode == 'release' ? '--release' : ''"
+                    "spacefight4ever-bin",
                 ]
             },
             "args": [],
@@ -28,7 +28,7 @@
                 "args": [
                     "test",
                     "--package",
-                    "${input:package}",
+                    "spacefight4ever-test",
                     "--no-run"
                 ]
             },
@@ -43,7 +43,8 @@
             "cargo": {
                 "args": [
                     "run",
-                    "--package", "spacefight4ever-bin",
+                    "--package", 
+                    "spacefight4ever-bin",
                     "--release"
                 ]
             },

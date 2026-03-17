@@ -17,6 +17,12 @@
     ],
     "tasks": [
         {
+            "label": "cargo build SF4E debug",
+            "type": "shell",
+            "command": "cargo build --package spacefight4ever-bin",
+            "problemMatcher": ["$rustc"]
+        },
+        {
             "label": "cargo build package",
             "type": "shell",
             "command": "cargo build --package ${input:package}${input:releaseFlag}",
