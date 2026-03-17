@@ -5,14 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug executable 'SF4E'",
+            "name": "Debug selected package",
             "type": "lldb",
             "request": "launch",
+            "preLaunchTask": "cargo build package",
             "cargo": {
                 "args": [
                     "run",
                     "--package",
-                    "spacefight4ever-bin"
+                    "${input:mode == 'release' ? '--release' : ''"
                 ]
             },
             "args": [],
@@ -22,11 +23,12 @@
             "name": "Debug integration tests for 'SF4E'",
             "type": "lldb",
             "request": "launch",
+            "preLaunchTask": "cargo test package",
             "cargo": {
                 "args": [
                     "test",
                     "--package",
-                    "spacefight4ever-test",
+                    "${input:package}",
                     "--no-run"
                 ]
             },

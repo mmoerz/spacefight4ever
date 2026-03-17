@@ -1,28 +1,41 @@
 {
     "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "package",
+            "type": "promptString",
+            "description": "Enter the Cargo package name to build/run",
+            "default": "spacefight4ever-bin"
+        },
+        {
+            "id": "releaseFlag",
+            "type": "pickString",
+            "description": "Build type",
+            "options": ["", "--release"],
+            "default": ""
+        }
+    ],
     "tasks": [
         {
-            "label": "cargo build bin",
+            "label": "cargo build package",
             "type": "shell",
-            "command": "cargo build --package spacefight4ever-bin",
+            "command": "cargo build --package ${input:package}${input:releaseFlag}",
             "problemMatcher": ["$rustc"]
         },
         {
-            "label": "cargo build test",
+            "label": "cargo run package",
             "type": "shell",
-            "command": "cargo build --package spacefight4ever-test",
-            "problemMatcher": ["$rustc"]
+            "command": "cargo run --package ${input:package}${input:releaseFlag}",
+            "problemMatcher": ["$rustc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
-            "label": "cargo build bin (release)",
+            "label": "cargo test package",
             "type": "shell",
-            "command": "cargo build --package spacefight4ever-bin --release",
-            "problemMatcher": ["$rustc"]
-        },
-        {
-            "label": "cargo build test (release)",
-            "type": "shell",
-            "command": "cargo build --package spacefight4ever-test --release",
+            "command": "cargo test --package ${input:package}${input:releaseFlag}",
             "problemMatcher": ["$rustc"]
         }
     ]
