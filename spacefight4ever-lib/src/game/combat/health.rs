@@ -99,11 +99,6 @@ impl Default for HealReceived {
 /// - The function assumes `damage_efficiency` and `layer_resistence` values are in `[0.0, 1.0]`.
 /// - Fractional damage is truncated to integer health when applied.
 ///
-/// # Example
-/// ```rust
-/// let mut damage = HealthPercents::from_array([10.0, 5.0, 0.0, 2.0]);
-/// apply_damage_vector(damage, ship_efficiency, &mut ship_health, &ship_resistances);
-/// ```
 fn apply_damage_vector(
     mut damage: HealthPercents,
     damage_efficiency: DamageEfficiency,
@@ -289,6 +284,289 @@ pub fn apply_heal_system(
         if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
             let healing = event.healing;
             apply_healing_vector(healing, &mut health, resistances);
+        }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_apply_damage_vector_basic() {
+        let mut ship_health = ShipHealth {
+            values: LayeredHealth { values: [10, 10, 10] },
+            values_max: LayeredHealth { values: [10, 10, 10] },
+        };
+
+        let damage = HealthPercents { values: [5.0, 0.0, 0.0, 0.0] };
+        let damage_efficiency = DamageEfficiency {
+            values: [
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+            ]
+        };
+        let layer_resistence = ShipResistances(LayeredHealth {
+            values: [
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] }, // shield
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] }, // armor
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] }, // hull
+            ]
+        });
+
+        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+
+        // Damage is applied to shield first
+        assert_eq!(ship_health.values[HealthLayerType::Shield], 5);
+        assert_eq!(ship_health.values[HealthLayerType::Armor], 10);
+        assert_eq!(ship_health.values[HealthLayerType::Hull], 10);
+    }
+
+    #[test]
+    fn test_apply_damage_vector_with_resistance() {
+        let mut ship_health = ShipHealth {
+            values: LayeredHealth { values: [10, 10, 10] },
+            values_max: LayeredHealth { values: [10, 10, 10] },
+        };
+
+        let damage = HealthPercents { values: [10.0, 0.0, 0.0, 0.0] };
+        let damage_efficiency = DamageEfficiency {
+            values: [
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+            ]
+        };
+        let layer_resistence = ShipResistances(LayeredHealth {
+            values: [
+                HealthPercents { values: [0.5, 0.0, 0.0, 0.0] }, // 50% shield resistance
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+            ]
+        });
+
+        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+
+        // Shield absorbs half of 10 => 5 damage
+        assert_eq!(ship_health.values[HealthLayerType::Shield], 5);
+        assert_eq!(ship_health.values[HealthLayerType::Armor], 10);
+        assert_eq!(ship_health.values[HealthLayerType::Hull], 10);
+    }
+
+    #[test]
+    fn test_apply_damage_vector_overflow_layers() {
+        let mut ship_health = ShipHealth {
+            values: LayeredHealth { values: [3, 5, 10] },
+            values_max: LayeredHealth { values: [3, 5, 10] },
+        };
+
+        let damage = HealthPercents { values: [10.0, 0.0, 0.0, 0.0] };
+        let damage_efficiency = DamageEfficiency {
+            values: [
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+            ]
+        };
+        let layer_resistence = ShipResistances(LayeredHealth {
+            values: [
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+            ]
+        });
+
+        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+
+        // Damage overflow: 3 to shield, remaining 7 to armor (5 max), leftover 2 to hull
+        assert_eq!(ship_health.values[HealthLayerType::Shield], 0);
+        assert_eq!(ship_health.values[HealthLayerType::Armor], 0);
+        assert_eq!(ship_health.values[HealthLayerType::Hull], 8);
+    }
+
+    #[test]
+    fn test_apply_damage_vector_no_damage() {
+        let mut ship_health = ShipHealth {
+            values: LayeredHealth { values: [5, 5, 5] },
+            values_max: LayeredHealth { values: [5, 5, 5] },
+        };
+
+        let damage = HealthPercents { values: [0.0, 0.0, 0.0, 0.0] };
+        let damage_efficiency = DamageEfficiency {
+            values: [
+                HealthPercents::default(),
+                HealthPercents::default(),
+                HealthPercents::default(),
+            ]
+        };
+        let layer_resistence = ShipResistances(LayeredHealth {
+            values: [
+                HealthPercents::default(),
+                HealthPercents::default(),
+                HealthPercents::default(),
+            ]
+        });
+
+        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+
+        // No damage applied
+        assert_eq!(ship_health.values[HealthLayerType::Shield], 5);
+        assert_eq!(ship_health.values[HealthLayerType::Armor], 5);
+        assert_eq!(ship_health.values[HealthLayerType::Hull], 5);
+    }
+
+    #[test]
+    fn test_apply_damage_vector_mixed_types() {
+        let mut ship_health = ShipHealth {
+            values: LayeredHealth { values: [10, 10, 10] },
+            values_max: LayeredHealth { values: [10, 10, 10] },
+        };
+
+        // Mixed damage: 4 Kinetic, 6 Thermal, 2 Explosive, 8 EM
+        let damage = HealthPercents { values: [4.0, 6.0, 2.0, 8.0] };
+
+        // Damage efficiency: shield absorbs EM only, armor all physical types, hull all types
+        let damage_efficiency = DamageEfficiency {
+            values: [
+                // Shield
+                HealthPercents { values: [0.0, 0.0, 0.0, 1.0] },
+                // Armor
+                HealthPercents { values: [1.0, 1.0, 1.0, 0.0] },
+                // Hull
+                HealthPercents { values: [1.0, 1.0, 1.0, 1.0] },
+            ],
+        };
+
+        // Resistances: Shield has 50% EM resistance, Armor 25% Kinetic/Thermal/Explosive, Hull no resistance
+        let layer_resistance = ShipResistances(LayeredHealth {
+            values: [
+                HealthPercents { values: [0.0, 0.0, 0.0, 0.5] }, // shield
+                HealthPercents { values: [0.25, 0.25, 0.25, 0.0] }, // armor
+                HealthPercents::default(), // hull
+            ],
+        });
+
+        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistance);
+
+        // Shield: 8 EM * (1 - 0.5) = 4 damage -> 10 - 4 = 6
+        assert_eq!(ship_health.values[HealthLayerType::Shield], 6);
+
+        // Armor: 
+        // Physical damage: Kinetic 4*1*(1-0.25)=3, Thermal 6*1*(1-0.25)=4.5, Explosive 2*1*(1-0.25)=1.5
+        // Total = 3 + 4.5 + 1.5 = 9
+        // Health = 10 - 9 = 1
+        assert_eq!(ship_health.values[HealthLayerType::Armor], 1);
+
+        // Hull: remaining damage (overflow) for each type
+        // Kinetic: remaining from armor = 4 - 3 =1
+        // Thermal: 6 - 4.5 = 1.5
+        // Explosive: 2 -1.5 = 0.5
+        // EM: nothing left (shield absorbed 4/8, remaining 4, but efficiency for hull=1, resistance=0)
+        // EM remaining 4 goes to hull
+        // Total hull damage = 1 + 1.5 + 0.5 + 4 = 7
+        // Health = 10 - 7 = 3
+        assert_eq!(ship_health.values[HealthLayerType::Hull], 3);
+    }
+}
+
+#[cfg(test)]
+mod table_driven_damage_tests {
+    use super::*;
+
+    struct TestCase {
+        damage: HealthPercents,
+        damage_efficiency: DamageEfficiency,
+        layer_resistance: ShipResistances,
+        expected: LayeredHealth<i32>,
+        description: &'static str,
+    }
+
+    #[test]
+    fn test_apply_damage_vector_table() {
+        let test_cases = vec![
+            TestCase {
+                damage: HealthPercents { values: [10.0, 0.0, 0.0, 0.0] },
+                damage_efficiency: DamageEfficiency {
+                    values: [
+                        HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                        HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                        HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                    ],
+                },
+                layer_resistance: ShipResistances(LayeredHealth {
+                    values: [
+                        HealthPercents { values: [0.5, 0.0, 0.0, 0.0] },
+                        HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                        HealthPercents::default(),
+                    ]
+                }),
+                expected: LayeredHealth { values: [5, 5, 10] },
+                description: "Kinetic 10 with 50% shield resistance",
+            },
+            TestCase {
+                damage: HealthPercents { values: [5.0, 5.0, 0.0, 0.0] },
+                damage_efficiency: DamageEfficiency {
+                    values: [
+                        HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
+                        HealthPercents { values: [1.0, 1.0, 0.0, 0.0] },
+                        HealthPercents { values: [1.0, 1.0, 0.0, 0.0] },
+                    ],
+                },
+                layer_resistance: ShipResistances(LayeredHealth {
+                    values: [
+                        HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                        HealthPercents { values: [0.2, 0.5, 0.0, 0.0] },
+                        HealthPercents::default(),
+                    ]
+                }),
+                expected: LayeredHealth { values: [5, 1, 9] },
+                description: "Mixed Kinetic/Thermal with resistances in armor",
+            },
+            TestCase {
+                damage: HealthPercents { values: [0.0, 0.0, 5.0, 5.0] },
+                damage_efficiency: DamageEfficiency {
+                    values: [
+                        HealthPercents { values: [0.0, 0.0, 1.0, 0.0] },
+                        HealthPercents { values: [0.0, 0.0, 1.0, 0.0] },
+                        HealthPercents { values: [1.0, 1.0, 0.0, 1.0] },
+                    ],
+                },
+                layer_resistance: ShipResistances(LayeredHealth {
+                    values: [
+                        HealthPercents { values: [0.0, 0.0, 0.5, 0.0] },
+                        HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                        HealthPercents::default(),
+                    ]
+                }),
+                expected: LayeredHealth { values: [8, 5, 5] },
+                description: "Explosive & EM damage with partial shield resistances",
+            },
+        ];
+
+        for case in test_cases {
+            let mut ship_health = ShipHealth {
+                values: LayeredHealth { values: [10, 10, 10] },
+                values_max: LayeredHealth { values: [10, 10, 10] },
+            };
+
+            apply_damage_vector(
+                case.damage,
+                case.damage_efficiency,
+                &mut ship_health,
+                &case.layer_resistance,
+            );
+
+            for layer in HealthLayerType::ALL {
+                assert_eq!(
+                    ship_health.values[layer],
+                    case.expected[layer],
+                    "Failed test case: {} on layer {:?}",
+                    case.description,
+                    layer
+                );
+            }
         }
     }
 }
