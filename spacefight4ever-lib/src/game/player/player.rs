@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::combat::{health::*, health_basetypes::Layered};
+use crate::game::combat::{health::*, health_basetypes::LayeredHealth};
 use super::ship::*;
 
 pub fn spawn_player(mut commands: Commands) {
@@ -8,8 +8,8 @@ pub fn spawn_player(mut commands: Commands) {
         Name::new("PlayerShip"),
         PlayerShip,
         ShipHealth {
-            values: Layered { values: [3, 10, 20 ] },
-            values_max: Layered { values: [10, 10, 20] },
+            values: LayeredHealth { values: [3, 10, 20 ] },
+            values_max: LayeredHealth { values: [10, 10, 20] },
         },
         Transform::default(),
     ));

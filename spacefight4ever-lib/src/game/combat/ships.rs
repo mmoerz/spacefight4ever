@@ -3,19 +3,30 @@ use bevy::prelude::*;
 
 use crate::game::combat::health_basetypes::*;
 
+pub enum Standing {
+    Enemy,
+    Neutral,
+    Ally
+}
 
 #[derive(Component)]
-pub struct EnemyShip;
+pub enum Character {
+    PC,
+    NPC
+}
 
 #[derive(Component)]
-pub struct NeutralShip;
+pub struct Ship {
+    pub standing: Standing,
+    
+}
 
 
 #[derive(Component, Debug, Default, Clone, Copy)]
-pub struct ShipResistances(pub Layered<HealthPercents>);
+pub struct ShipResistances(pub LayeredHealth<HealthPercents>);
 
 impl Deref for ShipResistances {
-    type Target = Layered<HealthPercents>;
+    type Target = LayeredHealth<HealthPercents>;
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 

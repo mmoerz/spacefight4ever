@@ -84,11 +84,11 @@ impl HealthLayerType {
 
 /// Generic container for per-layer values
 #[derive(Debug, Default, Clone, Copy)] 
-pub struct Layered<T: Default + Copy> {
+pub struct LayeredHealth<T: Default + Copy> {
      pub values: [T; 3], 
 } 
 
-impl<T: Default + Copy> Index<HealthLayerType> for Layered<T> {
+impl<T: Default + Copy> Index<HealthLayerType> for LayeredHealth<T> {
     type Output = T;
      
     fn index(&self, layer: HealthLayerType) -> &Self::Output {
@@ -96,7 +96,7 @@ impl<T: Default + Copy> Index<HealthLayerType> for Layered<T> {
     } 
 } 
 
-impl<T: Default + Copy> IndexMut<HealthLayerType> for Layered<T> {
+impl<T: Default + Copy> IndexMut<HealthLayerType> for LayeredHealth<T> {
     fn index_mut(&mut self, layer: HealthLayerType) -> &mut Self::Output {
         &mut self.values[layer.index()] 
     } 

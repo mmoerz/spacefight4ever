@@ -1,6 +1,7 @@
 // Todo: think about using i32 or i64 with fixed comma (= multiply with 1024) instead of f32 
 // Todo: when implementing networking i32 might come in handy (f32 is tricky to transport)
 
+use bevy::camera::visibility::Layer;
 use bevy::prelude::*;
 
 use crate::game::combat::health_basetypes::*;
@@ -8,11 +9,11 @@ use crate::game::combat::ships::*;
 
 #[derive(Component)]
 pub struct ShipHealth {
-    pub values: Layered<i32>,
-    pub values_max: Layered<i32>
+    pub values: LayeredHealth<i32>,
+    pub values_max: LayeredHealth<i32>
 }
 
-pub type DamageEfficiency = Layered<HealthPercents>;
+pub type DamageEfficiency = LayeredHealth<HealthPercents>;
 
 // messages start here
 //
@@ -37,21 +38,22 @@ impl Default for HealthDamageReceived {
     }
 }
 
+pub type HealthHealing  = LayeredHealth<i32>;
+
+/// for sending heal messages
 #[derive(Message, Debug)]
 pub struct HealReceived {
     pub entity: Entity,
-    pub shield: i32,
-    pub armor: i32,
-    pub hull: i32,
+    pub healing: HealthHealing,
 }
 
 impl Default for HealReceived {
     fn default() -> Self {
         Self {
             entity: Entity::PLACEHOLDER,
-            shield: 0,
-            armor: 0,
-            hull: 0,
+            healing: HealthHealing {
+                values: [0, 0, 0],
+            },
         }
     }
 }
@@ -118,7 +120,7 @@ fn apply_damage_vector(
         }
 
         let absorbed = total.min(ship_health.values[layer] as f32);
-        ship_health.values[layer] = (ship_health.values[layer] - absorbed as i32).min(ship_health.values_max[layer]);
+        ship_health.values[layer] = (ship_health.values[layer] as f32 - absorbed).min(ship_health.values_max[layer] as f32) as i32;
 
         // Scale applied damage to remaining fraction
         let fraction_remaining = if total > 0.0 { 1.0 - absorbed / total } else { 0.0 };
@@ -174,15 +176,119 @@ pub fn apply_damage_system(
     }
 }
 
+fn median_three(a: f32, b: f32, c: f32) -> f32 {
+    let mut vals = [a, b, c];
+    vals.sort_by(|x, y| x.partial_cmp(y).unwrap());
+    vals[1] // middle value
+}
+
+/// Applies healing across the ship's health layers, taking into account layer-specific resistances.
+///
+/// Healing flows through the layers in order: **Shield → Armor → Hull**. Each layer has a maximum
+/// health (`ShipHealth.values_max`) that cannot be exceeded. Healing is **scaled by specific resistances**
+/// per layer:
+///
+/// - **Shield layer:** Healing is reduced by the ship's **Electromagnetic resistance**.
+/// - **Armor layer:** Healing is reduced by **Kinetic, Thermal, and Explosive resistances**.
+/// - **Hull layer:** Healing is reduced by **Kinetic, Thermal, and Explosive resistances**.
+///
+/// After applying healing to a layer, any leftover healing (that was capped by max health) is carried
+/// over to the next layer in order. The remaining healing for each layer is recalculated after resistance
+/// scaling.
+///
+/// # Parameters
+/// - `healing`: A `HealthHealing` struct representing **raw per-layer healing amounts** (integer values).
+/// - `ship_health`: Mutable reference to the ship's current and maximum health per layer (`ShipHealth`).
+/// - `resistances`: A reference to the ship's resistances (`ShipResistances`) that reduce healing
+///                  effectiveness per layer.
+///
+/// # Behavior
+/// 1. For each layer in order (Shield → Armor → Hull):
+///     - Identify which resistances apply to that layer.
+///     - Scale the healing amount by `(1.0 - resistance)` for each applicable damage type.
+///     - Sum the effective healing across the applicable damage types.
+///     - Cap the healing to not exceed the layer's maximum health.
+///     - Apply the capped healing to the layer.
+///     - Compute any leftover healing and carry it forward to the next layer.
+///
+/// # Notes
+/// - Healing and health are represented as `i32` values.
+/// - Resistance values are `f32` in the range `[0.0, 1.0]`.
+/// - Layer-specific resistances ensure that only certain damage types reduce healing for a given layer.
+/// - Remaining healing is **carried forward** after each layer, preserving as much of the original
+///   healing as possible.
+///
+/// After this, each layer's health will have increased according to the resistances and
+/// capped by their maximums.
+fn apply_healing_vector(
+    healing: HealthHealing,
+    ship_health: &mut ShipHealth,
+    resistances: &ShipResistances,
+) {
+    let mut remaining_healing = healing;
+
+    for layer in HealthLayerType::ALL {
+        let effective_heal: i32 = match layer {
+            HealthLayerType::Shield => {
+                // Shield uses EM resistance
+                let resist = resistances[layer][HealthChangeType::Electromagnetic];
+                ((remaining_healing[layer] as f32) * (1.0 - resist)).round() as i32
+            }
+            HealthLayerType::Armor | HealthLayerType::Hull => {
+                // Armor/Hull use median of Kinetic, Thermal, Explosive resistances
+                let k = resistances[layer][HealthChangeType::Kinetic];
+                let t = resistances[layer][HealthChangeType::Thermal];
+                let e = resistances[layer][HealthChangeType::Explosive];
+                let median = median_three(k, t, e);
+                ((remaining_healing[layer] as f32) * (1.0 - median)).round() as i32
+            }
+        };
+
+        // Cap healing to max health
+        let current = ship_health.values[layer];
+        let max = ship_health.values_max[layer];
+        let healed = (effective_heal).min(max - current).max(0);
+        ship_health.values[layer] += healed;
+
+        // Remaining healing is unused (optional: could flow forward)
+        // there is no overflow healing
+    }
+}
+
+/// Processes all pending healing events for ships and applies them to their health layers.
+///
+/// This system reads `HealReceived` messages for the current frame and applies each
+/// healing instance to the corresponding ship entity. It passes the raw healing amount
+/// per layer to `apply_healing_vector`, which scales the healing according to the ship's
+/// resistances and caps it at each layer's maximum health.
+///
+/// # Parameters
+/// - `events`: A `MessageReader` for `HealReceived` messages. Each message contains
+///   the target entity and the raw healing values for shield, armor, and hull layers.
+/// - `query`: A `Query` to access mutable `ShipHealth` and `ShipResistances` components
+///   for the entities targeted by the healing events.
+///
+/// # Behavior
+/// - For each healing event, the system:
+///     1. Reads the per-layer healing values from the event.
+///     2. Calls `apply_healing_vector` to increase the ship's health layers in order:
+///        shield → armor → hull, respecting resistances for each layer.
+///     3. Ensures that healing does not exceed the maximum health for each layer.
+/// - This system only applies **healing**; damage should be handled in a separate system.
+///
+/// # Notes
+/// - Health values are integers (`i32`), while resistances are floating-point (`f32`) in
+///   the range `[0.0, 1.0]`.
+/// - All healing events for the frame are processed sequentially, ensuring proper capping
+///   and propagation according to the resistances of each layer.
 pub fn apply_heal_system(
     mut events: MessageReader<HealReceived>,
-    mut query: Query<&mut ShipHealth>,
+    mut query: Query<(&mut ShipHealth, &ShipResistances)>,
 ) {
     for event in events.read() {
-        if let Ok(mut health) = query.get_mut(event.entity) {
-            // health.shield = (health.shield + event.shield).clamp(0, health.shield_max);
-            // health.armor = (health.armor + event.armor).clamp(0, health.armor_max);
-            // health.hull = (health.hull + event.hull).clamp(0, health.hull_max);
+        if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
+            let healing = event.healing;
+            apply_healing_vector(healing, &mut health, resistances);
         }
     }
 }
