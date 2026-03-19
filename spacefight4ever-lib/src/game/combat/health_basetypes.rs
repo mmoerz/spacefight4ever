@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Deref, DerefMut};
 
 /// contains the diffent possible damage types
 /// 
@@ -100,6 +100,20 @@ impl<T: Default + Copy> IndexMut<HealthLayerType> for LayeredHealth<T> {
     fn index_mut(&mut self, layer: HealthLayerType) -> &mut Self::Output {
         &mut self.values[layer.index()] 
     } 
+}
+
+#[derive(Message, Debug, Clone, Copy)]
+pub struct HealthDamageAbsorbed
+{
+    pub entity: Entity,
+    pub damage: HealthPercents,
+}
+
+#[derive(Message, Debug, Clone, Copy)]
+pub struct HealthHealingAbsorbed
+{
+    pub entity: Entity,
+    pub healing: LayeredHealth<i32>,
 }
 
 #[cfg(test)]

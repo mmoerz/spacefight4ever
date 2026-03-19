@@ -7,7 +7,7 @@ use bevy::prelude::*;
 use crate::game::combat::health_basetypes::*;
 use crate::game::combat::ships::*;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy)]
 pub struct ShipHealth {
     pub values: LayeredHealth<i32>,
     pub values_max: LayeredHealth<i32>
@@ -104,7 +104,9 @@ fn apply_damage_vector(
     damage_efficiency: DamageEfficiency,
     ship_health: &mut ShipHealth,
     layer_resistence: &ShipResistances,
-) {
+) -> HealthPercents {
+    let mut final_absorbed_dmg = HealthPercents::default();
+
     for layer in HealthLayerType::ALL {
         // Calculate effective damage per type
         let mut applied = HealthPercents::default();
@@ -118,15 +120,15 @@ fn apply_damage_vector(
         ship_health.values[layer] = (ship_health.values[layer] as f32 - absorbed).min(ship_health.values_max[layer] as f32) as i32;
 
         // Scale applied damage to remaining fraction
-        let fraction_remaining = if total > 0.0 { 1.0 - absorbed / total } else { 0.0 };
+        let fraction = if total > 0.0 { absorbed / total } else { 0. };
+        let fraction_remaining =  1.0 - fraction;
         for dmg_type in HealthChangeType::ALL {
-            damage[dmg_type] = if layer_resistence[layer][dmg_type] < 1.0 {
-                applied[dmg_type] * fraction_remaining / (1.0 - layer_resistence[layer][dmg_type])
-            } else {
-                0.0
-            };
+            //let preserve = damage[dmg_type];
+            damage[dmg_type] *= fraction_remaining;
+            final_absorbed_dmg[dmg_type] += applied[dmg_type] * fraction;
         }
     }
+    final_absorbed_dmg
 }
 
 /// Processes all pending damage events for ships and applies them to their health layers.
@@ -161,12 +163,19 @@ fn apply_damage_vector(
 pub fn apply_damage_system(
     mut events: MessageReader<HealthDamageReceived>,
     mut query: Query<(&mut ShipHealth, &ShipResistances)>,
+    mut absorbed_writer: MessageWriter<HealthDamageAbsorbed>,
 ) {
     for event in events.read() {
         if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
             let damage = HealthPercents::split_value_by_percentages(event.damage, event.damage_profile);
 
-            apply_damage_vector(damage, event.damage_efficiency, &mut health, resistances);
+            let absorbed = apply_damage_vector(
+                damage, event.damage_efficiency, &mut health, resistances);
+            
+            absorbed_writer.write(HealthDamageAbsorbed {
+                entity: event.entity,
+                damage: absorbed
+            });
         }
     }
 }
@@ -219,8 +228,10 @@ fn apply_healing_vector(
     healing: HealthHealing,
     ship_health: &mut ShipHealth,
     resistances: &ShipResistances,
-) {
-    let mut remaining_healing = healing;
+    
+) -> LayeredHealth<i32> {
+    let remaining_healing = healing;
+    let mut absorbed_healing: LayeredHealth<i32> = LayeredHealth { values: [0,0,0], };
 
     for layer in HealthLayerType::ALL {
         let effective_heal: i32 = match layer {
@@ -245,9 +256,13 @@ fn apply_healing_vector(
         let healed = (effective_heal).min(max - current).max(0);
         ship_health.values[layer] += healed;
 
+        // store healing
+        absorbed_healing[layer] += healed;
         // Remaining healing is unused (optional: could flow forward)
         // there is no overflow healing
     }
+
+    absorbed_healing
 }
 
 /// Processes all pending healing events for ships and applies them to their health layers.
@@ -279,11 +294,17 @@ fn apply_healing_vector(
 pub fn apply_heal_system(
     mut events: MessageReader<HealReceived>,
     mut query: Query<(&mut ShipHealth, &ShipResistances)>,
+    mut absorbed_writer: MessageWriter<HealthHealingAbsorbed>,
 ) {
     for event in events.read() {
         if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
             let healing = event.healing;
-            apply_healing_vector(healing, &mut health, resistances);
+            let absorbed = apply_healing_vector(
+                healing, &mut health, resistances);
+            absorbed_writer.write(HealthHealingAbsorbed {
+                entity: event.entity,
+                healing: absorbed,
+            });
         }
     }
 }
@@ -316,12 +337,17 @@ mod tests {
             ]
         });
 
-        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+        let absorbed = 
+            apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
 
         // Damage is applied to shield first
         assert_eq!(ship_health.values[HealthLayerType::Shield], 5);
         assert_eq!(ship_health.values[HealthLayerType::Armor], 10);
         assert_eq!(ship_health.values[HealthLayerType::Hull], 10);
+        assert_eq!(absorbed[HealthChangeType::Kinetic],5.);
+        assert_eq!(absorbed[HealthChangeType::Thermal],0.);
+        assert_eq!(absorbed[HealthChangeType::Explosive],0.);
+        assert_eq!(absorbed[HealthChangeType::Electromagnetic],0.);
     }
 
     #[test]
@@ -347,12 +373,17 @@ mod tests {
             ]
         });
 
-        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+        let absorbed =
+            apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
 
         // Shield absorbs half of 10 => 5 damage
         assert_eq!(ship_health.values[HealthLayerType::Shield], 5);
         assert_eq!(ship_health.values[HealthLayerType::Armor], 10);
         assert_eq!(ship_health.values[HealthLayerType::Hull], 10);
+        assert_eq!(absorbed[HealthChangeType::Kinetic],5.);
+        assert_eq!(absorbed[HealthChangeType::Thermal],0.);
+        assert_eq!(absorbed[HealthChangeType::Explosive],0.);
+        assert_eq!(absorbed[HealthChangeType::Electromagnetic],0.);
     }
 
     #[test]
@@ -378,12 +409,17 @@ mod tests {
             ]
         });
 
-        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+        let absorbed =
+            apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
 
         // Damage overflow: 3 to shield, remaining 7 to armor (5 max), leftover 2 to hull
         assert_eq!(ship_health.values[HealthLayerType::Shield], 0);
         assert_eq!(ship_health.values[HealthLayerType::Armor], 0);
         assert_eq!(ship_health.values[HealthLayerType::Hull], 8);
+        assert_eq!(absorbed[HealthChangeType::Kinetic],10.);
+        assert_eq!(absorbed[HealthChangeType::Thermal],0.);
+        assert_eq!(absorbed[HealthChangeType::Explosive],0.);
+        assert_eq!(absorbed[HealthChangeType::Electromagnetic],0.);
     }
 
     #[test]
@@ -409,23 +445,28 @@ mod tests {
             ]
         });
 
-        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
+        let absorbed = 
+            apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistence);
 
         // No damage applied
         assert_eq!(ship_health.values[HealthLayerType::Shield], 5);
         assert_eq!(ship_health.values[HealthLayerType::Armor], 5);
         assert_eq!(ship_health.values[HealthLayerType::Hull], 5);
+        assert_eq!(absorbed[HealthChangeType::Kinetic],0.);
+        assert_eq!(absorbed[HealthChangeType::Thermal],0.);
+        assert_eq!(absorbed[HealthChangeType::Explosive],0.);
+        assert_eq!(absorbed[HealthChangeType::Electromagnetic],0.);
     }
 
     #[test]
     fn test_apply_damage_vector_mixed_types() {
         let mut ship_health = ShipHealth {
-            values: LayeredHealth { values: [10, 10, 10] },
+            values: LayeredHealth { values: [3, 10, 10] },
             values_max: LayeredHealth { values: [10, 10, 10] },
         };
 
         // Mixed damage: 4 Kinetic, 6 Thermal, 2 Explosive, 8 EM
-        let damage = HealthPercents { values: [4.0, 6.0, 2.0, 8.0] };
+        let damage = HealthPercents { values: [8.0, 6.0, 4.0, 8.0] };
 
         // Damage efficiency: shield absorbs EM only, armor all physical types, hull all types
         let damage_efficiency = DamageEfficiency {
@@ -433,7 +474,7 @@ mod tests {
                 // Shield
                 HealthPercents { values: [0.0, 0.0, 0.0, 1.0] },
                 // Armor
-                HealthPercents { values: [1.0, 1.0, 1.0, 0.0] },
+                HealthPercents { values: [1.0, 1.0, 1.0, 1.0] },
                 // Hull
                 HealthPercents { values: [1.0, 1.0, 1.0, 1.0] },
             ],
@@ -448,26 +489,26 @@ mod tests {
             ],
         });
 
-        apply_damage_vector(damage, damage_efficiency, &mut ship_health, &layer_resistance);
+        let absorbed = apply_damage_vector(
+            damage, damage_efficiency, &mut ship_health, &layer_resistance);
 
-        // Shield: 8 EM * (1 - 0.5) = 4 damage -> 10 - 4 = 6
-        assert_eq!(ship_health.values[HealthLayerType::Shield], 6);
+        // Shield: 8 EM * (1 - 0.5) = 4 damage -> 3 - 4 = 1 ==> 2 dmg remain
+        // ==> remaing dmg [2,1.5,1,2]
+        assert_eq!(ship_health.values[HealthLayerType::Shield], 0);
 
         // Armor: 
-        // Physical damage: Kinetic 4*1*(1-0.25)=3, Thermal 6*1*(1-0.25)=4.5, Explosive 2*1*(1-0.25)=1.5
-        // Total = 3 + 4.5 + 1.5 = 9
-        // Health = 10 - 9 = 1
-        assert_eq!(ship_health.values[HealthLayerType::Armor], 1);
+        // Physical damage: Kinetic 2*1*(1-0.25)=1.5  Thermal 1,5*1*(1-0.25)=1,125
+        //                  Explosive 1*1*(1-0.25)=0.75  EM 2*1*(1-0)=2
+        // Total = 5.125
+        // Health = 10 - 5.125 = 4,875
+        assert_eq!(ship_health.values[HealthLayerType::Armor], 4);
 
-        // Hull: remaining damage (overflow) for each type
-        // Kinetic: remaining from armor = 4 - 3 =1
-        // Thermal: 6 - 4.5 = 1.5
-        // Explosive: 2 -1.5 = 0.5
-        // EM: nothing left (shield absorbed 4/8, remaining 4, but efficiency for hull=1, resistance=0)
-        // EM remaining 4 goes to hull
-        // Total hull damage = 1 + 1.5 + 0.5 + 4 = 7
-        // Health = 10 - 7 = 3
-        assert_eq!(ship_health.values[HealthLayerType::Hull], 3);
+        // Hull: no remaining damage (overflow) for each type
+        assert_eq!(ship_health.values[HealthLayerType::Hull], 10);
+        assert_eq!(absorbed[HealthChangeType::Kinetic],1.5);
+        assert_eq!(absorbed[HealthChangeType::Thermal],1.125);
+        assert_eq!(absorbed[HealthChangeType::Explosive],0.75);
+        assert_eq!(absorbed[HealthChangeType::Electromagnetic],5.);
     }
 }
 
@@ -476,10 +517,12 @@ mod table_driven_damage_tests {
     use super::*;
 
     struct TestCase {
+        ship_health : ShipHealth,
         damage: HealthPercents,
         damage_efficiency: DamageEfficiency,
         layer_resistance: ShipResistances,
         expected: LayeredHealth<i32>,
+        expected_absorbed_dmg: HealthPercents,
         description: &'static str,
     }
 
@@ -487,6 +530,10 @@ mod table_driven_damage_tests {
     fn test_apply_damage_vector_table() {
         let test_cases = vec![
             TestCase {
+                ship_health: ShipHealth {
+                    values: LayeredHealth { values: [10, 10, 10] },
+                    values_max: LayeredHealth { values: [10, 10, 10] },
+                },
                 damage: HealthPercents { values: [10.0, 0.0, 0.0, 0.0] },
                 damage_efficiency: DamageEfficiency {
                     values: [
@@ -502,11 +549,17 @@ mod table_driven_damage_tests {
                         HealthPercents::default(),
                     ]
                 }),
-                expected: LayeredHealth { values: [5, 5, 10] },
+                expected: LayeredHealth { values: [5, 10, 10] },
+                expected_absorbed_dmg: HealthPercents { values: [5.,0.,0.,0.] },
                 description: "Kinetic 10 with 50% shield resistance",
             },
             TestCase {
-                damage: HealthPercents { values: [5.0, 5.0, 0.0, 0.0] },
+                ship_health: ShipHealth {
+                    values: LayeredHealth { values: [10, 10, 10] },
+                    values_max: LayeredHealth { values: [10, 10, 10] },
+                },
+                damage: HealthPercents { values: [20.0, 20.0, 0.0, 0.0] },
+                // damage efficiency
                 damage_efficiency: DamageEfficiency {
                     values: [
                         HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
@@ -516,15 +569,23 @@ mod table_driven_damage_tests {
                 },
                 layer_resistance: ShipResistances(LayeredHealth {
                     values: [
-                        HealthPercents { values: [0.0, 0.0, 0.0, 0.0] },
+                        HealthPercents::default(),
                         HealthPercents { values: [0.2, 0.5, 0.0, 0.0] },
                         HealthPercents::default(),
                     ]
                 }),
-                expected: LayeredHealth { values: [5, 1, 9] },
+                expected: LayeredHealth { values: [0, 0, 5] },
+                // shield absorbed [10.0] [10.0, 10.0, 0,0] dmg remains
+                // armor absorbed [10.0] [2.6, 2.6, 0, 0] dmg remaining
+                // hull absorbed [5]
+                expected_absorbed_dmg: HealthPercents { values: [18.461538,6.153846,0.,0.] },
                 description: "Mixed Kinetic/Thermal with resistances in armor",
             },
             TestCase {
+                ship_health: ShipHealth {
+                    values: LayeredHealth { values: [10, 10, 10] },
+                    values_max: LayeredHealth { values: [10, 10, 10] },
+                },
                 damage: HealthPercents { values: [0.0, 0.0, 5.0, 5.0] },
                 damage_efficiency: DamageEfficiency {
                     values: [
@@ -540,18 +601,17 @@ mod table_driven_damage_tests {
                         HealthPercents::default(),
                     ]
                 }),
-                expected: LayeredHealth { values: [8, 5, 5] },
+                expected: LayeredHealth { values: [7, 10, 10] },
+                expected_absorbed_dmg: HealthPercents { values: [0.,0.,2.5,0.] },
+                // dmg to shield is 2.5 -> 7.5 (floor is 7)
                 description: "Explosive & EM damage with partial shield resistances",
             },
         ];
 
         for case in test_cases {
-            let mut ship_health = ShipHealth {
-                values: LayeredHealth { values: [10, 10, 10] },
-                values_max: LayeredHealth { values: [10, 10, 10] },
-            };
+            let mut ship_health = case.ship_health.clone();
 
-            apply_damage_vector(
+            let absorbed = apply_damage_vector(
                 case.damage,
                 case.damage_efficiency,
                 &mut ship_health,
@@ -567,6 +627,16 @@ mod table_driven_damage_tests {
                     layer
                 );
             }
+            for res in HealthChangeType::ALL {
+                assert_eq!(
+                    absorbed[res],
+                    case.expected_absorbed_dmg[res],
+                    "Failed test case: {} on resistance {:?}",
+                    case.description,
+                    res
+                );
+            }
+            
         }
     }
 }
