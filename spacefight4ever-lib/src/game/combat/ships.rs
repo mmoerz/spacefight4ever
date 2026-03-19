@@ -16,9 +16,8 @@ pub enum Character {
 }
 
 #[derive(Component)]
-pub struct Ship {
+pub struct StandingStatus {
     pub standing: Standing,
-    
 }
 
 

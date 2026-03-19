@@ -88,7 +88,7 @@ pub enum ShipType {
     Carrier
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Component, Debug, Clone, PartialEq, Eq)]
 pub struct ShipModel {
     pub name: String,
     pub kind: ShipType,
