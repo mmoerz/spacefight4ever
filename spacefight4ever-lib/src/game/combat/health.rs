@@ -1,7 +1,6 @@
 // Todo: think about using i32 or i64 with fixed comma (= multiply with 1024) instead of f32 
 // Todo: when implementing networking i32 might come in handy (f32 is tricky to transport)
 
-use bevy::camera::visibility::Layer;
 use bevy::prelude::*;
 
 use crate::game::combat::health_basetypes::*;

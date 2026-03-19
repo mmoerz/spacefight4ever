@@ -68,6 +68,11 @@ Procedural Text + Buttons: dynamically inserted children for content.
 
 Interaction System: remains the same (button presses → messages).
 
+# vscode extensions
+error lens
+dependi
+todo tree
+
 ### prefab
 #[derive(Resource)]
 struct DialogTemplates {

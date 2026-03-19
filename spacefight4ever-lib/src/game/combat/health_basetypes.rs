@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use std::ops::{Index, IndexMut, Deref, DerefMut};
+use std::ops::{Index, IndexMut};
 
 /// contains the diffent possible damage types
 /// 
