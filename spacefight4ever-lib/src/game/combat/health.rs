@@ -291,14 +291,14 @@ fn apply_healing_vector(
 pub fn apply_heal_system(
     mut events: MessageReader<HealReceived>,
     mut query: Query<(&mut ShipHealth, &ShipResistances)>,
-    mut absorbed_writer: MessageWriter<HealthHealingAbsorbed>,
+    mut absorbed_writer: MessageWriter<HealthHealAbsorbed>,
 ) {
     for event in events.read() {
         if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
             let healing = event.healing;
             let absorbed = apply_healing_vector(
                 healing, &mut health, resistances);
-            absorbed_writer.write(HealthHealingAbsorbed {
+            absorbed_writer.write(HealthHealAbsorbed {
                 entity: event.entity,
                 healing: absorbed,
             });

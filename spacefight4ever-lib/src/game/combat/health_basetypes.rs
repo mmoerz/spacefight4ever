@@ -110,7 +110,7 @@ pub struct HealthDamageAbsorbed
 }
 
 #[derive(Message, Debug, Clone, Copy)]
-pub struct HealthHealingAbsorbed
+pub struct HealthHealAbsorbed
 {
     pub entity: Entity,
     pub healing: LayeredHealth<i32>,
