@@ -309,6 +309,8 @@ pub fn apply_heal_system(
 
 #[cfg(test)]
 mod tests {
+    use bevy::camera::visibility::Layer;
+
     use super::*;
 
     #[test]
@@ -320,11 +322,11 @@ mod tests {
 
         let damage = HealthPercents { values: [5.0, 0.0, 0.0, 0.0] };
         let damage_efficiency = DamageEfficiency {
-            values: [
+            0: LayeredHealth { values: [
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
-            ]
+            ]}
         };
         let layer_resistence = ShipResistances(LayeredHealth {
             values: [
@@ -356,11 +358,11 @@ mod tests {
 
         let damage = HealthPercents { values: [10.0, 0.0, 0.0, 0.0] };
         let damage_efficiency = DamageEfficiency {
-            values: [
+            0: LayeredHealth { values: [
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
-            ]
+            ]}
         };
         let layer_resistence = ShipResistances(LayeredHealth {
             values: [
@@ -392,11 +394,11 @@ mod tests {
 
         let damage = HealthPercents { values: [10.0, 0.0, 0.0, 0.0] };
         let damage_efficiency = DamageEfficiency {
-            values: [
+            0: LayeredHealth { values: [
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                 HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
-            ]
+            ]}
         };
         let layer_resistence = ShipResistances(LayeredHealth {
             values: [
@@ -428,11 +430,11 @@ mod tests {
 
         let damage = HealthPercents { values: [0.0, 0.0, 0.0, 0.0] };
         let damage_efficiency = DamageEfficiency {
-            values: [
+            0: LayeredHealth { values: [
                 HealthPercents::default(),
                 HealthPercents::default(),
                 HealthPercents::default(),
-            ]
+            ]}
         };
         let layer_resistence = ShipResistances(LayeredHealth {
             values: [
@@ -467,14 +469,14 @@ mod tests {
 
         // Damage efficiency: shield absorbs EM only, armor all physical types, hull all types
         let damage_efficiency = DamageEfficiency {
-            values: [
+            0: LayeredHealth { values: [
                 // Shield
                 HealthPercents { values: [0.0, 0.0, 0.0, 1.0] },
                 // Armor
                 HealthPercents { values: [1.0, 1.0, 1.0, 1.0] },
                 // Hull
                 HealthPercents { values: [1.0, 1.0, 1.0, 1.0] },
-            ],
+            ]},
         };
 
         // Resistances: Shield has 50% EM resistance, Armor 25% Kinetic/Thermal/Explosive, Hull no resistance
@@ -533,11 +535,11 @@ mod table_driven_damage_tests {
                 },
                 damage: HealthPercents { values: [10.0, 0.0, 0.0, 0.0] },
                 damage_efficiency: DamageEfficiency {
-                    values: [
+                    0: LayeredHealth { values: [
                         HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                         HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                         HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
-                    ],
+                    ]},
                 },
                 layer_resistance: ShipResistances(LayeredHealth {
                     values: [
@@ -558,11 +560,11 @@ mod table_driven_damage_tests {
                 damage: HealthPercents { values: [20.0, 20.0, 0.0, 0.0] },
                 // damage efficiency
                 damage_efficiency: DamageEfficiency {
-                    values: [
+                    0: LayeredHealth { values: [
                         HealthPercents { values: [1.0, 0.0, 0.0, 0.0] },
                         HealthPercents { values: [1.0, 1.0, 0.0, 0.0] },
                         HealthPercents { values: [1.0, 1.0, 0.0, 0.0] },
-                    ],
+                    ]},
                 },
                 layer_resistance: ShipResistances(LayeredHealth {
                     values: [
@@ -585,11 +587,11 @@ mod table_driven_damage_tests {
                 },
                 damage: HealthPercents { values: [0.0, 0.0, 5.0, 5.0] },
                 damage_efficiency: DamageEfficiency {
-                    values: [
+                    0: LayeredHealth { values: [
                         HealthPercents { values: [0.0, 0.0, 1.0, 0.0] },
                         HealthPercents { values: [0.0, 0.0, 1.0, 0.0] },
                         HealthPercents { values: [1.0, 1.0, 0.0, 1.0] },
-                    ],
+                    ]},
                 },
                 layer_resistance: ShipResistances(LayeredHealth {
                     values: [

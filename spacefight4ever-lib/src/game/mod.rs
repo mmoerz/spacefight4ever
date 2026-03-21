@@ -9,9 +9,13 @@ pub mod combat {
 }
 
 pub mod ship {
-    pub mod bundle; // contains all bundles for ships
+    pub mod cargo;
     pub mod module;
     pub mod weapon;
+    pub mod definition_repository;
+    pub mod weapon_definition; // for storing weapon definitions that are reused between identical weapons
+    pub mod ammunition_definitions; // for storing ammunition definitions that are reused between identical ammunition
+    pub mod bundle; // contains all bundles for ships
 }
 
 pub mod player {

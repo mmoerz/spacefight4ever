@@ -4979,6 +4979,8 @@ dependencies = [
  "bevy_prototype_lyon",
  "bevy_ui",
  "bevy_ui_widgets",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

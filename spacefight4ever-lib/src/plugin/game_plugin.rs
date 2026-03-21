@@ -6,6 +6,8 @@ use crate::game::player::player::*;
 use crate::game::combat::health::*;
 use crate::game::combat::health_basetypes::*;
 use crate::game::physics::raycast_damage::*;
+use crate::game::ship::weapon_definition::*;
+use crate::game::ship::ammunition_definitions::*;
 
 /// game plugin
 /// currently only contains player spawn
@@ -31,6 +33,10 @@ impl Plugin for CombatPlugin {
             .add_message::<HealthHealAbsorbed>()
             //.add_message::<HealthHealRequest>()
             .add_message::<WeaponFireRequest>()
+
+            .add_systems(Startup, setup_weapon_repo)
+            .add_systems(Startup, setup_ammunition_repo)
+
             .add_systems(
                 Update,
                 (

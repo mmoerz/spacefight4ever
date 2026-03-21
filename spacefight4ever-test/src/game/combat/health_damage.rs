@@ -30,11 +30,13 @@ fn test_simple_no_damage_apply_damage_system2() {
         entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,1.,0.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+            ] },
+        }
     });
 
     app.update();
@@ -69,11 +71,13 @@ fn test_simple_apply_damage_system1() {
         entity,
         damage: 5,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+            ] },
+            }
     });
 
     app.update();
@@ -107,11 +111,13 @@ fn test_simple_apply_damage_system2() {
         entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,1.,0.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [0.,1.,0.,0.] },
-            HealthPercents { values: [0.,1.,0.,0.] },
-            HealthPercents { values: [0.,1.,0.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [0.,1.,0.,0.] },
+                HealthPercents { values: [0.,1.,0.,0.] },
+                HealthPercents { values: [0.,1.,0.,0.] },
+            ] },
+        }
     });
 
     app.update();
@@ -145,11 +151,13 @@ fn test_simple_apply_damage_system3() {
         entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,0.,1.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [0.,0.,1.,0.] },
-            HealthPercents { values: [0.,0.,1.,0.] },
-            HealthPercents { values: [0.,0.,1.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [0.,0.,1.,0.] },
+                HealthPercents { values: [0.,0.,1.,0.] },
+                HealthPercents { values: [0.,0.,1.,0.] },
+            ] },
+        }
     });
 
     app.update();
@@ -183,11 +191,13 @@ fn test_simple_apply_damage_system4() {
         entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,0.,0.,1.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [1.,0.,0.,1.] },
-            HealthPercents { values: [1.,0.,0.,1.] },
-            HealthPercents { values: [1.,0.,0.,1.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [1.,0.,0.,1.] },
+                HealthPercents { values: [1.,0.,0.,1.] },
+                HealthPercents { values: [1.,0.,0.,1.] },
+            ] },
+        }
     });
 
     app.update();
@@ -221,11 +231,13 @@ fn test_simple_with_resistence_apply_damage_system1() {
         entity,
         damage: 5,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+            ] },
+        }
     });
 
     app.update();
@@ -261,11 +273,13 @@ fn test_simple_with_efficiency_apply_damage_system1() {
         entity,
         damage: 20,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [0.2,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [0.2,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+            ] },
+        }
     });
 
     app.update();
@@ -300,11 +314,13 @@ fn test_simple_with_resistence_and_efficiency_apply_damage_system1() {
         entity,
         damage: 20,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
-        damage_efficiency: DamageEfficiency { values: [
-            HealthPercents { values: [0.2,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-            HealthPercents { values: [1.,0.,0.,0.] },
-        ] },
+        damage_efficiency: DamageEfficiency { 
+            0: LayeredHealth { values: [
+                HealthPercents { values: [0.2,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+                HealthPercents { values: [1.,0.,0.,0.] },
+            ] },
+        }
     });
 
     app.update();

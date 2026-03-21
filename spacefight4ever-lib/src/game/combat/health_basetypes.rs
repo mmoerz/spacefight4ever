@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use std::ops::{Index, IndexMut};
+use serde::{Deserialize, Serialize};
+use std::ops::{Index, IndexMut, Deref, DerefMut};
 
 /// contains the diffent possible damage types
 /// 
@@ -29,7 +30,8 @@ impl HealthChangeType {
     ];
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+/// Generic container for per-layer (shield, armor, hull, ...) values
+#[derive(Debug, Default, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct HealthPercents {
     pub values: [f32; 4],
 }
@@ -83,7 +85,7 @@ impl HealthLayerType {
 }
 
 /// Generic container for per-layer values
-#[derive(Debug, Default, Clone, Copy)] 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Deserialize, Serialize)] 
 pub struct LayeredHealth<T: Default + Copy> {
      pub values: [T; 3], 
 } 
@@ -116,7 +118,20 @@ pub struct HealthHealAbsorbed
     pub healing: LayeredHealth<i32>,
 }
 
-pub type DamageEfficiency = LayeredHealth<HealthPercents>;
+/// damage efficiency across all layers in percent per damagetype
+/// 
+#[derive(Default, Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
+pub struct DamageEfficiency(pub LayeredHealth<HealthPercents>);
+
+impl Deref for DamageEfficiency {
+    type Target = LayeredHealth<HealthPercents>;
+    fn deref(&self) -> &Self::Target { &self.0 }
+}
+
+impl DerefMut for DamageEfficiency {
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+}
+
 
 
 #[cfg(test)]

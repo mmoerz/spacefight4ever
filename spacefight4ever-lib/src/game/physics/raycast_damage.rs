@@ -4,8 +4,11 @@ use avian3d::prelude::*;
 use crate::game::combat::basetypes::*;
 use crate::game::combat::health::*;
 use crate::game::combat::health_basetypes::HealthPercents;
-use crate::game::ship::weapon;
+use crate::game::ship::ammunition_definitions::{AmmunitionDefinitionRepository, AmmunitionDefinition};
 use crate::game::ship::weapon::*;
+use crate::game::ship::weapon_definition::*;
+
+
 
 /// something that can be targeted
 #[derive(Component)]
@@ -19,6 +22,22 @@ pub struct WeaponFireRequest {
     pub weapon_entity: Entity,
     pub target_entity: Option<Entity>, // Some if specific target, None for no target - can't fire then if it is not an aoe weapon
 }
+
+// // how to trigger
+// fn player_input_fire(
+//     keyboard: Res<Input<KeyCode>>,
+//     mut fire_writer: EventWriter<WeaponFireRequest>,
+//     query: Query<Entity, With<Weapon>>,
+// ) {
+//     if keyboard.just_pressed(KeyCode::Space) {
+//         for weapon_entity in query.iter() {
+//             fire_writer.send(WeaponFireRequest {
+//                 weapon_entity,
+//                 target_entity: None, // auto-target, or assign a specific target
+//             });
+//         }
+//     }
+// }
 
 // i need a damage_system for environment damage
 
@@ -41,19 +60,23 @@ pub struct WeaponFireRequest {
 pub fn weapon_fire_system(
     mut fire_events: MessageReader<WeaponFireRequest>,
     mut weapon_query: Query<(&Transform, &mut Weapon, &mut Ammunition)>,
-    definition_query: Query<(&WeaponStats, &WeaponBehavior)>,
+    definition_query: Query<&WeaponBehavior>,
     target_query: Query<(Entity, &Transform), With<Target>>,
     spatial_query: SpatialQuery,
     mut damage_writer: MessageWriter<HealthDamageReceived>,
+    weapon_repo: Res<WeaponDefinitionRepository>,
+    ammo_repo: Res<AmmunitionDefinitionRepository>,
 ) {
     for event in fire_events.read() {
         let Ok((weapon_transform, mut weapon, mut ammunition)) = weapon_query.get_mut(event.weapon_entity) else { continue; };
-        let Ok((weapon_stats, behavior)) = definition_query.get(weapon.weapon_definition) else { continue; };
+        let Ok(behavior) = definition_query.get(event.weapon_entity) else { continue; };
+        let weapon_def = weapon_repo.get_by_id(weapon.weapon_id);
+        let ammo_def = ammo_repo.get_by_id(ammunition.ammo_id);
 
         if weapon.cooldown > 0.0 { continue; }
         if ammunition.count <= 0 { continue; }
         ammunition.count -= 1;
-        weapon.cooldown = weapon_stats.fire_rate;
+        weapon.cooldown = weapon_def.fire_rate;
 
         if let Some(target_entity) = event.target_entity {
             let origin = weapon_transform.translation;
@@ -66,23 +89,23 @@ pub fn weapon_fire_system(
             let dir  = Dir3::new((to_target / distance).normalize()).unwrap();
 
             // range
-            if distance > weapon_stats.range[WeaponRangeType::Max] { continue; }
+            if distance > weapon_def.range[WeaponRangeType::Max] { continue; }
 
             // cone
-            if let Some(max_angle) = weapon_stats.max_angle {
+            if let Some(max_angle) = weapon_def.max_angle {
                 let cos_angle = forward.dot(dir.into()).clamp(-1.0, 1.0);
                 if cos_angle < (max_angle * 0.5).cos() { continue; }
             }
             match behavior {
                 WeaponBehavior::Beam => {
                     if has_line_of_sight(origin, dir, distance, target_entity, &spatial_query) { 
-                    let raw_damage = compose_raw_damage(distance, weapon_stats, &ammunition);
+                    let raw_damage = compose_raw_damage(distance, weapon_def, ammo_def);
 
                     damage_writer.write(HealthDamageReceived {
                         entity: target_entity,
                         damage: raw_damage, 
-                        damage_profile: ammunition.damage_profile,
-                        damage_efficiency: ammunition.damage_efficiency 
+                        damage_profile: ammo_def.damage_profile,
+                        damage_efficiency: ammo_def.damage_efficiency 
                     });
                 }
                 }
@@ -106,16 +129,16 @@ pub fn weapon_fire_system(
 ///
 pub fn compose_raw_damage(
     distance: f32,
-    weapon_stats: &WeaponStats,
-    ammunition: &Ammunition
+    weapon_def: &WeaponDefinition,
+    ammo_def: &AmmunitionDefinition,
 ) -> i32 {
-    let mut damage = weapon_stats.damage + ammunition.additional_damage;
-    if distance <= weapon_stats.range[WeaponRangeType::Min] || distance > weapon_stats.range[WeaponRangeType::Max] {
+    let mut damage = weapon_def.damage + ammo_def.additional_damage;
+    if distance <= weapon_def.range[WeaponRangeType::Min] || distance > weapon_def.range[WeaponRangeType::Max] {
         damage = 0.;
-    } else if distance > weapon_stats.range[WeaponRangeType::Optimal] {
+    } else if distance > weapon_def.range[WeaponRangeType::Optimal] {
         // reduce damage with the distance^2 from Optimal to max (and after it's 0)
-        let over_optimal = distance - weapon_stats.range[WeaponRangeType::Optimal];
-        let optimal_max = weapon_stats.range[WeaponRangeType::Max] - weapon_stats.range[WeaponRangeType::Optimal];
+        let over_optimal = distance - weapon_def.range[WeaponRangeType::Optimal];
+        let optimal_max = weapon_def.range[WeaponRangeType::Max] - weapon_def.range[WeaponRangeType::Optimal];
         let reduction = 1.0 - over_optimal / optimal_max;
         damage *= reduction.powf(2.0);
     }
@@ -201,49 +224,36 @@ fn has_line_of_sight(
     true
 }
 
-// // how to trigger
-// fn player_input_fire(
-//     keyboard: Res<Input<KeyCode>>,
-//     mut fire_writer: EventWriter<WeaponFireRequest>,
-//     query: Query<Entity, With<Weapon>>,
-// ) {
-//     if keyboard.just_pressed(KeyCode::Space) {
-//         for weapon_entity in query.iter() {
-//             fire_writer.send(WeaponFireRequest {
-//                 weapon_entity,
-//                 target_entity: None, // auto-target, or assign a specific target
-//             });
-//         }
-//     }
-// }
-
 // unittests for damage calculation
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn base_weapon() -> WeaponStats {
+    fn base_weapon() -> WeaponDefinition {
         let mut range = WeaponRange::default();
         range[WeaponRangeType::Min] = 10.0;
         range[WeaponRangeType::Optimal] = 50.0;
         range[WeaponRangeType::Max] = 100.0;
 
-        WeaponStats {
-            damage: 100.0,
-            max_angle: Some(360.0),
-            fire_rate: 1.0,
+        WeaponDefinition { 
+            name: "Thunder".into(),
+            behavior: WeaponBehavior::Beam, 
             range: range,
+            max_angle: Some(360.0),
+            damage: 100.0,
+            fire_rate: 1.0,
             ammo_max: 10,
         }
     }
 
-    fn base_ammo() -> Ammunition {
-        Ammunition {
+    fn base_ammo() -> AmmunitionDefinition {
+        AmmunitionDefinition {
+            name: "Lightning".into(),
             additional_damage: 20.0,
             damage_profile: Default::default(),
             damage_efficiency: Default::default(),
             range_modifier: 1.0,
-            count: 10,
+            missile_fuel_max: Some(20),
         }
     }
 
@@ -293,7 +303,7 @@ mod tests {
 
     #[test]
     fn damage_clamped_to_zero_when_reduction_negative() {
-        let mut weapon = base_weapon();
+        let weapon = base_weapon();
         let ammo = base_ammo();
 
         // Force edge case
