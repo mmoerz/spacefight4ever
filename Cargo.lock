@@ -4965,6 +4965,7 @@ dependencies = [
 name = "spacefight4ever-bin"
 version = "0.1.0"
 dependencies = [
+ "avian3d",
  "bevy",
  "spacefight4ever-lib",
 ]
@@ -4984,6 +4985,7 @@ dependencies = [
 name = "spacefight4ever-test"
 version = "0.1.0"
 dependencies = [
+ "avian3d",
  "bevy",
  "bevy_prototype_lyon",
  "spacefight4ever-lib",

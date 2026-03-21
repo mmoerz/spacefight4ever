@@ -116,6 +116,9 @@ pub struct HealthHealingAbsorbed
     pub healing: LayeredHealth<i32>,
 }
 
+pub type DamageEfficiency = LayeredHealth<HealthPercents>;
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

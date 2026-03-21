@@ -71,9 +71,22 @@ pub enum ModuleSize {
 pub struct Module {
     pub id: usize,
     pub name: String,
-    pub kind: MountType,
+    pub kind: MountType, /// this is the equivalent to the module type (weapon, shield, ...)
     pub size: ModuleSize,
 }
+
+impl Module {
+    /// Helper to create a standard weapon module definition
+    pub fn new_weapon(id: usize, name: impl Into<String>, size: ModuleSize) -> Self {
+        Self {
+            id,
+            name: name.into(),
+            kind: MountType::Hardpoint(HardPointType::Weapon),
+            size,
+        }
+    }
+}
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShipType {
@@ -88,6 +101,7 @@ pub enum ShipType {
     Carrier
 }
 
+
 #[derive(Component, Debug, Clone, PartialEq, Eq)]
 pub struct ShipModel {
     pub name: String,
@@ -97,11 +111,29 @@ pub struct ShipModel {
     // put a reference or identifier for the graphics part here?
 }
 
+// each ship has a list of mountpoints that adhere
+// to the 'default' mountpoints defined in ShipModel
 #[derive(Component)]
 pub struct Ship {
     pub id: usize,
     pub kind: ShipType,
     pub mount_points: Vec<MountPoint>
+}
+
+impl Ship {
+    /// Logically assigns a module entity to a specific mount point ID.
+    /// Note: This does not handle the hierarchy (parent/child) relationship.
+    pub fn equip(&mut self, mount_point_id: usize, module_entity: Entity) -> Result<(), String> {
+        if let Some(mp) = self.mount_points.iter_mut().find(|mp| mp.id == mount_point_id) {
+            if mp.occupied.is_some() {
+                return Err(format!("Mount point {} is already occupied", mount_point_id));
+            }
+            mp.occupied = Some(module_entity);
+            Ok(())
+        } else {
+            Err(format!("Mount point {} not found", mount_point_id))
+        }
+    }
 }
 
 #[cfg(test)]

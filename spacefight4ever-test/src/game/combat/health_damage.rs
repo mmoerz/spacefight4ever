@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use spacefight4ever_lib::game::combat::health_basetypes::{HealthLayerType, HealthPercents};
+use spacefight4ever_lib::game::combat::health_basetypes::{HealthLayerType, HealthPercents, DamageEfficiency};
 use spacefight4ever_lib::game::combat::health::*;
 use spacefight4ever_lib::game::combat::ships::ShipResistances;
 use spacefight4ever_lib::prelude::combat::health_basetypes::LayeredHealth;

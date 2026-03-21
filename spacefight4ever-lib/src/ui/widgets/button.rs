@@ -13,7 +13,7 @@ pub fn spawn_button(
     font: Handle<Font>,
     color: Color,
     background_color:Color,
-) -> Bundle {
+) -> Entity {
     commands
         .spawn( (
             Node {
@@ -36,4 +36,3 @@ pub fn spawn_button(
             )]
         )).id()
 }
-

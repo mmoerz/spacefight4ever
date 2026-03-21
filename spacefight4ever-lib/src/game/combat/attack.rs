@@ -1,7 +1,12 @@
+use std::ops::{Index, IndexMut};
+
 use bevy::prelude::*;
 
 use crate::game::combat::ships::*;
-use crate::game::ships::modules::*;
+use crate::game::ship::module::*;
+
+
+
 
 #[derive(Message)]
 pub struct Attack {

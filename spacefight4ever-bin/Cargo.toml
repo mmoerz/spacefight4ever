@@ -7,3 +7,4 @@ edition = "2024"
 spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "dynamic_linking", "debug" ] }
 
 bevy = { workspace = true, features = [ "dynamic_linking", "debug" ] }
+avian3d = { version = "0.6.0", features = ["simd"] }

@@ -8,3 +8,4 @@ spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "debug" ] 
 
 bevy = { workspace = true, features = [ "debug" ] }
 bevy_prototype_lyon = { workspace = true, features = [] }
+avian3d = { version = "0.6.0", features = ["simd"] }

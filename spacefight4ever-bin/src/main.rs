@@ -14,6 +14,9 @@
 
 
 use bevy::prelude::*;
+use avian3d::prelude::*;
+
+
 use spacefight4ever_lib::prelude::*;
 
 use spacefight4ever_lib::{ setup, trigger_exit_dialog };
@@ -22,11 +25,14 @@ use spacefight4ever_lib::config::environment::*;
 fn main() {
     App::new()
 
-        .add_plugins(DefaultPlugins.set(
+        .add_plugins((
+            DefaultPlugins.set(
             bevy::asset::AssetPlugin {
             file_path: get_s4fe_config().asset_path.into(),
             ..default()
-        }))
+            }),
+            PhysicsPlugins::default()) 
+        )
         .add_plugins(UiPlugin)
 
         .add_systems(Startup, setup)

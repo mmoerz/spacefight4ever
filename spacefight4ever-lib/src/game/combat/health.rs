@@ -12,8 +12,6 @@ pub struct ShipHealth {
     pub values_max: LayeredHealth<i32>
 }
 
-pub type DamageEfficiency = LayeredHealth<HealthPercents>;
-
 // messages start here
 //
 //
