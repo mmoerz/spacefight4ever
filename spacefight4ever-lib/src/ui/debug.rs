@@ -1,11 +1,41 @@
 use bevy::prelude::*;
 
+
+#[derive(Resource)]
+pub struct DebugPrintTimer {
+    output_timer: Timer,
+}
+
+impl DebugPrintTimer {
+    pub fn new() -> Self {
+        Self {
+            output_timer: Timer::from_seconds(
+                15.0,
+                TimerMode::Repeating
+            ),
+        }
+    }
+}
+
+impl Default for DebugPrintTimer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub fn debug_print_ui_tree(
+    time: Res<Time>, mut timer: ResMut<DebugPrintTimer>,
     roots: Query<Entity, Without<ChildOf>>,
     children: Query<&Children>,
     name_query: Query<&Name>,
     visibility_query: Query<&Visibility>,
 ) {
+    //timer.output_timer.tick(time.delta());
+
+    if ! timer.output_timer.tick(time.delta()).just_finished() {
+        return;
+    }
+
     println!("-----------");
 
     for root in roots.iter() {

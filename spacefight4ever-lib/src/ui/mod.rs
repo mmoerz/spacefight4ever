@@ -9,6 +9,10 @@ pub mod dialog_manager;
 
 pub mod debug;
 
+pub mod input {
+    pub mod keybindings;
+}
+
 pub mod hud {
     pub mod hud_root;
     pub mod health_display;
@@ -18,6 +22,7 @@ pub mod hud {
 pub mod dialogs {
     pub mod confirm_exit;
     pub mod message;
+    pub mod ship_equipment;
 }
 
 // pub mod widgets {

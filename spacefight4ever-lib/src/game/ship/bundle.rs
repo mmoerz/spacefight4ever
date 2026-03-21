@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::ship::ammunition_definitions;
-
 use super::module::*;
 use super::weapon::*;
+
+
 
 // Example: Put this in game/ship/weapon.rs or similar
 #[derive(Bundle)]

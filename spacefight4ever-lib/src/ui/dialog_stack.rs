@@ -9,6 +9,7 @@ pub struct DialogStack {
 pub enum DialogType {
     ConfirmExit,
     Message(String),
+    ShipEquipment,
 }
 
 impl DialogStack {

@@ -4,6 +4,7 @@ use super::layers::*;
 use super::dialog_stack::*;
 use super::dialogs::confirm_exit::*;
 use super::dialogs::message::*;
+use super::dialogs::ship_equipment::*;
 
 #[derive(Component)]
 pub struct DialogEntity;
@@ -25,6 +26,9 @@ pub fn dialog_request_system(
             }
             DialogRequest::Message(msg) => {
                 stack.push(DialogType::Message(msg.clone()));
+            }
+            DialogRequest::ShipEquipment => {
+                stack.push(DialogType::ShipEquipment);
             }
         }
     }
@@ -59,6 +63,12 @@ pub fn dialog_spawn_system(
                     ui_layers.dialog_root,
                     &asset_server,
                     msg);
+            }
+            DialogType::ShipEquipment => {
+                spawn_ship_equipment_dialog(
+                    &mut commands,
+                    ui_layers.dialog_root,
+                    &asset_server);
             }
         }
     }

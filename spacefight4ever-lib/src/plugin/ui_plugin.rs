@@ -11,6 +11,7 @@ impl Plugin for UiPlugin {
             .init_state::<ui::state::UiInitState>()
             .init_resource::<ui::state::UiState>()
             .init_resource::<ui::dialog_stack::DialogStack>()
+            .init_resource::<ui::debug::DebugPrintTimer>()
             //.init_resource::<ui::layers::UiLayers>()
 
             .add_message::<DialogRequest>()
@@ -31,6 +32,11 @@ impl Plugin for UiPlugin {
             .add_systems(Update, ui::hud::ship_modul_bar::ship_module_button_system)
             //.add_systems(Update, ui::animation::animate_ui)
             .add_systems(Update, ui::state::input_routing_system)
-            .add_systems(Update, ui::dialog_manager::exit_on_confirm);
+            .add_systems(Update, ui::dialog_manager::exit_on_confirm)
+            .add_systems(Update, ui::input::keybindings::trigger_exit_dialog)
+            .add_systems(Update,ui::input::keybindings::trigger_ship_equipment_dialog)
+                    
+            .add_systems(Update, ui::debug::debug_print_ui_tree)
+            ;
     }
 }

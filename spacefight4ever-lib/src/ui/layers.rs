@@ -62,6 +62,7 @@ pub fn spawn_ui_roots(
         dialog_root,
         overlay_root,
     });
+    // enable drawing of ui layers
     next_state.set(UiInitState::Ready)
 }
 
