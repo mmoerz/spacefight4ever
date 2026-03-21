@@ -6,3 +6,8 @@ pub struct CargoItem {
     pub volume: f32,
     pub weight: f32,
 }
+
+#[derive(Component)]
+pub struct Cargo {
+    pub items: Vec<Entity>,
+}

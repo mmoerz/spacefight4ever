@@ -114,7 +114,7 @@ impl NamedDefinition for WeaponDefinition {
 /// 
 /// usize is safer (no overflow), but it uses up i64 on 64bit systems
 /// u32 uses less memory, better for ECS
-pub type WeaponId = u32;
+pub type WeaponDefinitionId = u32;
 
 /// Manager for weapon definitions.
 /// 
@@ -144,13 +144,13 @@ impl WeaponDefinitionRepository {
         Self(DefinitionRepository::from_vec(defs))
     }
 
-    pub fn get_by_id(&self, id: WeaponId) -> &WeaponDefinition {
+    pub fn get_by_id(&self, id: WeaponDefinitionId) -> &WeaponDefinition {
         self.0.get_by_id(id as usize)
     }
     pub fn get_by_name(&self, name: &str) -> Option<&WeaponDefinition> {
         self.0.get_by_name(name)
     }
-    pub fn has_id(&self, id: WeaponId) -> bool {
+    pub fn has_id(&self, id: WeaponDefinitionId) -> bool {
         self.0.has_id(id as usize)
     }
     pub fn has_name(&self, name: &str) -> bool {
@@ -239,7 +239,7 @@ mod tests {
         let repo = repo_from_defs(sample_weapon_defs());
 
         for id in 0..repo.len() {
-            let def_by_id = repo.get_by_id(id as WeaponId);
+            let def_by_id = repo.get_by_id(id as WeaponDefinitionId);
             let def_by_name = repo.get_by_name(&def_by_id.name).unwrap();
             assert_eq!(def_by_id, def_by_name);
         }
@@ -284,9 +284,9 @@ mod tests {
         let repo = repo_from_defs(sample_weapon_defs());
 
         for id in 0..repo.len() {
-            assert!(repo.has_id(id as WeaponId));
+            assert!(repo.has_id(id as WeaponDefinitionId));
 
-            let def = repo.get_by_id(id as WeaponId);
+            let def = repo.get_by_id(id as WeaponDefinitionId);
             assert!(repo.has_name(&def.name));
 
             let by_name = repo.get_by_name(&def.name).unwrap();

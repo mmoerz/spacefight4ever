@@ -67,6 +67,7 @@ pub fn weapon_fire_system(
     mut damage_writer: MessageWriter<HealthDamageReceived>,
     weapon_repo: Res<WeaponDefinitionRepository>,
     ammo_repo: Res<AmmunitionDefinitionRepository>,
+    time: Res<Time>,
 ) {
     for event in fire_events.read() {
         let Ok((weapon_transform, mut weapon, mut ammunition)) = weapon_query.get_mut(event.weapon_entity) else { continue; };
@@ -80,11 +81,10 @@ pub fn weapon_fire_system(
         weapon.cooldown = weapon_def.fire_rate;
 
         if let Some(target_entity) = event.target_entity {
-            let origin = weapon_transform.translation;
-            let forward = weapon_transform.forward(); //rotation.mul_vec3(Vec3::X).normalize();
-
             let Ok((_entity, target_transform)) = target_query.get(target_entity) else { continue; };
 
+            let origin = weapon_transform.translation;
+            let forward = weapon_transform.forward(); //rotation.mul_vec3(Vec3::X).normalize();
             let to_target = target_transform.translation - origin;
             let distance = to_target.length();
             let dir  = Dir3::new((to_target / distance).normalize()).unwrap();
@@ -136,6 +136,11 @@ pub fn weapon_fire_system(
                 }
             }
         }   
+    }
+
+    // Finally reduce cooldowns
+    for (_transform, mut weapon, _ammo) in weapon_query.iter_mut() {
+        weapon.cooldown = (weapon.cooldown - time.delta_secs()).max(0.0);
     }
 }
 

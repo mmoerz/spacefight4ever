@@ -27,7 +27,7 @@ impl NamedDefinition for AmmunitionDefinition {
 ///
 /// usize is safer (no overflow), but it uses up i64 on 64bit systems
 /// u32 uses less memory, better for ECS
-pub type AmmunitionId = usize;
+pub type AmmunitionDefinitionId = usize;
 
 /// Manager for ammunition definitions.
 ///
@@ -52,13 +52,13 @@ impl AmmunitionDefinitionRepository {
 
         Self(DefinitionRepository::from_vec(defs))
     }
-    pub fn get_by_id(&self, id: AmmunitionId) -> &AmmunitionDefinition {
+    pub fn get_by_id(&self, id: AmmunitionDefinitionId) -> &AmmunitionDefinition {
         self.0.get_by_id(id)
     }
     pub fn get_by_name(&self, name: &str) -> Option<&AmmunitionDefinition> {
         self.0.get_by_name(name)
     }
-    pub fn has_id(&self, id: AmmunitionId) -> bool {
+    pub fn has_id(&self, id: AmmunitionDefinitionId) -> bool {
         self.0.has_id(id)
     }
     pub fn has_name(&self, name: &str) -> bool {
