@@ -34,9 +34,12 @@ fn main() {
             PhysicsPlugins::default()) 
         )
         .add_plugins(UiPlugin)
+        .add_plugins(GamePlugin)
 
         .add_systems(Startup, setup)
         .add_systems(Update, trigger_exit_dialog)
+
+        
 
         //.add_systems(Update, spacefight4ever_lib::ui::debug::debug_print_ui_tree)
         .run();

@@ -58,6 +58,7 @@ pub struct WeaponFireRequest {
 // 4. Apply damage / spawn missile or projectile
 //
 pub fn weapon_fire_system(
+    mut commands: Commands,
     mut fire_events: MessageReader<WeaponFireRequest>,
     mut weapon_query: Query<(&Transform, &mut Weapon, &mut Ammunition)>,
     definition_query: Query<&WeaponBehavior>,
@@ -102,7 +103,7 @@ pub fn weapon_fire_system(
                     let raw_damage = compose_raw_damage(distance, weapon_def, ammo_def);
 
                     damage_writer.write(HealthDamageReceived {
-                        entity: target_entity,
+                        target: target_entity,
                         damage: raw_damage, 
                         damage_profile: ammo_def.damage_profile,
                         damage_efficiency: ammo_def.damage_efficiency 
@@ -112,11 +113,26 @@ pub fn weapon_fire_system(
                 WeaponBehavior::Missile => {
                     // TODO: no line of sight necessary however missiles must evade enemies on their way to the target
                     // TODO: spawn a missile with the target and the damage to apply
-
+                    commands.spawn(Missile {
+                        origin: origin,
+                        target: target_entity,
+                        base_damage: weapon_def.damage,
+                        fuel: ammo_def.missile_fuel_max.unwrap_or(0) as f32,
+                        ammo_id: ammunition.ammo_id,
+                    });
                 }
                 WeaponBehavior::Projectile => {
                     // TODO: LOS necessary, but spawn a projectile since damage is not instantly applied
                     // TODO: include damage and target weapon behaviour
+                    if has_line_of_sight(origin, dir, distance, target_entity, &spatial_query) {
+                        // spawn projectile entity
+                        commands.spawn(Projectile {
+                            origin: origin,
+                            target: target_entity,
+                            base_damage: weapon_def.damage,
+                            ammo_id: ammunition.ammo_id,
+                        });
+                    }
                 }
             }
         }   

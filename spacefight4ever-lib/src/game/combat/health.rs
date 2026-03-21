@@ -18,7 +18,7 @@ pub struct ShipHealth {
 
 #[derive(Message, Debug)]
 pub struct HealthDamageReceived {
-    pub entity: Entity,
+    pub target: Entity,
     pub damage: i32,
     pub damage_profile: HealthPercents,
     pub damage_efficiency: DamageEfficiency,
@@ -27,7 +27,7 @@ pub struct HealthDamageReceived {
 impl Default for HealthDamageReceived {
     fn default() -> Self {
         Self {
-            entity: Entity::PLACEHOLDER,
+            target: Entity::PLACEHOLDER,
             damage: 0,
             damage_profile: HealthPercents { ..default() },
             damage_efficiency: DamageEfficiency { ..default() },
@@ -163,14 +163,14 @@ pub fn apply_damage_system(
     mut absorbed_writer: MessageWriter<HealthDamageAbsorbed>,
 ) {
     for event in events.read() {
-        if let Ok((mut health, resistances)) = query.get_mut(event.entity) {
+        if let Ok((mut health, resistances)) = query.get_mut(event.target) {
             let damage = HealthPercents::split_value_by_percentages(event.damage, event.damage_profile);
 
             let absorbed = apply_damage_vector(
                 damage, event.damage_efficiency, &mut health, resistances);
             
             absorbed_writer.write(HealthDamageAbsorbed {
-                entity: event.entity,
+                entity: event.target,
                 damage: absorbed
             });
         }
@@ -309,8 +309,6 @@ pub fn apply_heal_system(
 
 #[cfg(test)]
 mod tests {
-    use bevy::camera::visibility::Layer;
-
     use super::*;
 
     #[test]

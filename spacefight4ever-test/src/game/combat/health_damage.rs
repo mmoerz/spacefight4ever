@@ -27,7 +27,7 @@ fn test_simple_no_damage_apply_damage_system2() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,1.,0.,0.] },
         damage_efficiency: DamageEfficiency { 
@@ -68,7 +68,7 @@ fn test_simple_apply_damage_system1() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 5,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
         damage_efficiency: DamageEfficiency { 
@@ -108,7 +108,7 @@ fn test_simple_apply_damage_system2() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,1.,0.,0.] },
         damage_efficiency: DamageEfficiency { 
@@ -148,7 +148,7 @@ fn test_simple_apply_damage_system3() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,0.,1.,0.] },
         damage_efficiency: DamageEfficiency { 
@@ -188,7 +188,7 @@ fn test_simple_apply_damage_system4() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 5,
         damage_profile: HealthPercents { values: [0.,0.,0.,1.] },
         damage_efficiency: DamageEfficiency { 
@@ -228,7 +228,7 @@ fn test_simple_with_resistence_apply_damage_system1() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 5,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
         damage_efficiency: DamageEfficiency { 
@@ -270,7 +270,7 @@ fn test_simple_with_efficiency_apply_damage_system1() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 20,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
         damage_efficiency: DamageEfficiency { 
@@ -311,7 +311,7 @@ fn test_simple_with_resistence_and_efficiency_apply_damage_system1() {
     )).id();
 
     app.world_mut().write_message(HealthDamageReceived {
-        entity,
+        target: entity,
         damage: 20,
         damage_profile: HealthPercents { values: [1.,0.,0.,0.] },
         damage_efficiency: DamageEfficiency { 

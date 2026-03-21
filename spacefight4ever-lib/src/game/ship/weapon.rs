@@ -32,5 +32,19 @@ pub struct Ammunition {
 
 #[derive(Component, Clone, Copy)]
 pub struct Missile {
-    pub fuel: i32,
+    pub origin: Vec3,
+    pub target: Entity,
+    pub base_damage: f32, // base dmg from weapon, additional dmg from ammunition
+    pub ammo_id: AmmunitionId,
+    pub fuel: f32,
 }
+
+
+#[derive(Component, Clone, Copy)]
+pub struct Projectile {
+    pub origin: Vec3,
+    pub target: Entity,
+    pub base_damage: f32, // base dmg from weapon, additional dmg from ammunition
+    pub ammo_id: AmmunitionId,
+}
+
