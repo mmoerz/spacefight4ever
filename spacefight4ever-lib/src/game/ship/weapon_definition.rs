@@ -2,7 +2,11 @@ use std::ops::{Index, IndexMut};
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::game::ship::definition_repository::{DefinitionRepository, NamedDefinition};
+use crate::game::ship::{definition_repository::{DefinitionRepository, NamedDefinition}, module::ModuleSize};
+
+const PATH_WEAPON_DEFINITION: &str = "assets/data/weapons.json";
+
+/// describes the static data of a weapon
 
 // for storing weapon definitions that are reused between identical weapons
 // what should be possible weapons
@@ -87,9 +91,11 @@ pub enum WeaponBehavior{
     Projectile
 }
 
+/// describes the static data of a weapon
 #[derive(Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct WeaponDefinition {
     pub name: String,
+    pub size: ModuleSize,
     pub behavior: WeaponBehavior,
     pub range: WeaponRange<f32>,
     pub max_angle: Option<f32>,
@@ -156,7 +162,7 @@ impl WeaponDefinitionRepository {
 }
 
 pub fn setup_weapon_repo(mut commands: Commands) {
-    let repo = WeaponDefinitionRepository::load_from_file("assets/weapons.json");
+    let repo = WeaponDefinitionRepository::load_from_file(PATH_WEAPON_DEFINITION);
     commands.insert_resource(repo);
 }
 
@@ -168,6 +174,7 @@ mod tests {
         vec![
             WeaponDefinition {
                 name: "Laser".to_string(),
+                size: ModuleSize::Small,
                 behavior: WeaponBehavior::Beam,
                 range: WeaponRange::new(10.0, 50.0, 100.0),
                 max_angle: Some(5.0),
@@ -176,6 +183,7 @@ mod tests {
                 ammo_max: 50,
             },
             WeaponDefinition {
+                size: ModuleSize::Medium,
                 name: "Missile".to_string(),
                 behavior: WeaponBehavior::Missile,
                 range: WeaponRange::new(20.0, 100.0, 200.0),

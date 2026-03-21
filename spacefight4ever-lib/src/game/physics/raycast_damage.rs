@@ -228,6 +228,7 @@ fn has_line_of_sight(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::game::ship::module::ModuleSize;
 
     fn base_weapon() -> WeaponDefinition {
         let mut range = WeaponRange::default();
@@ -237,6 +238,7 @@ mod tests {
 
         WeaponDefinition { 
             name: "Thunder".into(),
+            size: ModuleSize::Small,
             behavior: WeaponBehavior::Beam, 
             range: range,
             max_angle: Some(360.0),

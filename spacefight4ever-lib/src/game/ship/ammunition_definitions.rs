@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::game::{combat::health_basetypes::{DamageEfficiency, HealthPercents}};
 use crate::game::ship::definition_repository::{NamedDefinition, DefinitionRepository};
 
-pub const PATH_AMMUNITION_DEFINITION: &str = "assets/weapons.json";
+pub const PATH_AMMUNITION_DEFINITION: &str = "assets/data/ammunitions.json";
 
 /// describes the static data of a weapon
 #[derive(Default, Debug, Clone, PartialEq, Deserialize, Serialize)]

@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Laser Blaster",
+    "size": "Small",
+    "behavior": "Beam",
+    "range": { "values": [50.0, 150.0, 300.0] },
+    "max_angle": 10.0,
+    "fire_rate": 1.0,
+    "damage": 15.0,
+    "ammo_max": 0
+  },
+  {
+    "name": "Pulse Laser",
+    "size": "Medium",
+    "behavior": "Beam",
+    "range": { "values": [75.0, 200.0, 350.0] },
+    "max_angle": 15.0,
+    "fire_rate": 1.5,
+    "damage": 20.0,
+    "ammo_max": 0
+  },
+  {
+    "name": "Railgun",
+    "size": "Large",
+    "behavior": "Projectile",
+    "range": { "values": [100.0, 300.0, 600.0] },
+    "max_angle": null,
+    "fire_rate": 0.5,
+    "damage": 100.0,
+    "ammo_max": 10
+  },
+  {
+    "name": "Gauss Cannon",
+    "size": "Large",
+    "behavior": "Projectile",
+    "range": { "values": [120.0, 400.0, 700.0] },
+    "max_angle": null,
+    "fire_rate": 0.7,
+    "damage": 80.0,
+    "ammo_max": 8
+  },
+  {
+    "name": "Missile Launcher",
+    "size": "XLarge",
+    "behavior": "Missile",
+    "range": { "values": [150.0, 500.0, 1000.0] },
+    "max_angle": 30.0,
+    "fire_rate": 0.3,
+    "damage": 200.0,
+    "ammo_max": 6
+  },
+  {
+    "name": "Plasma Cannon",
+    "size": "Medium",
+    "behavior": "Projectile",
+    "range": { "values": [50.0, 200.0, 400.0] },
+    "max_angle": 25.0,
+    "fire_rate": 0.9,
+    "damage": 50.0,
+    "ammo_max": 12
+  },
+  {
+    "name": "Ion Beam",
+    "size": "Small",
+    "behavior": "Beam",
+    "range": { "values": [80.0, 250.0, 500.0] },
+    "max_angle": 5.0,
+    "fire_rate": 1.2,
+    "damage": 25.0,
+    "ammo_max": 0
+  },
+  {
+    "name": "Particle Cannon",
+    "size": "Medium",
+    "behavior": "Projectile",
+    "range": { "values": [60.0, 180.0, 400.0] },
+    "max_angle": 10.0,
+    "fire_rate": 1.0,
+    "damage": 35.0,
+    "ammo_max": 15
+  },
+  {
+    "name": "Gattling Gun",
+    "size": "Small",
+    "behavior": "Projectile",
+    "range": { "values": [30.0, 120.0, 250.0] },
+    "max_angle": 5.0,
+    "fire_rate": 5.0,
+    "damage": 5.0,
+    "ammo_max": 100
+  },
+  {
+    "name": "Laser Cannon",
+    "size": "Medium",
+    "behavior": "Beam",
+    "range": { "values": [70.0, 220.0, 450.0] },
+    "max_angle": 12.0,
+    "fire_rate": 1.0,
+    "damage": 30.0,
+    "ammo_max": 0
+  }
+]

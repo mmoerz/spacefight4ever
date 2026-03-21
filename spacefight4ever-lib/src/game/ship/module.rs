@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+/// 
 
 /// the 'hardpoint' type
 /// there are different types of slots where 
@@ -54,9 +57,11 @@ impl MountPoint {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default,Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum ModuleSize {
+    #[default]
     Micro,
+    Tiny,
     Small,
     Medium,
     Large,

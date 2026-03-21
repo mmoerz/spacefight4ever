@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Laser Cell",
+    "range_modifier": 1.0,
+    "damage_profile": 100,
+    "damage_efficiency": 90,
+    "additional_damage": 5.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Pulse Cell",
+    "range_modifier": 1.2,
+    "damage_profile": 90,
+    "damage_efficiency": 85,
+    "additional_damage": 8.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Railgun Slug",
+    "range_modifier": 1.0,
+    "damage_profile": 100,
+    "damage_efficiency": 95,
+    "additional_damage": 50.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Gauss Bolt",
+    "range_modifier": 0.9,
+    "damage_profile": 100,
+    "damage_efficiency": 90,
+    "additional_damage": 40.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Standard Missile",
+    "range_modifier": 1.0,
+    "damage_profile": 120,
+    "damage_efficiency": 100,
+    "additional_damage": 100.0,
+    "missile_fuel_max": 100
+  },
+  {
+    "name": "Heavy Missile",
+    "range_modifier": 1.1,
+    "damage_profile": 150,
+    "damage_efficiency": 100,
+    "additional_damage": 150.0,
+    "missile_fuel_max": 120
+  },
+  {
+    "name": "Plasma Charge",
+    "range_modifier": 0.8,
+    "damage_profile": 100,
+    "damage_efficiency": 80,
+    "additional_damage": 60.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Ion Pod",
+    "range_modifier": 1.0,
+    "damage_profile": 110,
+    "damage_efficiency": 95,
+    "additional_damage": 20.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Particle Cell",
+    "range_modifier": 0.9,
+    "damage_profile": 100,
+    "damage_efficiency": 85,
+    "additional_damage": 35.0,
+    "missile_fuel_max": null
+  },
+  {
+    "name": "Homing Missile",
+    "range_modifier": 1.2,
+    "damage_profile": 130,
+    "damage_efficiency": 100,
+    "additional_damage": 120.0,
+    "missile_fuel_max": 150
+  }
+]
