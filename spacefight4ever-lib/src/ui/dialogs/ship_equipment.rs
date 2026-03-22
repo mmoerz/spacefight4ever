@@ -12,12 +12,31 @@ pub fn spawn_ship_equipment_dialog(
         asset_server.load("fonts/FiraSans-Bold.ttf");
     let icon_menu: Handle<Image> = 
         asset_server.load("ui/ButtonsSmall [Normal]/Button-4.png");
+    let icon_menu_hover: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Hover]/Button-4.png");
+    let icon_menu_disabled: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Disabled]/Button-4.png");
+
     let icon_close: Handle<Image> = 
         asset_server.load("ui/ButtonsSmall [Normal]/Button-1.png");
+    let icon_close_hover: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Hover]/Button-1.png");
+    let icon_close_disabled: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Disabled]/Button-1.png");
+
     let icon_minimize: Handle<Image> = 
-        asset_server.load("ui/ButtonsSmall [Normal]/Button-3.png");
-    let icon_maximize: Handle<Image> =
         asset_server.load("ui/ButtonsSmall [Normal]/Button-2.png");
+    let icon_minimize_hover: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Hover]/Button-2.png");
+    let icon_minimize_disabled: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Disabled]/Button-2.png");
+    
+    let icon_maximize: Handle<Image> =
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-3.png");
+    let icon_maximize_hover: Handle<Image> =
+        asset_server.load("ui/ButtonsSmall [Hover]/Button-3.png");
+    let icon_maximize_disabled: Handle<Image> =
+        asset_server.load("ui/ButtonsSmall [Disabled]/Button-3.png");
 
     match asset_server.get_load_state(&font_handle) {
         Some(bevy::asset::LoadState::Loaded) => println!("Loaded"),
@@ -40,96 +59,21 @@ pub fn spawn_ship_equipment_dialog(
                         UiElementSize::Small,
                         font_handle.clone(),
                         icon_menu.clone(),
+                        icon_menu_hover.clone(),
+                        icon_menu_disabled.clone(),
                         icon_close.clone(),
+                        icon_close_hover.clone(),
+                        icon_close_disabled.clone(),
                         icon_minimize.clone(),
+                        icon_minimize_hover.clone(),
+                        icon_minimize_disabled.clone(),
                         icon_maximize.clone(),
+                        icon_maximize_hover.clone(),
+                        icon_maximize_disabled.clone(),
                     ),
                     )
                 ).id();
         });
-            //     DialogEntity,
-            //     Name::new("Ship_Equiment_Dialog"),
-            //     Node {
-            //         width: px(600.0),
-            //         height: px(400.0),
-            //         // flex_direction: FlexDirection::Row,
-            //         // justify_content: JustifyContent::Start,
-            //         // align_items: AlignItems::,
-            //         // position_type: PositionType::Absolute,
-            //         align_self: AlignSelf::Auto,
-            //         left: px(100.0),
-            //         top: px(100.0),
-            //         ..default()
-            //     },
-            //     BackgroundColor(Color::srgba(0.99, 0., 0., 0.9)),
-            //     Visibility::Visible,
-            
-            //     children![
-            //         (
-            //             Node {
-            //                 width: px(15),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
-            //         ), (
-            //             Node {
-            //                 width: px(20),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.2, 0.5))
-            //         ), (
-            //             Node {
-            //                 width: px(240),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
-            //         ), (
-            //             Node {
-            //                 width: px(20),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.2, 0.5))
-            //         ), (
-            //             Node {
-            //                 width: px(25),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
-            //         ), (
-            //             Node {
-            //                 width: px(260),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.2, 0.5))
-            //         ), (
-            //             Node {
-            //                 width: px(20),
-            //                 height: percent(100),
-            //                 ..default()
-            //             },
-            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
-
-            //         )
-            //     ]
-            // ));
-            // .with_children(|dialog| {
-            //     dialog.spawn((
-            //         Node {
-            //             width: px(20),
-            //             height: percent(100),
-            //             ..default()
-            //         },
-            //         BackgroundColor(Color::srgb(0., 0.5, 0.5))
-            //     ));
-            // });
-        // })
-        // ;
 
     window_id
 }

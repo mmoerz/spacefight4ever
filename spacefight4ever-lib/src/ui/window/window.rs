@@ -1,9 +1,10 @@
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use bevy::ecs::bundle::Bundle;
+use bevy::window::SystemCursorIcon;
 
-use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle};
-use crate::ui::window::component::UiWindowTitleBar;
+use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle, UiImageButtonBundle};
+use crate::ui::window::component::{UiWindowTitleBar, UiWindowMenuButton, UiWindowMinimizeButton, UiWindowMaximizeButton, UiWindowCloseButton, UiImageButtonState};
 use crate::ui::window::structs::UiElementSize;
 use crate::ui::window::consts::{HEIGHT_TITLE_BAR, HEIGHT_STATUS_BAR};
 
@@ -24,9 +25,17 @@ pub fn window_bundle(
     ui_size: UiElementSize,
     font: Handle<Font>,
     icon_menu: Handle<Image>,
+    icon_menu_hover: Handle<Image>,
+    icon_menu_disabled: Handle<Image>,
     icon_close: Handle<Image>,
+    icon_close_hover: Handle<Image>,
+    icon_close_disabled: Handle<Image>,
     icon_minimize: Handle<Image>,
+    icon_minimize_hover: Handle<Image>,
+    icon_minimize_disabled: Handle<Image>,
     icon_maximize: Handle<Image>,
+    icon_maximize_hover: Handle<Image>,
+    icon_maximize_disabled: Handle<Image>,
 ) -> impl Bundle {
     let margin1 = UiRect {
         left: px(1.),
@@ -37,7 +46,7 @@ pub fn window_bundle(
     let bar_height = HEIGHT_TITLE_BAR[ui_size] -2.;
 
     {(
-        Name::new("AWindow"),
+        Name::new("Window"),
         UiWindowBundle {
             node: Node {
                 width: Val::Px(width),
@@ -75,13 +84,27 @@ pub fn window_bundle(
                 },
                 children![
                     (
-                        Node {
-                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                            margin: margin1,
+                        UiWindowMenuButton,
+                        UiImageButtonBundle {
+                            button: Button,
+                            node: Node {
+                                width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                margin: margin1,
+                                ..default()
+                            },
+                            state: UiImageButtonState::Normal,
                             ..default()
                         },
-                        ImageNode::new(icon_menu),
+                        children![
+                            (
+                                ImageNode { image: icon_menu, ..default() }
+                            ), (
+                                ImageNode { image: icon_menu_hover, ..default() }
+                            ), (
+                                ImageNode { image: icon_menu_disabled, ..default() }
+                            ),
+                        ]
                     ), (
                         Node {
                             //width: Val::Percent(100.),
@@ -105,30 +128,60 @@ pub fn window_bundle(
                         },
                         children![
                             (
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    margin: margin1,
+                                UiWindowMinimizeButton,
+                                UiImageButtonBundle {
+                                    button: Button,
+                                    node: Node {
+                                        width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                        height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                        margin: margin1,
+                                        ..default()
+                                    },
+                                    image: ImageNode::new(icon_minimize.clone()),
+                                    state: UiImageButtonState {
+                                        normal: icon_minimize,
+                                        hover: Some(icon_minimize_hover),
+                                        disabled: Some(icon_minimize_disabled)
+                                    },
                                     ..default()
                                 },
-                                ImageNode::new(icon_maximize),
                             ), (
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    margin: margin1,
+                                UiWindowMaximizeButton,
+                                UiImageButtonBundle {
+                                    button: Button,
+                                    node: Node {
+                                        width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                        height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                        margin: margin1,
+                                        ..default()
+                                    },
+                                    image: ImageNode::new(icon_maximize.clone()),
+                                    state: UiImageButtonState {
+                                        normal: icon_maximize,
+                                        hover: Some(icon_maximize_hover),
+                                        disabled: Some(icon_maximize_disabled)
+                                    },
                                     ..default()
                                 },
-                                ImageNode::new(icon_minimize),
                             ), (
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    margin: margin1,
+                                UiWindowCloseButton,
+                                UiImageButtonBundle {
+                                    button: Button,
+                                    node: Node {
+                                        width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                        height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                        margin: margin1,
+                                        ..default()
+                                    },
+                                    image: ImageNode::new(icon_close.clone()),
+                                    state: UiImageButtonState {
+                                        normal: icon_close,
+                                        hover: Some(icon_close_hover),
+                                        disabled: Some(icon_close_disabled)
+                                    },
                                     ..default()
                                 },
-                                ImageNode::new(icon_close),
-                            ),
+                            ), 
                         ]),
                 ]
             ), (
@@ -167,9 +220,9 @@ fn on_window_titelbar_drag_start(
 fn on_window_titelbar_drag(
     on_drag: On<Pointer<Drag>>,
     mut query: Query<&mut UiTransform>,
-    parents: Query<(&UiWindowTitleBar, &Name, &ChildOf)>
+    parents: Query<(&UiWindowTitleBar, &ChildOf)>
 ) {
-    if let Ok((_bar, name, parent)) = parents.get(on_drag.event_target()) {
+    if let Ok((_bar, parent)) = parents.get(on_drag.event_target()) {
         //println!("name: {:?}", name);
         if let Ok(mut transform) = query.get_mut(parent.get()) {
             // Extract the current values as f32
@@ -198,6 +251,35 @@ fn on_window_titelbar_drag_end(
             transform.translation = Val2::ZERO;
             outline.color = Color::NONE;
             global_zindex.0 = 0;
+        }
+    }
+}
+
+pub fn window_button_interaction_system(
+    mut interaction_query: Query<
+        (&Interaction, &UiImageButtonState, &mut ImageNode),
+        (Changed<Interaction>, Or<(
+            With<UiWindowMenuButton>,
+            With<UiWindowMinimizeButton>,
+            With<UiWindowMaximizeButton>,
+            With<UiWindowCloseButton>
+        )>)>,
+) {
+    for (interaction, state,image  ) in &mut interaction_query {
+        match *interaction {
+            Interaction::Pressed => {
+                // Display pressed image
+                image.image.;
+                println!("Window button clicked!");
+            },
+            Interaction::Hovered => {
+                // Display hover image
+                //bundle.image = bundle.hover.clone();
+            },
+            Interaction::None => {
+                // Display default image
+                //bundle.image = bundle.image.clone(); // or default
+            }
         }
     }
 }

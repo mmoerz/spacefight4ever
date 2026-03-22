@@ -23,6 +23,14 @@ pub struct UiButtonBundle {
     pub interaction: Interaction,
 }
 
+#[derive(Default, Bundle)]
+pub struct UiImageButtonBundle {
+    pub state: UiImageButtonState,
+    pub button: Button,
+    pub node: Node,
+    pub interaction: Interaction,
+}
+
 /// A wrapper for UI text.
 #[derive(Bundle)]
 pub struct UiTextBundle {
