@@ -69,7 +69,21 @@ pub fn spawn_ship_equipment_dialog(
                         BackgroundColor(Color::srgb(0., 0.2, 0.5))
                     ), (
                         Node {
-                            width: px(30),
+                            width: px(25),
+                            height: percent(100),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb(0., 0.5, 0.5))
+                    ), (
+                        Node {
+                            width: px(260),
+                            height: percent(100),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb(0., 0.2, 0.5))
+                    ), (
+                        Node {
+                            width: px(20),
                             height: percent(100),
                             ..default()
                         },
