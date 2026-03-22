@@ -1,13 +1,13 @@
 use bevy::prelude::*;
-use crate::ui::bundle::UiButtonBundle;
-use crate::ui::dialog_manager::{DialogButton, DialogEntity};
+use crate::ui::window::structs::UiElementSize;
+use crate::ui::window::window;
 
 /// Spawns a "Confirm Exit" dialog under the DialogRoot layer
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
     dialog_root: Entity,
     asset_server: &Res<AssetServer>,
-) {
+) -> Entity {
     let font_handle: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
 
     match asset_server.get_load_state(&font_handle) {
@@ -16,81 +16,99 @@ pub fn spawn_ship_equipment_dialog(
         _ => println!("Loading..."),
     }
 
+    let mut window_id = Entity::PLACEHOLDER;
+
     // Spawn dialog panel under DialogRoot
     commands
         .entity(dialog_root)
         .with_children(|parent| {
-            parent.spawn((
-                DialogEntity,
-                Name::new("Ship_Equiment_Dialog"),
-                Node {
-                    width: px(600.0),
-                    height: px(400.0),
-                    // flex_direction: FlexDirection::Row,
-                    // justify_content: JustifyContent::Start,
-                    // align_items: AlignItems::,
-                    // position_type: PositionType::Absolute,
-                    align_self: AlignSelf::Auto,
-                    left: px(100.0),
-                    top: px(100.0),
-                    ..default()
-                },
-                BackgroundColor(Color::srgba(0.99, 0., 0., 0.9)),
-                Visibility::Visible,
-            
-                children![
-                    (
-                        Node {
-                            width: px(15),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.5, 0.5))
-                    ), (
-                        Node {
-                            width: px(20),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.2, 0.5))
-                    ), (
-                        Node {
-                            width: px(240),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.5, 0.5))
-                    ), (
-                        Node {
-                            width: px(20),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.2, 0.5))
-                    ), (
-                        Node {
-                            width: px(25),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.5, 0.5))
-                    ), (
-                        Node {
-                            width: px(260),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.2, 0.5))
-                    ), (
-                        Node {
-                            width: px(20),
-                            height: percent(100),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0., 0.5, 0.5))
+            window_id =
+                parent.spawn((
+                    window::window_bundle(
+                        "Ship Equipment",
+                        100., 100.,
+                        600., 400.,
+                        UiElementSize::Small,
+                        font_handle.clone(),
+                        asset_server.load("icons/menu.png"),
+                        asset_server.load("icons/close.png"),
+                        asset_server.load("icons/minimize.png"),
+                        asset_server.load("icons/maximize.png"),
+                    ),
                     )
-                ]
-            ));
+                ).id();
+        });
+            //     DialogEntity,
+            //     Name::new("Ship_Equiment_Dialog"),
+            //     Node {
+            //         width: px(600.0),
+            //         height: px(400.0),
+            //         // flex_direction: FlexDirection::Row,
+            //         // justify_content: JustifyContent::Start,
+            //         // align_items: AlignItems::,
+            //         // position_type: PositionType::Absolute,
+            //         align_self: AlignSelf::Auto,
+            //         left: px(100.0),
+            //         top: px(100.0),
+            //         ..default()
+            //     },
+            //     BackgroundColor(Color::srgba(0.99, 0., 0., 0.9)),
+            //     Visibility::Visible,
+            
+            //     children![
+            //         (
+            //             Node {
+            //                 width: px(15),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
+            //         ), (
+            //             Node {
+            //                 width: px(20),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.2, 0.5))
+            //         ), (
+            //             Node {
+            //                 width: px(240),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
+            //         ), (
+            //             Node {
+            //                 width: px(20),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.2, 0.5))
+            //         ), (
+            //             Node {
+            //                 width: px(25),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
+            //         ), (
+            //             Node {
+            //                 width: px(260),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.2, 0.5))
+            //         ), (
+            //             Node {
+            //                 width: px(20),
+            //                 height: percent(100),
+            //                 ..default()
+            //             },
+            //             BackgroundColor(Color::srgb(0., 0.5, 0.5))
+
+            //         )
+            //     ]
+            // ));
             // .with_children(|dialog| {
             //     dialog.spawn((
             //         Node {
@@ -101,7 +119,8 @@ pub fn spawn_ship_equipment_dialog(
             //         BackgroundColor(Color::srgb(0., 0.5, 0.5))
             //     ));
             // });
-        })
-        ;
+        // })
+        // ;
 
+    window_id
 }

@@ -113,24 +113,3 @@ impl UiButtonBundle {
     }
 }
 
-/// A wrapper for UI text.
-#[derive(Bundle)]
-pub struct UiTextBundle {
-    pub text: Text,
-    pub font: TextFont,
-    pub color: TextColor,
-}
-
-impl UiTextBundle {
-    pub fn new(value: &str, font_handle: Handle<Font>, font_size: f32, color: Color) -> Self {
-        Self {
-            text: Text::new(value.to_string()),
-            font: TextFont {
-                font: font_handle.clone(),
-                font_size: font_size,
-                ..default()
-            },
-            color: TextColor(color),
-        }
-    }
-}
