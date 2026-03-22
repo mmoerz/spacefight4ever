@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::ecs::bundle::Bundle;
 
 use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle, UiImageButtonBundle};
-use crate::ui::window::component::{UiWindowTitleBar, UiWindowMenuButton, UiWindowMinimizeButton, UiWindowMaximizeButton, UiWindowCloseButton, UiImageButtonState};
+use crate::ui::window::component::{UiWindowTitleBar, UiWindowMain, UiWindowMenuButton, UiWindowMinimizeButton, UiWindowMaximizeButton, UiWindowCloseButton, UiImageButtonState};
 use crate::ui::window::structs::UiElementSize;
 use crate::ui::window::consts::{HEIGHT_TITLE_BAR, HEIGHT_STATUS_BAR};
 
@@ -318,6 +318,7 @@ pub fn window_bundle(
                         ]),
                 ]
             ), (
+                UiWindowMain,
                 Node {
                     width: percent(100.),
                     height: percent(100.),

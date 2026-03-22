@@ -9,6 +9,9 @@ pub struct UiWindow;
 pub struct UiWindowTitleBar;
 
 #[derive(Default, Component)]
+pub struct UiWindowMain;
+
+#[derive(Default, Component)]
 pub struct UiWindowResizeHandle;
 
 #[derive(Default, Component)]
@@ -27,12 +30,26 @@ pub struct UiWindowCloseButton;
 //
 //
 
-#[derive(Default, Component)]
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
+pub enum UiWindowStatus {
+    #[default]
+    Normal,
+    Minimized,
+    Maximized,
+}
+
+#[derive(Default, Component, Clone, Copy)]
 pub struct UiWindowState {
-    pub size: UiElementSize,
-    pub minimized: bool,
-    pub maximized: bool,
+    pub ui_size: UiElementSize,
+    pub status: UiWindowStatus,
     pub focused: bool,
+    pub normal_size: UiRect,
+}
+
+impl UiWindowState {
+    pub fn set_focus(&mut self, focused: bool) {
+        self.focused = focused;
+    }
 }
 
 #[derive(Default, Component, PartialEq, Eq)]
@@ -52,6 +69,7 @@ impl UiImageButtonState {
         }
     }
 }
+
 
 #[derive(Default, Component)]
 pub struct UiWindowResize {
