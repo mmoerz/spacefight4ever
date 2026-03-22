@@ -1,7 +1,6 @@
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use bevy::ecs::bundle::Bundle;
-use bevy::window::SystemCursorIcon;
 
 use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle, UiImageButtonBundle};
 use crate::ui::window::component::{UiWindowTitleBar, UiWindowMenuButton, UiWindowMinimizeButton, UiWindowMaximizeButton, UiWindowCloseButton, UiImageButtonState};
@@ -15,6 +14,7 @@ impl Plugin for UiWindowPlugin {
         app.add_observer(on_window_titelbar_drag_start)
             .add_observer(on_window_titelbar_drag)
             .add_observer(on_window_titelbar_drag_end);
+        app.add_systems(Update, window_button_interaction_system);
     }
 }
 
@@ -90,6 +90,7 @@ pub fn window_bundle(
                             node: Node {
                                 width: px(HEIGHT_TITLE_BAR[ui_size]),
                                 height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                display: Display::Block,
                                 margin: margin1,
                                 ..default()
                             },
@@ -98,11 +99,41 @@ pub fn window_bundle(
                         },
                         children![
                             (
-                                ImageNode { image: icon_menu, ..default() }
+                                UiImageButtonState::Normal,
+                                Node {
+                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    position_type: PositionType::Absolute,
+                                    top: px(0.),
+                                    left: px(0.),
+                                    ..default()
+                                },
+                                ImageNode { image: icon_menu, ..default() },
+                                Visibility::Visible,
                             ), (
-                                ImageNode { image: icon_menu_hover, ..default() }
+                                UiImageButtonState::Hover,
+                                Node {
+                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    position_type: PositionType::Absolute,
+                                    top: px(0.),
+                                    left: px(0.),
+                                    ..default()
+                                },
+                                ImageNode { image: icon_menu_hover, ..default() },
+                                Visibility::Hidden,
                             ), (
-                                ImageNode { image: icon_menu_disabled, ..default() }
+                                UiImageButtonState::Disabled,
+                                Node {
+                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    position_type: PositionType::Absolute,
+                                    top: px(0.),
+                                    left: px(0.),
+                                    ..default()
+                                },
+                                ImageNode { image: icon_menu_disabled, ..default() },
+                                Visibility::Hidden,
                             ),
                         ]
                     ), (
@@ -137,14 +168,48 @@ pub fn window_bundle(
                                         margin: margin1,
                                         ..default()
                                     },
-                                    image: ImageNode::new(icon_minimize.clone()),
-                                    state: UiImageButtonState {
-                                        normal: icon_minimize,
-                                        hover: Some(icon_minimize_hover),
-                                        disabled: Some(icon_minimize_disabled)
-                                    },
+                                    state: UiImageButtonState::Normal,
                                     ..default()
                                 },
+                                children![
+                                    (
+                                        UiImageButtonState::Normal,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_minimize, ..default() },
+                                        Visibility::Visible,
+                                    ), (
+                                        UiImageButtonState::Hover,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_minimize_hover, ..default() },
+                                        Visibility::Hidden,
+                                    ), (
+                                        UiImageButtonState::Disabled,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_minimize_disabled, ..default() },
+                                        Visibility::Hidden,
+                                    ),
+                                ]
                             ), (
                                 UiWindowMaximizeButton,
                                 UiImageButtonBundle {
@@ -155,14 +220,48 @@ pub fn window_bundle(
                                         margin: margin1,
                                         ..default()
                                     },
-                                    image: ImageNode::new(icon_maximize.clone()),
-                                    state: UiImageButtonState {
-                                        normal: icon_maximize,
-                                        hover: Some(icon_maximize_hover),
-                                        disabled: Some(icon_maximize_disabled)
-                                    },
+                                    state: UiImageButtonState::Normal,
                                     ..default()
                                 },
+                                children![
+                                    (
+                                        UiImageButtonState::Normal,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_maximize, ..default() },
+                                        Visibility::Visible,
+                                    ), (
+                                        UiImageButtonState::Hover,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_maximize_hover, ..default() },
+                                        Visibility::Hidden,
+                                    ), (
+                                        UiImageButtonState::Disabled,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_maximize_disabled, ..default() },
+                                        Visibility::Hidden,
+                                    ),
+                                ]
                             ), (
                                 UiWindowCloseButton,
                                 UiImageButtonBundle {
@@ -173,14 +272,48 @@ pub fn window_bundle(
                                         margin: margin1,
                                         ..default()
                                     },
-                                    image: ImageNode::new(icon_close.clone()),
-                                    state: UiImageButtonState {
-                                        normal: icon_close,
-                                        hover: Some(icon_close_hover),
-                                        disabled: Some(icon_close_disabled)
-                                    },
+                                    state: UiImageButtonState::Normal,
                                     ..default()
                                 },
+                                children![
+                                    (
+                                        UiImageButtonState::Normal,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_close, ..default() },
+                                        Visibility::Visible,
+                                    ), (
+                                        UiImageButtonState::Hover,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_close_hover, ..default() },
+                                        Visibility::Hidden,
+                                    ), (
+                                        UiImageButtonState::Disabled,
+                                        Node {
+                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                            position_type: PositionType::Absolute,
+                                            top: px(0.),
+                                            left: px(0.),
+                                            ..default()
+                                        },
+                                        ImageNode { image: icon_close_disabled, ..default() },
+                                        Visibility::Hidden,
+                                    ),
+                                ]
                             ), 
                         ]),
                 ]
@@ -257,31 +390,27 @@ fn on_window_titelbar_drag_end(
 
 pub fn window_button_interaction_system(
     mut interaction_query: Query<
-        (&Interaction, &UiImageButtonState, &mut ImageNode),
+        (&Interaction, &Button, &Children),
         (Changed<Interaction>, Or<(
             With<UiWindowMenuButton>,
             With<UiWindowMinimizeButton>,
             With<UiWindowMaximizeButton>,
             With<UiWindowCloseButton>
         )>)>,
-) {
-    for (interaction, state,image  ) in &mut interaction_query {
-        match *interaction {
-            Interaction::Pressed => {
-                // Display pressed image
-                image.image.;
-                println!("Window button clicked!");
-            },
-            Interaction::Hovered => {
-                // Display hover image
-                //bundle.image = bundle.hover.clone();
-            },
-            Interaction::None => {
-                // Display default image
-                //bundle.image = bundle.image.clone(); // or default
-            }
+    mut vis_query: Query<(&UiImageButtonState, &mut Visibility)>,
+){
+    for (interaction, _button, children  ) in &mut interaction_query {
+        for child in children.iter() {
+            if let Ok((state_type, mut visibility)) = vis_query.get_mut(child) {
+                *visibility = match (*interaction, state_type) {
+                    (Interaction::Pressed, UiImageButtonState::Normal) => Visibility::Visible,
+                    (Interaction::Hovered, UiImageButtonState::Hover) => Visibility::Visible,
+                    (Interaction::None, UiImageButtonState::Normal) => Visibility::Visible,
+                    _ => Visibility::Hidden
+                }
+            };
         }
-    }
+    }    
 }
 
 // fn on_window_titelbar_drag_drop(

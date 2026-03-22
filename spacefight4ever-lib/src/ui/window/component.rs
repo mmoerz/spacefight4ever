@@ -35,7 +35,7 @@ pub struct UiWindowState {
     pub focused: bool,
 }
 
-#[derive(Default, Component)]
+#[derive(Default, Component, PartialEq, Eq)]
 pub enum UiImageButtonState {
     #[default]
     Normal,

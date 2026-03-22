@@ -37,14 +37,14 @@ use crate::ui::window::component::*;
 //     }
 // }
 
-pub fn stop_drag(
-    mut commands: Commands,
-    mouse: Res<ButtonInput<MouseButton>>,
-    q: Query<Entity, With<UiWindowDrag>>,
-) {
-    if mouse.just_released(MouseButton::Left) {
-        for e in &q {
-            commands.entity(e).remove::<UiWindowDrag>();
-        }
-    }
-}
+// pub fn stop_drag(
+//     mut commands: Commands,
+//     mouse: Res<ButtonInput<MouseButton>>,
+//     q: Query<Entity, With<UiWindowDrag>>,
+// ) {
+//     if mouse.just_released(MouseButton::Left) {
+//         for e in &q {
+//             commands.entity(e).remove::<UiWindowDrag>();
+//         }
+//     }
+// }

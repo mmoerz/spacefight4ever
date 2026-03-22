@@ -25,18 +25,18 @@ pub fn spawn_ship_equipment_dialog(
         asset_server.load("ui/ButtonsSmall [Disabled]/Button-1.png");
 
     let icon_minimize: Handle<Image> = 
-        asset_server.load("ui/ButtonsSmall [Normal]/Button-2.png");
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-3.png");
     let icon_minimize_hover: Handle<Image> = 
-        asset_server.load("ui/ButtonsSmall [Hover]/Button-2.png");
+        asset_server.load("ui/ButtonsSmall [Hover]/Button-3.png");
     let icon_minimize_disabled: Handle<Image> = 
-        asset_server.load("ui/ButtonsSmall [Disabled]/Button-2.png");
+        asset_server.load("ui/ButtonsSmall [Disabled]/Button-3.png");
     
     let icon_maximize: Handle<Image> =
-        asset_server.load("ui/ButtonsSmall [Normal]/Button-3.png");
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-2.png");
     let icon_maximize_hover: Handle<Image> =
-        asset_server.load("ui/ButtonsSmall [Hover]/Button-3.png");
+        asset_server.load("ui/ButtonsSmall [Hover]/Button-2.png");
     let icon_maximize_disabled: Handle<Image> =
-        asset_server.load("ui/ButtonsSmall [Disabled]/Button-3.png");
+        asset_server.load("ui/ButtonsSmall [Disabled]/Button-2.png");
 
     match asset_server.get_load_state(&font_handle) {
         Some(bevy::asset::LoadState::Loaded) => println!("Loaded"),
