@@ -26,10 +26,11 @@ pub fn spawn_ship_equipment_dialog(
                 Node {
                     width: px(600.0),
                     height: px(400.0),
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::Start,
-                    align_items: AlignItems::Center,
-                    position_type: PositionType::Absolute,
+                    // flex_direction: FlexDirection::Row,
+                    // justify_content: JustifyContent::Start,
+                    // align_items: AlignItems::,
+                    // position_type: PositionType::Absolute,
+                    align_self: AlignSelf::Auto,
                     left: px(100.0),
                     top: px(100.0),
                     ..default()

@@ -24,6 +24,10 @@ impl UiNode {
                 height,
                 justify_content,
                 align_items,
+                display: Display::Block,
+                position_type: PositionType::Absolute,
+                left: px(0),
+                top: px(0),
                 ..Default::default()
             },
             BackgroundColor(color),
@@ -34,15 +38,16 @@ impl UiNode {
 
 impl Default for UiNode {
     /// Default node: fills parent, transparent, column layout
+    /// display::Block, PositionType::Absolute, left:px(0), top:px(0)
     fn default() -> Self {
         Self {
             node: Node {
                 width: percent(100.0),
                 height: percent(100.0),
-                //flex_direction: FlexDirection::Column,
-                // justify_content: JustifyContent::FlexStart,
-                // align_items: AlignItems::FlexStart,
-                // position_type: PositionType::Relative,
+                display: Display::Block,
+                position_type: PositionType::Absolute,
+                left: px(0),
+                top: px(0),
                 ..Default::default()
             },
             background_color: BackgroundColor(Color::srgba(0.,0.,0., 0.)),
@@ -115,7 +120,6 @@ pub struct UiTextBundle {
     pub font: TextFont,
     pub color: TextColor,
 }
-
 
 impl UiTextBundle {
     pub fn new(value: &str, font_handle: Handle<Font>, font_size: f32, color: Color) -> Self {

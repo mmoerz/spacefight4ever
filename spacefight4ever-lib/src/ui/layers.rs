@@ -5,6 +5,8 @@
 
 use bevy::prelude::*;
 
+use crate::ui::systems::dialog;
+
 use super::bundle::UiNode;
 use super::state::*;
 
@@ -37,22 +39,30 @@ pub fn spawn_ui_roots(
     mut commands: Commands,
     mut next_state: ResMut<NextState<UiInitState>>,
 ) {
+    let mut hud_root: Entity = Entity::PLACEHOLDER;
+    let mut menu_root = Entity::PLACEHOLDER;
+    let mut dialog_root= Entity::PLACEHOLDER;
+    let mut overlay_root = Entity::PLACEHOLDER;
+
     // Spawn UiRoot first
     let ui_root = commands.spawn((
-        UiRoot, UiNode::default(), Name::new("UiRoot"))).id();
-
-    // Spawn all layer children and capture their entity IDs
-    let hud_root = commands.spawn((
-        HudRoot, UiNode::default(), Name::new("HudRoot"))).id();
-    let menu_root = commands.spawn((
-        MenuRoot, UiNode::default(), Name::new("MenuRoot"))).id();
-    let dialog_root = commands.spawn((
-        DialogRoot, UiNode::default(), Name::new("DialogRoot"))).id();
-    let overlay_root = commands.spawn((OverlayRoot, 
-        UiNode::default(), Name::new("OverlayRoot"))).id();
-
-    // Attach children to UiRoot
-    commands.entity(ui_root).add_children(&[hud_root, menu_root, dialog_root, overlay_root]);
+        UiRoot, UiNode::new(
+            percent(100),
+            percent(100), Color::WHITE,
+            JustifyContent::Stretch,
+            AlignItems::Stretch
+        ), Name::new("UiRoot"))
+    ).with_children(|root| {
+        hud_root = root.spawn((
+            HudRoot, UiNode::default(), Name::new("HudRoot"))).id();
+        menu_root = root.spawn((
+            MenuRoot, UiNode::default(), Name::new("MenuRoot"))).id();
+        dialog_root = root.spawn((
+            DialogRoot, UiNode::default(), Name::new("DialogRoot"))).id();
+        overlay_root = root.spawn((
+            OverlayRoot, UiNode::default(), Name::new("OverlayRoot"))).id();
+    })
+    .id();
 
     // Store all layer roots in a resource
     commands.insert_resource(UiLayers {
