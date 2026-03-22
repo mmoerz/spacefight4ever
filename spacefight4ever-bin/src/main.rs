@@ -21,6 +21,7 @@ use spacefight4ever_lib::prelude::*;
 
 use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
+use spacefight4ever_lib::ui::window::window::UiWindowPlugin;
 
 fn main() {
     App::new()
@@ -34,6 +35,7 @@ fn main() {
             PhysicsPlugins::default()) 
         )
         .add_plugins(UiPlugin)
+        .add_plugins(UiWindowPlugin)
         .add_plugins(GamePlugin)
 
         .add_systems(Startup, setup)

@@ -20,6 +20,9 @@ pub struct HudRoot;
 pub struct MenuRoot;
 
 #[derive(Component)]
+pub struct WindowRoot;
+
+#[derive(Component)]
 pub struct DialogRoot;
 
 #[derive(Component)]
@@ -30,6 +33,7 @@ pub struct UiLayers {
     pub ui_root: Entity,
     pub hud_root: Entity,
     pub menu_root: Entity,
+    pub window_root: Entity,
     pub dialog_root: Entity,
     pub overlay_root: Entity,
 }
@@ -41,6 +45,7 @@ pub fn spawn_ui_roots(
 ) {
     let mut hud_root: Entity = Entity::PLACEHOLDER;
     let mut menu_root = Entity::PLACEHOLDER;
+    let mut window_root = Entity::PLACEHOLDER;
     let mut dialog_root= Entity::PLACEHOLDER;
     let mut overlay_root = Entity::PLACEHOLDER;
 
@@ -57,6 +62,8 @@ pub fn spawn_ui_roots(
             HudRoot, UiNode::default(), Name::new("HudRoot"))).id();
         menu_root = root.spawn((
             MenuRoot, UiNode::default(), Name::new("MenuRoot"))).id();
+        window_root = root.spawn((
+            WindowRoot, UiNode::default(), Name::new("WindowRoot"))).id();
         dialog_root = root.spawn((
             DialogRoot, UiNode::default(), Name::new("DialogRoot"))).id();
         overlay_root = root.spawn((
@@ -69,6 +76,7 @@ pub fn spawn_ui_roots(
         ui_root,
         hud_root,
         menu_root,
+        window_root,
         dialog_root,
         overlay_root,
     });

@@ -3,6 +3,8 @@ use crate::ui::window::systems::minmax::*;
 use crate::ui::window::systems::drag_system::*;
 use crate::ui::window::systems::resize::*;
 
+use crate::ui::window::window::*;
+
 pub struct UiWindowPlugin;
 
 impl Plugin for UiWindowPlugin {
@@ -11,12 +13,13 @@ impl Plugin for UiWindowPlugin {
             //start_drag,
             //drag_windows,
             //stop_drag,
-            start_resize,
-            //resize_windows,
-            minimize_windows,
-            apply_minimize,
-            maximize_windows,
-            apply_maximize,
+            // start_resize,
+            // //resize_windows,
+            // minimize_windows,
+            // apply_minimize,
+            // maximize_windows,
+             apply_maximize,
+
         ));
     }
 }

@@ -5,10 +5,19 @@ use crate::ui::window::window;
 /// Spawns a "Confirm Exit" dialog under the DialogRoot layer
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
-    dialog_root: Entity,
+    parent: Entity,
     asset_server: &Res<AssetServer>,
 ) -> Entity {
-    let font_handle: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
+    let font_handle: Handle<Font> =
+        asset_server.load("fonts/FiraSans-Bold.ttf");
+    let icon_menu: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-4.png");
+    let icon_close: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-1.png");
+    let icon_minimize: Handle<Image> = 
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-3.png");
+    let icon_maximize: Handle<Image> =
+        asset_server.load("ui/ButtonsSmall [Normal]/Button-2.png");
 
     match asset_server.get_load_state(&font_handle) {
         Some(bevy::asset::LoadState::Loaded) => println!("Loaded"),
@@ -20,7 +29,7 @@ pub fn spawn_ship_equipment_dialog(
 
     // Spawn dialog panel under DialogRoot
     commands
-        .entity(dialog_root)
+        .entity(parent)
         .with_children(|parent| {
             window_id =
                 parent.spawn((
@@ -30,10 +39,10 @@ pub fn spawn_ship_equipment_dialog(
                         600., 400.,
                         UiElementSize::Small,
                         font_handle.clone(),
-                        asset_server.load("icons/menu.png"),
-                        asset_server.load("icons/close.png"),
-                        asset_server.load("icons/minimize.png"),
-                        asset_server.load("icons/maximize.png"),
+                        icon_menu.clone(),
+                        icon_close.clone(),
+                        icon_minimize.clone(),
+                        icon_maximize.clone(),
                     ),
                     )
                 ).id();

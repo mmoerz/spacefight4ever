@@ -5,7 +5,13 @@ use bevy::prelude::*;
 pub struct UiNode {
     pub node: Node,
     pub background_color: BackgroundColor,
+
+    pub pickable: Pickable,
+
+    pub transform: Transform,
+    pub global_transform: GlobalTransform,
     pub visibility: Visibility,
+    pub inherited_visibility: InheritedVisibility,
 }
 
 /// helper function to setup ui nodes, however I don't know if this really
@@ -17,9 +23,9 @@ impl UiNode {
         color: Color,
         justify_content : JustifyContent,
         align_items : AlignItems) 
-    -> (Node, BackgroundColor, Visibility) {
-        (
-            Node {
+    -> Self {
+        Self {
+            node: Node {
                 width,
                 height,
                 justify_content,
@@ -30,9 +36,14 @@ impl UiNode {
                 top: px(0),
                 ..Default::default()
             },
-            BackgroundColor(color),
-            Visibility::Visible,
-        )
+            background_color: BackgroundColor(color),
+
+            pickable: Pickable::IGNORE,
+            visibility: Visibility::Visible,
+            transform: Transform::default(),
+            global_transform: GlobalTransform::default(),
+            inherited_visibility: InheritedVisibility::default(),
+        }
     }
 }
 
@@ -51,7 +62,12 @@ impl Default for UiNode {
                 ..Default::default()
             },
             background_color: BackgroundColor(Color::srgba(0.,0.,0., 0.)),
-            visibility: Visibility::Visible
+            pickable: Pickable::IGNORE,
+
+            visibility: Visibility::Visible,
+            transform: Transform::default(),
+            global_transform: GlobalTransform::default(),
+            inherited_visibility: InheritedVisibility::default(),
         }
     }
 }

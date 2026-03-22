@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::ui::dialog_manager::DialogEntity;
 use crate::ui::bundle::*;
+use crate::ui::window::bundle::UiTextBundle;
 
 pub fn spawn_message_dialog(
     commands: &mut Commands,
