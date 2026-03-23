@@ -7,13 +7,19 @@ use crate::ui::window::component::{UiWindowTitleBar, UiWindowMain, UiWindowMenuB
 use crate::ui::window::structs::UiElementSize;
 use crate::ui::window::consts::{HEIGHT_TITLE_BAR, HEIGHT_STATUS_BAR};
 
+use crate::ui::window::systems::minmax::*;
+
 pub struct UiWindowPlugin;
 
 impl Plugin for UiWindowPlugin {
     fn build(&self, app: &mut App) {
         app.add_observer(on_window_titelbar_drag_start)
             .add_observer(on_window_titelbar_drag)
-            .add_observer(on_window_titelbar_drag_end);
+            .add_observer(on_window_titelbar_drag_end)
+            .add_message::<UiWindowsStatusChangeRequest>()
+            .add_systems(Update, minimize_windows)
+            .add_systems(Update, apply_window_status_change)
+            .add_systems(Update, maximize_windows);
         app.add_systems(Update, window_button_interaction_system);
     }
 }

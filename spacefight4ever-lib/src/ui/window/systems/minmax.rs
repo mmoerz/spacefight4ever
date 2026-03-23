@@ -12,17 +12,23 @@ pub struct UiWindowsStatusChangeRequest {
 }
 
 pub fn minimize_windows(
-    mut q: Query<(&Interaction, &ChildOf), (Changed<Interaction>, With<UiWindowMinimizeButton>)>,
-    mut windows: Query<Entity, With<UiWindow>>,
+    q: Query<(&Interaction, &ChildOf), (Changed<Interaction>, With<UiWindowMinimizeButton>)>,
+    parent_query: Query<&ChildOf>,
+    windows: Query<Entity, With<UiWindow>>,
     mut change_message: MessageWriter<UiWindowsStatusChangeRequest>,
 ) {
-    for (interaction, parent_titelbar) in &mut q {
+    for (interaction, button_container) in q {
         if *interaction == Interaction::Pressed {
-            if let Ok(window) = windows.get_mut(parent_titelbar.get()) {
-                change_message.write(UiWindowsStatusChangeRequest {
-                    window: window,
-                    status: UiWindowStatus::Minimized,
-                });
+            if let Ok(titlebar) = parent_query.get(button_container.get()) {
+                println!("parent_tbar: {:?}", titlebar);
+                if let Ok(parent_window) = parent_query.get(titlebar.get()) {
+                if let Ok(window) = windows.get(parent_window.get()) {
+                    change_message.write(UiWindowsStatusChangeRequest {
+                        window: window,
+                        status: UiWindowStatus::Minimized,
+                    });
+                }
+            }
             }
         }
     }
@@ -102,18 +108,23 @@ pub fn apply_window_status_change(
 
 pub fn maximize_windows(
     mut q: Query<(&Interaction, &ChildOf), (Changed<Interaction>, With<UiWindowMaximizeButton>)>,
+    parent_query: Query<&ChildOf>,
     mut windows: Query<Entity, With<UiWindow>>,
     mut change_message: MessageWriter<UiWindowsStatusChangeRequest>,
 ) {
-    for (interaction, parent_titelbar) in &mut q {
+    for (interaction, button_container) in &mut q {
         if *interaction == Interaction::Pressed {
-            if let Ok(window) = windows.get_mut(parent_titelbar.get()) {
-                change_message.write(UiWindowsStatusChangeRequest {
-                    window: window,
-                    status: UiWindowStatus::Maximized,
-                });
+             if let Ok(titlebar) = parent_query.get(button_container.get()) {
+                println!("parent_tbar: {:?}", titlebar);
+                if let Ok(parent_window) = parent_query.get(titlebar.get()) {
+                    if let Ok(window) = windows.get_mut(parent_window.get()) {
+                        change_message.write(UiWindowsStatusChangeRequest {
+                            window: window,
+                            status: UiWindowStatus::Maximized,
+                        });
+                    }
+                }
             }
         }
     }
-    
 }
