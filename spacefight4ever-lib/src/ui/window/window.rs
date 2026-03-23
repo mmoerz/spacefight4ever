@@ -13,9 +13,9 @@ pub struct UiWindowPlugin;
 
 impl Plugin for UiWindowPlugin {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_window_titelbar_drag_start)
-            .add_observer(on_window_titelbar_drag)
-            .add_observer(on_window_titelbar_drag_end)
+        app.add_observer(on_window_titlebar_drag_start)
+            .add_observer(on_window_titlebar_drag)
+            .add_observer(on_window_titlebar_drag_end)
             .add_message::<UiWindowsStatusChangeRequest>()
             .add_systems(Update, minimize_windows)
             .add_systems(Update, apply_window_status_change)
@@ -341,7 +341,7 @@ pub fn window_bundle(
     )}
 }
 
-fn on_window_titelbar_drag_start(
+fn on_window_titlebar_drag_start(
     on_drag_start: On<Pointer<DragStart>>,
     mut query: Query<(&UiWindowTitleBar ,&mut GlobalZIndex)>,
     parents: Query<&ChildOf>
@@ -357,7 +357,7 @@ fn on_window_titelbar_drag_start(
     }
 }
 
-fn on_window_titelbar_drag(
+fn on_window_titlebar_drag(
     on_drag: On<Pointer<Drag>>,
     mut query: Query<&mut UiTransform>,
     parents: Query<(&UiWindowTitleBar, &ChildOf)>
@@ -381,7 +381,7 @@ fn on_window_titelbar_drag(
     }
 }
 
-fn on_window_titelbar_drag_end(
+fn on_window_titlebar_drag_end(
     on_drag_end: On<Pointer<DragEnd>>,
     mut query: Query<(&mut UiTransform, &mut Outline, &mut GlobalZIndex)>,
     parents: Query<(&UiWindowTitleBar,&ChildOf)>
