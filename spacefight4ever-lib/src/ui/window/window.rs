@@ -1,21 +1,30 @@
+use avian3d::parry::partitioning::BvhLeafCost;
 use bevy::ecs::relationship::Relationship;
+use bevy::picking::window;
 use bevy::prelude::*;
 use bevy::ecs::bundle::Bundle;
 
+use crate::plugin::ui_window_plugin;
 use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle, UiImageButtonBundle};
-use crate::ui::window::component::{UiWindowTitleBar, UiWindowMain, UiWindowMenuButton, UiWindowMinimizeButton, UiWindowMaximizeButton, UiWindowCloseButton, UiImageButtonState};
+use crate::ui::window::component::*;
 use crate::ui::window::structs::UiElementSize;
 use crate::ui::window::consts::{HEIGHT_TITLE_BAR, HEIGHT_STATUS_BAR};
 
 use crate::ui::window::systems::minmax::*;
+use crate::ui::window::systems::resize::*;
 
 pub struct UiWindowPlugin;
 
 impl Plugin for UiWindowPlugin {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_window_titlebar_drag_start)
+        app
+            .init_resource::<UiWindowZCounter>()
+            .init_resource::<UiWindowFocused>()
+            .add_observer(on_window_click_focus)
+            .add_observer(on_window_titlebar_drag_start)
             .add_observer(on_window_titlebar_drag)
             .add_observer(on_window_titlebar_drag_end)
+            .add_observer(window_resize_system)
             .add_message::<UiWindowsStatusChangeRequest>()
             .add_systems(Update, minimize_windows)
             .add_systems(Update, apply_window_status_change)
@@ -43,6 +52,7 @@ pub fn window_bundle(
     icon_maximize_hover: Handle<Image>,
     icon_maximize_disabled: Handle<Image>,
 ) -> impl Bundle {
+    let border: f32 = 5.;
     let margin1 = UiRect {
         left: px(1.),
         right: px(1.),
@@ -324,36 +334,119 @@ pub fn window_bundle(
                         ]),
                 ]
             ), (
-                UiWindowMain,
+                // main body and right side border
                 Node {
                     width: percent(100.),
                     height: percent(100.),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
                     ..default()
-                }
+                },
+                children![
+                    (
+                        UiWindowMain,
+                        Node {
+                            width: Val::Percent(100.),
+                            height: Val::Percent(100.),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb(0.9,0., 0.))
+
+                    ), (
+                        // and the right side for resize
+                        Node {
+                            width: px(border),
+                            height: percent(100.),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::Right },
+                        BackgroundColor(Color::BLACK)
+                    )],
             ), (
                 Node {
                     width: percent(100.),
-                    height: px(HEIGHT_STATUS_BAR[ui_size]),
+                    height: px(border),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
                     ..default()
                 },
+                children![
+                    (
+                        Node {
+                            width: Val::Percent(100.),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::Bottom },
+                        BackgroundColor(Color::BLACK)
+                    ), (
+                        Node {
+                            height: px(border),
+                            width: px(border),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::BottomRight },
+                        BackgroundColor(Color::srgb(0.8, 0., 0.8))
+                    )
+                ],
             )
         ]
     )}
 }
 
+
+
+/// helper to the the parent/grandparent/... window entity
+pub fn get_window_node(
+    mut windows: Query<Entity, With<UiWindow>>,
+    mut current: Entity,
+    parents: &Query<&ChildOf>,
+) -> Option<Entity> {
+    loop {
+        if let Ok(window) = windows.get_mut(current) {
+            return Some(window);
+        }
+        if let Ok(parent) = parents.get(current) {
+            current = parent.get();
+        } else {
+            return None;
+        }
+    }
+}
+
+fn on_window_click_focus(
+    on_down: On<Pointer<Press>>,
+    mut z_query: Query<&mut GlobalZIndex, With<UiWindow>>,
+    mut counter: ResMut<UiWindowZCounter>,
+    parents: Query<&ChildOf>,
+    mut focus: ResMut<UiWindowFocused>,
+) {
+    let mut current = on_down.event_target();
+
+    // climb hierarchy until we find UiWindow
+    loop {
+        if let Ok(mut z) = z_query.get_mut(current) {
+            z.0 = counter.inc();
+            focus.set(current);
+            break;
+        }
+
+        if let Ok(parent) = parents.get(current) {
+            current = parent.get();
+        } else {
+            break;
+        }
+    }
+}
+
 fn on_window_titlebar_drag_start(
     on_drag_start: On<Pointer<DragStart>>,
-    mut query: Query<(&UiWindowTitleBar ,&mut GlobalZIndex)>,
-    parents: Query<&ChildOf>
+    mut z_query: Query<&mut GlobalZIndex>,
+    parents: Query<&ChildOf, With<UiWindowTitleBar>>,
+    children: Query<&Children>,
+    mut zindex: ResMut<UiWindowZCounter>,
 ) {
-    if let Ok((_bar, mut node_zindex)) = query.get_mut(on_drag_start.event_target()) {
-        node_zindex.0 = 1;
+    if let Ok(parent) = parents.get(on_drag_start.event_target()) {
 
-        if let Ok(parent) = parents.get(on_drag_start.event_target()) {
-            if let Ok((_bar, mut zindex)) = query.get_mut(parent.get()) {
-                zindex.0 = 1;
-            }
-        }
     }
 }
 
@@ -383,14 +476,22 @@ fn on_window_titlebar_drag(
 
 fn on_window_titlebar_drag_end(
     on_drag_end: On<Pointer<DragEnd>>,
-    mut query: Query<(&mut UiTransform, &mut Outline, &mut GlobalZIndex)>,
+    mut query: Query<(&mut Node, &mut UiTransform)>,
     parents: Query<(&UiWindowTitleBar,&ChildOf)>
 ) {
     if let Ok((_bar, parent)) = parents.get(on_drag_end.event_target()) {
-        if let Ok((mut transform, mut outline, mut global_zindex)) = query.get_mut(parent.get()) {
+        if let Ok((mut node, mut transform)) = query.get_mut(parent.get()) {
+            let dx = match transform.translation.x { Val::Px(v) => v, _ => 0.0 };
+            let dy = match transform.translation.y { Val::Px(v) => v, _ => 0.0 };
+
+            if let Val::Px(left) = node.left {
+                node.left = Val::Px(left + dx);
+            }
+
+            if let Val::Px(top) = node.top {
+                node.top = Val::Px(top + dy);
+            }
             transform.translation = Val2::ZERO;
-            outline.color = Color::NONE;
-            global_zindex.0 = 0;
         }
     }
 }

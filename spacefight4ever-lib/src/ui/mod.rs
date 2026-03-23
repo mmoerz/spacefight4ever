@@ -25,6 +25,7 @@ pub mod window {
     pub mod component;
     pub mod bundle;
     pub mod window;
+    pub mod window_ninepatch;
     pub mod systems {
         pub mod drag_system;
         pub mod resize;

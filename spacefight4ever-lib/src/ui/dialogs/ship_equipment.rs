@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use crate::ui::window::structs::UiElementSize;
-use crate::ui::window::window;
+use crate::ui::window::{window, window_ninepatch};
 
-/// Spawns a "Confirm Exit" dialog under the DialogRoot layer
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
     parent: Entity,
@@ -47,32 +46,49 @@ pub fn spawn_ship_equipment_dialog(
     let mut window_id = Entity::PLACEHOLDER;
 
     // Spawn dialog panel under DialogRoot
+    // commands
+    //     .entity(parent)
+    //     .with_children(|parent| {
+    //         window_id =
+    //             parent.spawn((
+    //                 window::window_bundle(
+    //                     "Ship Equipment",
+    //                     100., 100.,
+    //                     600., 400.,
+    //                     UiElementSize::Small,
+    //                     font_handle.clone(),
+    //                     icon_menu.clone(),
+    //                     icon_menu_hover.clone(),
+    //                     icon_menu_disabled.clone(),
+    //                     icon_close.clone(),
+    //                     icon_close_hover.clone(),
+    //                     icon_close_disabled.clone(),
+    //                     icon_minimize.clone(),
+    //                     icon_minimize_hover.clone(),
+    //                     icon_minimize_disabled.clone(),
+    //                     icon_maximize.clone(),
+    //                     icon_maximize_hover.clone(),
+    //                     icon_maximize_disabled.clone(),
+    //                 ),
+    //                 )
+    //             ).id();
+    //     });
+
+    let window_texture = asset_server.load("textures/slice_square_2.png");
+
     commands
         .entity(parent)
         .with_children(|parent| {
             window_id =
-                parent.spawn((
-                    window::window_bundle(
-                        "Ship Equipment",
-                        100., 100.,
-                        600., 400.,
-                        UiElementSize::Small,
-                        font_handle.clone(),
-                        icon_menu.clone(),
-                        icon_menu_hover.clone(),
-                        icon_menu_disabled.clone(),
-                        icon_close.clone(),
-                        icon_close_hover.clone(),
-                        icon_close_disabled.clone(),
-                        icon_minimize.clone(),
-                        icon_minimize_hover.clone(),
-                        icon_minimize_disabled.clone(),
-                        icon_maximize.clone(),
-                        icon_maximize_hover.clone(),
-                        icon_maximize_disabled.clone(),
-                    ),
-                    )
-                ).id();
+                parent.spawn(
+                    window_ninepatch::create_ui_ninepatch_window(
+                        px(100.),
+                        px(100.),
+                        px(600.),
+                        px(400.),
+                        window_texture
+                )
+            ).id();
         });
 
     window_id

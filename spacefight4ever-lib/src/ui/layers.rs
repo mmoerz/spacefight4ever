@@ -86,5 +86,12 @@ pub fn spawn_ui_roots(
 
 /// spawn the ui camera
 pub fn spawn_ui_camera(mut commands: Commands) {
-    commands.spawn((Camera2d, Name::new("Camera2d")));
+    commands.spawn((
+        Camera2d {
+            //TODO: make 2d cam render above 3d
+            ..default()
+        }, 
+        Name::new("Camera2d"),
+        
+    ));
 }

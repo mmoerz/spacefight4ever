@@ -13,6 +13,7 @@ pub struct UiWindowBundle {
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,
     pub inherited_visibility: InheritedVisibility,
+    pub z_index: GlobalZIndex,
 }
 
 #[derive(Bundle)]
