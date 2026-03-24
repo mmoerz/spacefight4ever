@@ -35,6 +35,11 @@ pub struct UiWindowNinePatch {
     pub slice: Vec4, // left, right, top, bottom
 }
 
+#[derive(Resource, Default, Debug)]
+pub struct UiWindowAtlas {
+    pub layout: Handle<TextureAtlasLayout>,
+}
+
 // state components
 //
 //

@@ -3,6 +3,7 @@ use bevy::ecs::relationship::Relationship;
 use bevy::picking::window;
 use bevy::prelude::*;
 use bevy::ecs::bundle::Bundle;
+use bevy::state::commands;
 
 use crate::plugin::ui_window_plugin;
 use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle, UiImageButtonBundle};
@@ -20,18 +21,33 @@ impl Plugin for UiWindowPlugin {
         app
             .init_resource::<UiWindowZCounter>()
             .init_resource::<UiWindowFocused>()
+            .init_resource::<UiWindowAtlas>()
             .add_observer(on_window_click_focus)
             .add_observer(on_window_titlebar_drag_start)
             .add_observer(on_window_titlebar_drag)
             .add_observer(on_window_titlebar_drag_end)
             .add_observer(window_resize_system)
             .add_message::<UiWindowsStatusChangeRequest>()
+            .add_systems(Startup, setup_window_bundle)
             .add_systems(Update, minimize_windows)
             .add_systems(Update, apply_window_status_change)
             .add_systems(Update, maximize_windows);
         app.add_systems(Update, window_button_interaction_system);
     }
 }
+
+/// register texture atlas?
+pub fn setup_window_bundle(
+    mut commands: Commands,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    let atlas_layout =
+        TextureAtlasLayout::from_grid(UVec2::new(50, 50), 6, 6, Some(UVec2::splat(2)), None);
+    let atlas_layout_handle = texture_atlases.add(atlas_layout);
+
+    commands.insert_resource(UiWindowAtlas { layout: atlas_layout_handle });
+}
+
 
 pub fn window_bundle(
     title: &str,
@@ -51,7 +67,16 @@ pub fn window_bundle(
     icon_maximize: Handle<Image>,
     icon_maximize_hover: Handle<Image>,
     icon_maximize_disabled: Handle<Image>,
+    window_ninepatch_texture: Handle<Image>,
+    atlas_layout_handle: Handle<TextureAtlasLayout>,
 ) -> impl Bundle {
+    let slicer = TextureSlicer {
+        border: BorderRect::all(24.0),
+        center_scale_mode: SliceScaleMode::Stretch,
+        sides_scale_mode: SliceScaleMode::Stretch,
+        max_corner_scale: 1.0,
+    };
+
     let border: f32 = 5.;
     let margin1 = UiRect {
         left: px(1.),
@@ -76,7 +101,15 @@ pub fn window_bundle(
                 top: Val::Px(top),
                 ..default()
             },
-            background: BackgroundColor(Color::srgb(0., 0.6, 0.75)),
+            //background: BackgroundColor(Color::srgb(0., 0.6, 0.75)),
+            image_node: ImageNode::from_atlas_image(
+                window_ninepatch_texture,
+                TextureAtlas {
+                    index: 0,
+                    layout: atlas_layout_handle.clone(),
+                },
+            )
+            .with_mode(NodeImageMode::Sliced(slicer.clone())),
             ..default()
         },
         children![

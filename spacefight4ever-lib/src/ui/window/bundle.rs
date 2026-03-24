@@ -8,6 +8,7 @@ pub struct UiWindowBundle {
 
     pub node: Node,
     pub background: BackgroundColor,
+    pub image_node: ImageNode,
 
     pub transform: Transform,
     pub global_transform: GlobalTransform,

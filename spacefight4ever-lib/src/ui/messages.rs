@@ -4,7 +4,6 @@ use bevy::prelude::*;
 pub enum DialogRequest {
     ConfirmExit,
     Message(String),
-    ShipEquipment,
 }
 
 #[derive(Message)]
