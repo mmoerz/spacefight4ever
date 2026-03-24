@@ -42,7 +42,7 @@ pub fn setup_window_bundle(
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let atlas_layout =
-        TextureAtlasLayout::from_grid(UVec2::new(50, 50), 6, 6, Some(UVec2::splat(2)), None);
+        TextureAtlasLayout::from_grid(UVec2::new(50, 50), 4, 4, Some(UVec2::splat(2)), None);
     let atlas_layout_handle = texture_atlases.add(atlas_layout);
 
     commands.insert_resource(UiWindowAtlas { layout: atlas_layout_handle });
@@ -383,7 +383,7 @@ pub fn window_bundle(
                             height: Val::Percent(100.),
                             ..default()
                         },
-                        BackgroundColor(Color::srgb(0.9,0., 0.))
+                        //BackgroundColor(Color::srgb(0.9,0., 0.))
 
                     ), (
                         // and the right side for resize
@@ -410,7 +410,7 @@ pub fn window_bundle(
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::Bottom },
-                        BackgroundColor(Color::BLACK)
+                        //BackgroundColor(Color::BLACK)
                     ), (
                         Node {
                             height: px(border),
