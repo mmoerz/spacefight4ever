@@ -238,7 +238,7 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                UiAtlasButtonIndex(1),
+                                UiAtlasButtonIndex(0),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
