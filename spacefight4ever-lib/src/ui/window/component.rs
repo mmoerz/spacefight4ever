@@ -35,10 +35,14 @@ pub struct UiWindowNinePatch {
     pub slice: Vec4, // left, right, top, bottom
 }
 
+#[derive(Component)]
+pub struct UiAtlasButtonIndex(pub usize);
+
 #[derive(Resource, Default, Debug)]
 pub struct UiWindowAtlas {
     pub window_layout: Handle<TextureAtlasLayout>,
     pub button_layout: Handle<TextureAtlasLayout>,
+    pub button_offset: usize,
 }
 
 // state components

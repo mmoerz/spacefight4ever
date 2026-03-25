@@ -41,19 +41,21 @@ pub fn setup_window_bundle(
     mut commands: Commands,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
+    let button_atlas_offset: u32 = 20;
+
     let atlas_layout =
         TextureAtlasLayout::from_grid(UVec2::new(50, 50), 4, 4, Some(UVec2::splat(2)), None);
     let window_atlas_handle = texture_atlases.add(atlas_layout);
     let atlas_layout =
-        TextureAtlasLayout::from_grid(UVec2::new(54, 54), 20, 3, Some(UVec2::splat(2)), None);
+        TextureAtlasLayout::from_grid(UVec2::new(54, 54), button_atlas_offset, 3, Some(UVec2::splat(2)), None);
     let button_atlas_handle = texture_atlases.add(atlas_layout);
 
     commands.insert_resource(UiWindowAtlas { 
         window_layout: window_atlas_handle,
-        button_layout: button_atlas_handle 
+        button_layout: button_atlas_handle,
+        button_offset: button_atlas_offset as usize,
     });
 }
-
 
 pub fn window_bundle(
     title: &str,
@@ -135,6 +137,7 @@ pub fn window_bundle(
                 },
                 children![
                     (
+                        // menu button
                         UiWindowMenuButton,
                         UiImageButtonBundle {
                             button: Button,
@@ -147,6 +150,7 @@ pub fn window_bundle(
                             },
                             ..default()
                         },
+                        UiAtlasButtonIndex(3),
                         ImageNode::from_atlas_image(
                             button_atlas_texture.clone(),
                             TextureAtlas {
@@ -178,6 +182,7 @@ pub fn window_bundle(
                         },
                         children![
                             (
+                                // minimize button
                                 UiWindowMinimizeButton,
                                 UiImageButtonBundle {
                                     button: Button,
@@ -189,7 +194,7 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                // minimize button
+                                UiAtlasButtonIndex(2),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
@@ -199,6 +204,7 @@ pub fn window_bundle(
                                 )
                                 .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
                             ), (
+                                // maximize button
                                 UiWindowMaximizeButton,
                                 UiImageButtonBundle {
                                     button: Button,
@@ -210,7 +216,7 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                // maximize button
+                                UiAtlasButtonIndex(1),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
@@ -220,6 +226,7 @@ pub fn window_bundle(
                                 )
                                 .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
                             ), (
+                                // close button
                                 UiWindowCloseButton,
                                 UiImageButtonBundle {
                                     button: Button,
@@ -231,7 +238,7 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                // close button
+                                UiAtlasButtonIndex(1),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
@@ -408,20 +415,21 @@ fn on_window_titlebar_drag_end(
 
 pub fn window_button_interaction_system(
     mut interaction_query: Query<
-        (&Interaction, &Button, &mut ImageNode),
+        (&Interaction, &UiAtlasButtonIndex, &mut ImageNode),
         (Changed<Interaction>, Or<(
             With<UiWindowMenuButton>,
             With<UiWindowMinimizeButton>,
             With<UiWindowMaximizeButton>,
             With<UiWindowCloseButton>
         )>)>,
+    texture_atlases: Res<UiWindowAtlas>,
 ){
-    for (interaction, _button, mut image_node  ) in &mut interaction_query {
+    for (interaction, button_index, mut image_node  ) in &mut interaction_query {
         if let Some(atlas) = &mut image_node.texture_atlas {
             atlas.index = match *interaction {
-                Interaction::Pressed => atlas.index % 20,
-                Interaction::Hovered => atlas.index % 20 + 20,
-                Interaction::None => atlas.index % 20,
+                Interaction::Pressed => button_index.0,
+                Interaction::Hovered => button_index.0 + texture_atlases.button_offset,
+                Interaction::None => button_index.0,
             };
         }
     }    
