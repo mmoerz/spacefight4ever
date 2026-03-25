@@ -4,6 +4,7 @@ use bevy::{ecs::relationship::Relationship, prelude::*};
 
 use crate::ui::window::component::*;
 use crate::ui::window::consts::HEIGHT_TITLE_BAR;
+use crate::ui::window::window::get_window_node;
 
 #[derive(Message)]
 pub struct UiWindowsStatusChangeRequest {
@@ -11,6 +12,9 @@ pub struct UiWindowsStatusChangeRequest {
     status: UiWindowStatus,
 }
 
+
+// TODO: implement making the titlebar smaller and moving it to the bottom corner, but
+// this will need some sort of tracking what windows have already been minimized
 pub fn minimize_windows(
     q: Query<(&Interaction, &ChildOf), (Changed<Interaction>, With<UiWindowMinimizeButton>)>,
     parent_query: Query<&ChildOf>,
@@ -19,16 +23,11 @@ pub fn minimize_windows(
 ) {
     for (interaction, button_container) in q {
         if *interaction == Interaction::Pressed {
-            if let Ok(titlebar) = parent_query.get(button_container.get()) {
-                println!("parent_tbar: {:?}", titlebar);
-                if let Ok(parent_window) = parent_query.get(titlebar.get()) {
-                if let Ok(window) = windows.get(parent_window.get()) {
-                    change_message.write(UiWindowsStatusChangeRequest {
-                        window: window,
-                        status: UiWindowStatus::Minimized,
-                    });
-                }
-            }
+            if let Some(window_entity) = get_window_node(windows.clone(), button_container.get(), &parent_query) {
+                change_message.write(UiWindowsStatusChangeRequest {
+                    window: window_entity,
+                    status: UiWindowStatus::Minimized,
+                });
             }
         }
     }
