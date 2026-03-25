@@ -37,7 +37,8 @@ pub struct UiWindowNinePatch {
 
 #[derive(Resource, Default, Debug)]
 pub struct UiWindowAtlas {
-    pub layout: Handle<TextureAtlasLayout>,
+    pub window_layout: Handle<TextureAtlasLayout>,
+    pub button_layout: Handle<TextureAtlasLayout>,
 }
 
 // state components

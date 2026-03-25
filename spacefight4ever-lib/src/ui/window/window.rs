@@ -43,9 +43,15 @@ pub fn setup_window_bundle(
 ) {
     let atlas_layout =
         TextureAtlasLayout::from_grid(UVec2::new(50, 50), 4, 4, Some(UVec2::splat(2)), None);
-    let atlas_layout_handle = texture_atlases.add(atlas_layout);
+    let window_atlas_handle = texture_atlases.add(atlas_layout);
+    let atlas_layout =
+        TextureAtlasLayout::from_grid(UVec2::new(54, 54), 20, 3, Some(UVec2::splat(2)), None);
+    let button_atlas_handle = texture_atlases.add(atlas_layout);
 
-    commands.insert_resource(UiWindowAtlas { layout: atlas_layout_handle });
+    commands.insert_resource(UiWindowAtlas { 
+        window_layout: window_atlas_handle,
+        button_layout: button_atlas_handle 
+    });
 }
 
 
@@ -55,22 +61,18 @@ pub fn window_bundle(
     width: f32, height: f32,
     ui_size: UiElementSize,
     font: Handle<Font>,
-    icon_menu: Handle<Image>,
-    icon_menu_hover: Handle<Image>,
-    icon_menu_disabled: Handle<Image>,
-    icon_close: Handle<Image>,
-    icon_close_hover: Handle<Image>,
-    icon_close_disabled: Handle<Image>,
-    icon_minimize: Handle<Image>,
-    icon_minimize_hover: Handle<Image>,
-    icon_minimize_disabled: Handle<Image>,
-    icon_maximize: Handle<Image>,
-    icon_maximize_hover: Handle<Image>,
-    icon_maximize_disabled: Handle<Image>,
     window_ninepatch_texture: Handle<Image>,
-    atlas_layout_handle: Handle<TextureAtlasLayout>,
+    button_atlas_texture: Handle<Image>,
+    window_layout: Handle<TextureAtlasLayout>,
+    button_layout: Handle<TextureAtlasLayout>,
 ) -> impl Bundle {
     let slicer = TextureSlicer {
+        border: BorderRect::all(24.0),
+        center_scale_mode: SliceScaleMode::Stretch,
+        sides_scale_mode: SliceScaleMode::Stretch,
+        max_corner_scale: 1.0,
+    };
+    let button_slicer = TextureSlicer {
         border: BorderRect::all(24.0),
         center_scale_mode: SliceScaleMode::Stretch,
         sides_scale_mode: SliceScaleMode::Stretch,
@@ -106,7 +108,7 @@ pub fn window_bundle(
                 window_ninepatch_texture,
                 TextureAtlas {
                     index: 0,
-                    layout: atlas_layout_handle.clone(),
+                    layout: window_layout.clone(),
                 },
             )
             .with_mode(NodeImageMode::Sliced(slicer.clone())),
@@ -146,45 +148,15 @@ pub fn window_bundle(
                             state: UiImageButtonState::Normal,
                             ..default()
                         },
-                        children![
-                            (
-                                UiImageButtonState::Normal,
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    position_type: PositionType::Absolute,
-                                    top: px(0.),
-                                    left: px(0.),
-                                    ..default()
-                                },
-                                ImageNode { image: icon_menu, ..default() },
-                                Visibility::Visible,
-                            ), (
-                                UiImageButtonState::Hover,
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    position_type: PositionType::Absolute,
-                                    top: px(0.),
-                                    left: px(0.),
-                                    ..default()
-                                },
-                                ImageNode { image: icon_menu_hover, ..default() },
-                                Visibility::Hidden,
-                            ), (
-                                UiImageButtonState::Disabled,
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    position_type: PositionType::Absolute,
-                                    top: px(0.),
-                                    left: px(0.),
-                                    ..default()
-                                },
-                                ImageNode { image: icon_menu_disabled, ..default() },
-                                Visibility::Hidden,
-                            ),
-                        ]
+                        ImageNode::from_atlas_image(
+                            button_atlas_texture.clone(),
+                            TextureAtlas {
+                                index: 3,
+                                layout: button_layout.clone(),
+                            },
+                        )
+                        .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                        Visibility::Visible,
                     ), (
                         Node {
                             //width: Val::Percent(100.),
@@ -220,45 +192,16 @@ pub fn window_bundle(
                                     state: UiImageButtonState::Normal,
                                     ..default()
                                 },
-                                children![
-                                    (
-                                        UiImageButtonState::Normal,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_minimize, ..default() },
-                                        Visibility::Visible,
-                                    ), (
-                                        UiImageButtonState::Hover,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_minimize_hover, ..default() },
-                                        Visibility::Hidden,
-                                    ), (
-                                        UiImageButtonState::Disabled,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_minimize_disabled, ..default() },
-                                        Visibility::Hidden,
-                                    ),
-                                ]
+                                // minimize button
+                                ImageNode::from_atlas_image(
+                                    button_atlas_texture.clone(),
+                                    TextureAtlas {
+                                        index: 2,
+                                        layout: button_layout.clone(),
+                                    },
+                                )
+                                .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                                Visibility::Visible,
                             ), (
                                 UiWindowMaximizeButton,
                                 UiImageButtonBundle {
@@ -272,45 +215,16 @@ pub fn window_bundle(
                                     state: UiImageButtonState::Normal,
                                     ..default()
                                 },
-                                children![
-                                    (
-                                        UiImageButtonState::Normal,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_maximize, ..default() },
-                                        Visibility::Visible,
-                                    ), (
-                                        UiImageButtonState::Hover,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_maximize_hover, ..default() },
-                                        Visibility::Hidden,
-                                    ), (
-                                        UiImageButtonState::Disabled,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_maximize_disabled, ..default() },
-                                        Visibility::Hidden,
-                                    ),
-                                ]
+                                // maximize button
+                                ImageNode::from_atlas_image(
+                                    button_atlas_texture.clone(),
+                                    TextureAtlas {
+                                        index: 1,
+                                        layout: button_layout.clone(),
+                                    },
+                                )
+                                .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                                Visibility::Visible,
                             ), (
                                 UiWindowCloseButton,
                                 UiImageButtonBundle {
@@ -324,45 +238,16 @@ pub fn window_bundle(
                                     state: UiImageButtonState::Normal,
                                     ..default()
                                 },
-                                children![
-                                    (
-                                        UiImageButtonState::Normal,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_close, ..default() },
-                                        Visibility::Visible,
-                                    ), (
-                                        UiImageButtonState::Hover,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_close_hover, ..default() },
-                                        Visibility::Hidden,
-                                    ), (
-                                        UiImageButtonState::Disabled,
-                                        Node {
-                                            width: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                            position_type: PositionType::Absolute,
-                                            top: px(0.),
-                                            left: px(0.),
-                                            ..default()
-                                        },
-                                        ImageNode { image: icon_close_disabled, ..default() },
-                                        Visibility::Hidden,
-                                    ),
-                                ]
+                                // close button
+                                ImageNode::from_atlas_image(
+                                    button_atlas_texture.clone(),
+                                    TextureAtlas {
+                                        index: 0,
+                                        layout: button_layout.clone(),
+                                    },
+                                )
+                                .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                                Visibility::Visible,
                             ), 
                         ]),
                 ]
@@ -531,7 +416,7 @@ fn on_window_titlebar_drag_end(
 
 pub fn window_button_interaction_system(
     mut interaction_query: Query<
-        (&Interaction, &Button, &Children),
+        (&Interaction, &Button, &mut ImageNode),
         (Changed<Interaction>, Or<(
             With<UiWindowMenuButton>,
             With<UiWindowMinimizeButton>,
@@ -540,15 +425,12 @@ pub fn window_button_interaction_system(
         )>)>,
     mut vis_query: Query<(&UiImageButtonState, &mut Visibility)>,
 ){
-    for (interaction, _button, children  ) in &mut interaction_query {
-        for child in children.iter() {
-            if let Ok((state_type, mut visibility)) = vis_query.get_mut(child) {
-                *visibility = match (*interaction, state_type) {
-                    (Interaction::Pressed, UiImageButtonState::Normal) => Visibility::Visible,
-                    (Interaction::Hovered, UiImageButtonState::Hover) => Visibility::Visible,
-                    (Interaction::None, UiImageButtonState::Normal) => Visibility::Visible,
-                    _ => Visibility::Hidden
-                }
+    for (interaction, _button, mut image_node  ) in &mut interaction_query {
+        if let Some(atlas) = &mut image_node.texture_atlas {
+            atlas.index = match *interaction {
+                Interaction::Pressed => atlas.index % 20,
+                Interaction::Hovered => atlas.index % 20 + 20,
+                Interaction::None => atlas.index % 20,
             };
         }
     }    
