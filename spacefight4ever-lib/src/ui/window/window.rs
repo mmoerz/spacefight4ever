@@ -145,7 +145,6 @@ pub fn window_bundle(
                                 margin: margin1,
                                 ..default()
                             },
-                            state: UiImageButtonState::Normal,
                             ..default()
                         },
                         ImageNode::from_atlas_image(
@@ -156,7 +155,6 @@ pub fn window_bundle(
                             },
                         )
                         .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
-                        Visibility::Visible,
                     ), (
                         Node {
                             //width: Val::Percent(100.),
@@ -189,7 +187,6 @@ pub fn window_bundle(
                                         margin: margin1,
                                         ..default()
                                     },
-                                    state: UiImageButtonState::Normal,
                                     ..default()
                                 },
                                 // minimize button
@@ -201,7 +198,6 @@ pub fn window_bundle(
                                     },
                                 )
                                 .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
-                                Visibility::Visible,
                             ), (
                                 UiWindowMaximizeButton,
                                 UiImageButtonBundle {
@@ -212,7 +208,6 @@ pub fn window_bundle(
                                         margin: margin1,
                                         ..default()
                                     },
-                                    state: UiImageButtonState::Normal,
                                     ..default()
                                 },
                                 // maximize button
@@ -224,7 +219,6 @@ pub fn window_bundle(
                                     },
                                 )
                                 .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
-                                Visibility::Visible,
                             ), (
                                 UiWindowCloseButton,
                                 UiImageButtonBundle {
@@ -235,7 +229,6 @@ pub fn window_bundle(
                                         margin: margin1,
                                         ..default()
                                     },
-                                    state: UiImageButtonState::Normal,
                                     ..default()
                                 },
                                 // close button
@@ -247,7 +240,6 @@ pub fn window_bundle(
                                     },
                                 )
                                 .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
-                                Visibility::Visible,
                             ), 
                         ]),
                 ]
@@ -423,7 +415,6 @@ pub fn window_button_interaction_system(
             With<UiWindowMaximizeButton>,
             With<UiWindowCloseButton>
         )>)>,
-    mut vis_query: Query<(&UiImageButtonState, &mut Visibility)>,
 ){
     for (interaction, _button, mut image_node  ) in &mut interaction_query {
         if let Some(atlas) = &mut image_node.texture_atlas {

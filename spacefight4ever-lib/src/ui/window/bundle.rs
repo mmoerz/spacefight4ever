@@ -27,7 +27,6 @@ pub struct UiButtonBundle {
 
 #[derive(Default, Bundle)]
 pub struct UiImageButtonBundle {
-    pub state: UiImageButtonState,
     pub button: Button,
     pub node: Node,
     pub interaction: Interaction,

@@ -113,23 +113,3 @@ pub enum ResizeSide {
     BottomLeft,
     BottomRight,
 }
-
-
-#[derive(Default, Component, PartialEq, Eq)]
-pub enum UiImageButtonState {
-    #[default]
-    Normal,
-    Hover,
-    Disabled,
-}
-
-impl UiImageButtonState {
-    pub fn index(self) -> usize {
-        match self {
-            UiImageButtonState::Normal => 0,
-            UiImageButtonState::Hover => 1,
-            UiImageButtonState::Disabled => 2,
-        }
-    }
-}
-
