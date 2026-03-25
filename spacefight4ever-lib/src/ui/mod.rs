@@ -30,6 +30,7 @@ pub mod window {
         pub mod drag_system;
         pub mod resize;
         pub mod minmax;
+        pub mod close;
     }
 }
 

@@ -10,6 +10,7 @@ use crate::ui::window::bundle::{UiTextBundle, UiWindowBundle, UiImageButtonBundl
 use crate::ui::window::component::*;
 use crate::ui::window::structs::UiElementSize;
 use crate::ui::window::consts::{HEIGHT_TITLE_BAR, HEIGHT_STATUS_BAR};
+use crate::ui::window::systems::close::*;
 
 use crate::ui::window::systems::minmax::*;
 use crate::ui::window::systems::resize::*;
@@ -31,7 +32,8 @@ impl Plugin for UiWindowPlugin {
             .add_systems(Startup, setup_window_bundle)
             .add_systems(Update, minimize_windows)
             .add_systems(Update, apply_window_status_change)
-            .add_systems(Update, maximize_windows);
+            .add_systems(Update, maximize_windows)
+            .add_systems(Update, close_windows);
         app.add_systems(Update, window_button_interaction_system);
     }
 }
