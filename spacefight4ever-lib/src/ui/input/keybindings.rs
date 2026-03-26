@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::ui;
 use crate::ui::layers::UiLayers;
-use crate::ui::window::component::{UiWindowAtlas, UiWindowZCounter};
+use spacefight4ever_ui::prelude::{UiWindowAtlas, UiWindowZCounter};
 
 pub fn trigger_exit_dialog(
     keyboard: Res<ButtonInput<KeyCode>>,

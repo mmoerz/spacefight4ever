@@ -8,3 +8,5 @@ spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "dynamic_l
 
 bevy = { workspace = true, features = [ "dynamic_linking", "debug" ] }
 avian3d = { version = "0.6.0", features = ["simd"] }
+
+spacefight4ever_ui = { workspace = true }

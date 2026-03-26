@@ -1,7 +1,8 @@
 use bevy::{ecs::relationship::Relationship, prelude::*};
 
-use crate::ui::window::component::*;
-use crate::ui::window::window::get_window_node;
+use crate::structs::*;
+use crate::component::*;
+use crate::window::window::get_window_node;
 
 pub fn window_resize_system(
     on_drag: On<Pointer<Drag>>,
@@ -14,7 +15,7 @@ pub fn window_resize_system(
     let target = on_drag.event_target();
 
     if let Ok((handle, child_parent)) = resize_query.get(target) {
-        if let Some(window) = get_window_node(windows, child_parent.get(), &parents) {
+        if let Some(window) = get_window_node(&windows, child_parent.get(), &parents) {
             if let Ok(mut node) = node_query.get_mut(window) {
                 match handle.side {
                     ResizeSide::BottomRight => {

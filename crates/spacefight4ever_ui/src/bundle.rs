@@ -18,11 +18,26 @@ pub struct UiWindowBundle {
 }
 
 #[derive(Bundle)]
-pub struct UiButtonBundle {
+pub struct  UiButtonBundle {
     pub button: Button,
     pub node: Node,
     pub background: BackgroundColor,
     pub interaction: Interaction,
+}
+
+impl UiButtonBundle {
+    pub fn new(width: Val, height: Val, color: Color) -> Self {
+        Self {
+            button: Button,
+            node: Node {
+                width: width,
+                height: height,
+                ..default()
+            },
+            background: BackgroundColor(color),
+            interaction: Interaction::None,
+        }
+    }
 }
 
 #[derive(Default, Bundle)]

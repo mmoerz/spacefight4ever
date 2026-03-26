@@ -1,10 +1,9 @@
-use std::os::linux::raw::stat;
-
 use bevy::{ecs::relationship::Relationship, prelude::*};
 
-use crate::ui::window::component::*;
-use crate::ui::window::consts::HEIGHT_TITLE_BAR;
-use crate::ui::window::window::get_window_node;
+use crate::component::*;
+use crate::structs::*;
+use crate::consts::HEIGHT_TITLE_BAR;
+use crate::window::window::get_window_node;
 
 #[derive(Message)]
 pub struct UiWindowsStatusChangeRequest {
@@ -23,7 +22,7 @@ pub fn minimize_windows(
 ) {
     for (interaction, button_container) in q {
         if *interaction == Interaction::Pressed {
-            if let Some(window_entity) = get_window_node(windows.clone(), button_container.get(), &parent_query) {
+            if let Some(window_entity) = get_window_node(&windows, button_container.get(), &parent_query) {
                 change_message.write(UiWindowsStatusChangeRequest {
                     window: window_entity,
                     status: UiWindowStatus::Minimized,

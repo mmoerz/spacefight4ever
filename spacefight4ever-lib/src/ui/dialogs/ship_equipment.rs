@@ -1,7 +1,5 @@
 use bevy::prelude::*;
-use crate::ui::window::structs::UiElementSize;
-use crate::ui::window::component::{UiWindowAtlas, UiWindowZCounter};
-use crate::ui::window::{window};
+use spacefight4ever_ui::prelude::{UiElementSize, UiWindowAtlas, UiWindowZCounter, window_bundle};
 
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
@@ -30,7 +28,7 @@ pub fn spawn_ship_equipment_dialog(
         .with_children(|parent| {
             window_id =
                 parent.spawn((
-                    window::window_bundle(
+                    window_bundle(
                         "Ship Equipment",
                         100., 100.,
                         600., 400.,

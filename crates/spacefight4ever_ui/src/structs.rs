@@ -1,6 +1,5 @@
 use std::ops::{Index, IndexMut};
 
-
 #[derive(Default, Debug, Clone, Copy)]
 pub enum UiElementSize {
     #[default]
@@ -46,4 +45,26 @@ impl UiElementSizeHeights {
     pub fn small(&self) -> f32 { self[UiElementSize::Small] }
     pub fn medium(&self) -> f32 { self[UiElementSize::Medium] }
     pub fn large(&self) -> f32 { self[UiElementSize::Large] }
+}
+
+/// windows 
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
+pub enum UiWindowStatus {
+    #[default]
+    Normal,
+    Minimized,
+    Maximized,
+}
+
+/// enum for expressing the side of the window that gets resized
+#[derive(Clone, Copy)]
+pub enum ResizeSide {
+    Top,
+    Bottom,
+    Left,
+    Right,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
 }

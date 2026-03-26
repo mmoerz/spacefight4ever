@@ -3,7 +3,8 @@ resolver = "2"
 members = [
     "spacefight4ever-bin",
     "spacefight4ever-lib",
-    "spacefight4ever-test"
+    "spacefight4ever-test",
+    "crates/*"
 ]
 
 [workspace.dependencies]
@@ -13,6 +14,8 @@ bevy_ui = "0.18.1"
 bevy_ui_widgets = "0.18.1"
 serde = "1.0.228"
 serde_json = "1.0.149"
+
+spacefight4ever_ui = { version = "0.1.0", path = "./crates/spacefight4ever_ui/"}
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

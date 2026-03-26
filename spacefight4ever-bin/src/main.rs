@@ -21,7 +21,7 @@ use spacefight4ever_lib::prelude::*;
 
 use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
-use spacefight4ever_lib::ui::window::window::UiWindowPlugin;
+use spacefight4ever_ui::UiWindowPlugin;
 
 fn main() {
     App::new()

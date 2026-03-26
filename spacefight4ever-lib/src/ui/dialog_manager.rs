@@ -59,7 +59,7 @@ pub fn dialog_spawn_system(
                     &mut commands,
                     ui_layers.dialog_root,
                     &asset_server,
-                    msg);
+                    &msg);
             }
         }
     }
