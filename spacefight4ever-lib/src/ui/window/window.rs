@@ -65,6 +65,7 @@ pub fn window_bundle(
     width: f32, height: f32,
     ui_size: UiElementSize,
     font: Handle<Font>,
+    mut z_index: ResMut<UiWindowZCounter>,
     window_ninepatch_texture: Handle<Image>,
     button_atlas_texture: Handle<Image>,
     window_layout: Handle<TextureAtlasLayout>,
@@ -116,6 +117,7 @@ pub fn window_bundle(
                 },
             )
             .with_mode(NodeImageMode::Sliced(slicer.clone())),
+            z_index: GlobalZIndex(z_index.inc()),
             ..default()
         },
         children![

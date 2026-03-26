@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::ui;
 use crate::ui::layers::UiLayers;
-use crate::ui::window::component::UiWindowAtlas;
+use crate::ui::window::component::{UiWindowAtlas, UiWindowZCounter};
 
 pub fn trigger_exit_dialog(
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -18,6 +18,7 @@ pub fn trigger_ship_equipment_dialog(
     ui_layers: Res<UiLayers>,
     asset_server: Res<AssetServer>,
     window_atlas: Res<UiWindowAtlas>,
+    mut z_index: ResMut<UiWindowZCounter>,
 ) {
     if keyboard.just_pressed(KeyCode::KeyI) {
         //events.write(ui::messages::DialogRequest::ShipEquipment);
@@ -25,6 +26,7 @@ pub fn trigger_ship_equipment_dialog(
             &mut commands,
             ui_layers.window_root,
             &asset_server,
+            z_index,
             &window_atlas,
         );
     

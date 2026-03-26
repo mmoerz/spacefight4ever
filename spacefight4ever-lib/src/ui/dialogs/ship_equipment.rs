@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 use crate::ui::window::structs::UiElementSize;
-use crate::ui::window::component::UiWindowAtlas;
+use crate::ui::window::component::{UiWindowAtlas, UiWindowZCounter};
 use crate::ui::window::{window};
 
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
     parent: Entity,
     asset_server: &Res<AssetServer>,
+    mut z_index: ResMut<UiWindowZCounter>,
     window_atlas: &Res<UiWindowAtlas>,
 ) -> Entity {
     let font_handle: Handle<Font> =
@@ -35,6 +36,7 @@ pub fn spawn_ship_equipment_dialog(
                         600., 400.,
                         UiElementSize::Small,
                         font_handle.clone(),
+                        z_index,
                         texture_handle.clone(),
                         buttons_handle.clone(),
                         window_atlas.window_layout.clone(),
