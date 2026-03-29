@@ -18,7 +18,7 @@ pub fn window_button_interaction_system(
     for (interaction, button_index, mut image_node  ) in &mut interaction_query {
         if let Some(atlas) = &mut image_node.texture_atlas {
             atlas.index = match *interaction {
-                Interaction::Pressed => button_index.0,
+                Interaction::Pressed => button_index.0 + texture_atlases.button_offset * 2,
                 Interaction::Hovered => button_index.0 + texture_atlases.button_offset,
                 Interaction::None => button_index.0,
             };

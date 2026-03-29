@@ -9,6 +9,12 @@ use crate::component::*;
 
 use crate::resource::UiWindowZCounter;
 
+const BUTTON_ATLAS_INDEX_CANCEL: usize = 1;
+const BUTTON_ATLAS_INDEX_OK: usize = 0;
+const BUTTON_ATLAS_INDEX_MINUS: usize = 3;
+const BUTTON_ATLAS_INDEX_PLUS: usize = 2;
+const BUTTON_ATLAS_INDEX_MENU: usize = 4;
+
 pub fn window_bundle(
     title: &str,
     left: f32, top: f32,
@@ -82,7 +88,7 @@ pub fn window_bundle(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                BackgroundColor(Color::srgb(0.4, 0.2, 0.2)),
+                //BackgroundColor(Color::srgb(0.4, 0.2, 0.2)),
                 Pickable {
                     should_block_lower: true,
                     is_hoverable: true,
@@ -102,11 +108,11 @@ pub fn window_bundle(
                             },
                             ..default()
                         },
-                        UiAtlasButtonIndex(3),
+                        UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_MENU),
                         ImageNode::from_atlas_image(
                             button_atlas_texture.clone(),
                             TextureAtlas {
-                                index: 3,
+                                index: BUTTON_ATLAS_INDEX_MENU,
                                 layout: button_layout.clone(),
                             },
                         )
@@ -144,11 +150,11 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                UiAtlasButtonIndex(2),
+                                UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_MINUS),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
-                                        index: 2,
+                                        index: BUTTON_ATLAS_INDEX_MINUS,
                                         layout: button_layout.clone(),
                                     },
                                 )
@@ -165,11 +171,11 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                UiAtlasButtonIndex(1),
+                                UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_PLUS),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
-                                        index: 1,
+                                        index: BUTTON_ATLAS_INDEX_PLUS,
                                         layout: button_layout.clone(),
                                     },
                                 )
@@ -186,11 +192,11 @@ pub fn window_bundle(
                                     },
                                     ..default()
                                 },
-                                UiAtlasButtonIndex(0),
+                                UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_CANCEL),
                                 ImageNode::from_atlas_image(
                                     button_atlas_texture.clone(),
                                     TextureAtlas {
-                                        index: 0,
+                                        index: BUTTON_ATLAS_INDEX_CANCEL,
                                         layout: button_layout.clone(),
                                     },
                                 )

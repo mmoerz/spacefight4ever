@@ -12,7 +12,7 @@ pub fn spawn_ship_equipment_dialog(
         asset_server.load("fonts/FiraSans-Bold.ttf");
  
     let texture_handle: Handle<Image> = asset_server.load("textures/window/window_sheet.png");
-    let buttons_handle: Handle<Image> = asset_server.load("textures/window/button_sheet.png");
+    let buttons_handle: Handle<Image> = asset_server.load("textures/window/button_atlas.png");
 
     match asset_server.get_load_state(&font_handle) {
         Some(bevy::asset::LoadState::Loaded) => println!("Loaded"),
