@@ -63,7 +63,7 @@ pub fn setup_hex_grid(
 //    config: Res<HexGridConfig>,
 ) {
     // Load SVG image
-    let hex_image: Handle<Image> = asset_server.load("ui/yel_hex.png");
+    let hex_image: Handle<Image> = asset_server.load("textures/Hexfield2_final.png");
 
     // Config
     let config = HexGridConfig {

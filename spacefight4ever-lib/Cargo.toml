@@ -19,7 +19,9 @@ default = []
 debug = [
     "bevy/debug",
     "avian3d/diagnostic_ui",
+    "spacefight4ever_ui/debug"
 ]
 dynamic_linking = [
     "bevy/dynamic_linking",
+    "spacefight4ever_ui/dynamic_linking"
 ]

@@ -15,6 +15,7 @@ pub mod window {
         pub mod close;
         pub mod minmax;
         pub mod resize;
+        pub mod window_atlas_switch;
     }
 }
 
@@ -36,6 +37,9 @@ use crate::window::systems::button::*;
 use crate::window::systems::close::*;
 use crate::window::systems::minmax::*;
 use crate::window::systems::resize::*;
+
+use crate::window::systems::window_atlas_switch::*;
+
 
 pub struct UiWindowPlugin;
 
@@ -62,6 +66,17 @@ impl Plugin for UiWindowPlugin {
     }
 }
 
+pub struct UiWindowExtensionPlugin;
+impl Plugin for UiWindowExtensionPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .init_resource::<UiWindowAtlasStatus>()
+            .add_message::<UiWindowsSwitchAtlasRequest>()
+            .add_systems(Update, window_atlas_switch_system);
+    }
+}
+
+
 pub fn setup_window_bundle(
     mut commands: Commands,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
@@ -69,10 +84,10 @@ pub fn setup_window_bundle(
     let button_atlas_offset: u32 = 20;
 
     let atlas_layout =
-        TextureAtlasLayout::from_grid(UVec2::new(50, 50), 4, 4, Some(UVec2::splat(2)), None);
+        TextureAtlasLayout::from_grid(UVec2::new(50, 50), 4, 4, Some(UVec2::splat(0)), None);
     let window_atlas_handle = texture_atlases.add(atlas_layout);
     let atlas_layout =
-        TextureAtlasLayout::from_grid(UVec2::new(54, 54), button_atlas_offset, 3, Some(UVec2::splat(2)), None);
+        TextureAtlasLayout::from_grid(UVec2::new(54, 54), button_atlas_offset, 3, Some(UVec2::splat(0)), None);
     let button_atlas_handle = texture_atlases.add(atlas_layout);
 
     commands.insert_resource(UiWindowAtlas { 

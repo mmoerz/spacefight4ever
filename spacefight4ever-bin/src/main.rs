@@ -21,7 +21,7 @@ use spacefight4ever_lib::prelude::*;
 
 use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
-use spacefight4ever_ui::UiWindowPlugin;
+use spacefight4ever_ui::{UiWindowPlugin, UiWindowExtensionPlugin};
 
 fn main() {
     App::new()
@@ -36,6 +36,7 @@ fn main() {
         )
         .add_plugins(UiPlugin)
         .add_plugins(UiWindowPlugin)
+        .add_plugins(UiWindowExtensionPlugin)
         //.add_plugins(UiWindowNinePlugin)
         .add_plugins(GamePlugin)
 

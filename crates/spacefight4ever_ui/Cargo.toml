@@ -8,3 +8,12 @@ bevy = { version = "0.18.1" }
 
 # If you use custom message types or other shared libs, add them here
 # spacefight4ever-lib = { path = "../../spacefight4ever-lib" }
+
+[features]
+default = []
+debug = [
+    "bevy/debug",
+]
+dynamic_linking = [
+    "bevy/dynamic_linking",
+]

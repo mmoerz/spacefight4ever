@@ -61,7 +61,7 @@ pub fn window_bundle(
             image_node: ImageNode::from_atlas_image(
                 window_ninepatch_texture,
                 TextureAtlas {
-                    index: 0,
+                    index: 11,
                     layout: window_layout.clone(),
                 },
             )
@@ -200,8 +200,8 @@ pub fn window_bundle(
                 ]
             ), (
                 Node {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
+                    width: percent(100.),
+                    height: percent(100.),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
                     ..default()
@@ -210,18 +210,45 @@ pub fn window_bundle(
                     (
                         UiWindowMain,
                         Node {
-                            width: Val::Percent(100.),
-                            height: Val::Percent(100.),
+                            width: percent(100.),
+                            height: percent(100.),
                             ..default()
                         },
                     ), (
                         Node {
-                            width: Val::Px(border),
-                            height: Val::Percent(100.),
+                            width: px(border),
+                            height: percent(100.),
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::Right },
-                        BackgroundColor(Color::BLACK)
+                        //BackgroundColor(Color::BLACK)
+                    )],
+            ), (
+                Node {
+                    width: percent(100.),
+                    height: px(border),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    ..default()
+                },
+                children![
+                    (
+                        UiWindowMain,
+                        Node {
+                            width: percent(100.),
+                            height: px(border),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::Bottom },
+                        //BackgroundColor(Color::srgb(0., 9., 0.))
+                    ), (
+                        Node {
+                            width: px(border),
+                            height: px(border),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::BottomRight },
+                        //BackgroundColor(Color::srgb(0., 9., 0.))
                     )],
             )
         ]
