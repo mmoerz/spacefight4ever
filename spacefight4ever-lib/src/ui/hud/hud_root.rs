@@ -30,20 +30,20 @@ pub fn spawn_hud(
 
     commands
         .entity(ui_layers.hud_root)
-        .add_child(bottom_hud)
-        .with_children(|hroot| {
-            hroot.spawn((
-                Node {
-                    height: px(100),
-                    width: px(100),
-                    align_self: AlignSelf::Auto,
-                    top: px(200),
-                    left: px(200),
-                    ..default()
-                },
-                BackgroundColor(Color::BLACK),
-            ));
-        });
+        .add_child(bottom_hud);
+        // .with_children(|hroot| {
+        //     hroot.spawn((
+        //         Node {
+        //             height: px(100),
+        //             width: px(100),
+        //             align_self: AlignSelf::Auto,
+        //             top: px(200),
+        //             left: px(200),
+        //             ..default()
+        //         },
+        //         BackgroundColor(Color::BLACK),
+        //     ));
+        // });
 
     commands
         .entity(bottom_hud)
