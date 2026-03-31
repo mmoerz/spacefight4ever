@@ -15,6 +15,32 @@ const BUTTON_ATLAS_INDEX_MINUS: usize = 3;
 const BUTTON_ATLAS_INDEX_PLUS: usize = 2;
 const BUTTON_ATLAS_INDEX_MENU: usize = 4;
 
+
+pub fn titlebar_button(index: usize,
+    tex: Handle<Image>,
+    layout: Handle<TextureAtlasLayout>,
+    size: f32,
+    margin: UiRect,
+) -> impl Bundle {
+    (
+        UiImageButtonBundle {
+            button: Button,
+            node: Node {
+                width: Val::Px(size),
+                height: Val::Px(size),
+                margin,
+                ..default()
+            },
+            ..default()
+        },
+        UiAtlasButtonIndex(index),
+        ImageNode::from_atlas_image(
+            tex,
+            TextureAtlas { index, layout },
+        )
+    )
+}
+
 pub fn window_bundle(
     title: &str,
     left: f32, top: f32,
@@ -28,13 +54,7 @@ pub fn window_bundle(
     button_layout: Handle<TextureAtlasLayout>,
 ) -> impl Bundle {
     let slicer = TextureSlicer {
-        border: BorderRect::all(24.0),
-        center_scale_mode: SliceScaleMode::Stretch,
-        sides_scale_mode: SliceScaleMode::Stretch,
-        max_corner_scale: 1.0,
-    };
-    let button_slicer = TextureSlicer {
-        border: BorderRect::all(24.0),
+        border: BorderRect::all(20.0),
         center_scale_mode: SliceScaleMode::Stretch,
         sides_scale_mode: SliceScaleMode::Stretch,
         max_corner_scale: 1.0,
@@ -67,7 +87,7 @@ pub fn window_bundle(
             image_node: ImageNode::from_atlas_image(
                 window_ninepatch_texture,
                 TextureAtlas {
-                    index: 11,
+                    index: 3,
                     layout: window_layout.clone(),
                 },
             )
@@ -97,26 +117,13 @@ pub fn window_bundle(
                 children![
                     (
                         UiWindowMenuButton,
-                        UiImageButtonBundle {
-                            button: Button,
-                            node: Node {
-                                width: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                display: Display::Block,
-                                margin: margin1,
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_MENU),
-                        ImageNode::from_atlas_image(
+                        titlebar_button(
+                            BUTTON_ATLAS_INDEX_MENU,
                             button_atlas_texture.clone(),
-                            TextureAtlas {
-                                index: BUTTON_ATLAS_INDEX_MENU,
-                                layout: button_layout.clone(),
-                            },
-                        )
-                        .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                            button_layout.clone(),
+                            HEIGHT_TITLE_BAR[ui_size],
+                            margin1,
+                        ),
                     ), (
                         Node {
                             height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
@@ -140,67 +147,31 @@ pub fn window_bundle(
                         children![
                             (
                                 UiWindowMinimizeButton,
-                                UiImageButtonBundle {
-                                    button: Button,
-                                    node: Node {
-                                        width: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                        height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                        margin: margin1,
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_MINUS),
-                                ImageNode::from_atlas_image(
+                                titlebar_button(
+                                    BUTTON_ATLAS_INDEX_MINUS,
                                     button_atlas_texture.clone(),
-                                    TextureAtlas {
-                                        index: BUTTON_ATLAS_INDEX_MINUS,
-                                        layout: button_layout.clone(),
-                                    },
-                                )
-                                .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                                    button_layout.clone(),
+                                    HEIGHT_TITLE_BAR[ui_size],
+                                    margin1,
+                                ),
                             ), (
                                 UiWindowMaximizeButton,
-                                UiImageButtonBundle {
-                                    button: Button,
-                                    node: Node {
-                                        width: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                        height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                        margin: margin1,
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_PLUS),
-                                ImageNode::from_atlas_image(
+                                titlebar_button(
+                                    BUTTON_ATLAS_INDEX_PLUS,
                                     button_atlas_texture.clone(),
-                                    TextureAtlas {
-                                        index: BUTTON_ATLAS_INDEX_PLUS,
-                                        layout: button_layout.clone(),
-                                    },
-                                )
-                                .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                                    button_layout.clone(),
+                                    HEIGHT_TITLE_BAR[ui_size],
+                                    margin1,
+                                ),
                             ), (
                                 UiWindowCloseButton,
-                                UiImageButtonBundle {
-                                    button: Button,
-                                    node: Node {
-                                        width: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                        height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
-                                        margin: margin1,
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                UiAtlasButtonIndex(BUTTON_ATLAS_INDEX_CANCEL),
-                                ImageNode::from_atlas_image(
+                                titlebar_button(
+                                    BUTTON_ATLAS_INDEX_CANCEL,
                                     button_atlas_texture.clone(),
-                                    TextureAtlas {
-                                        index: BUTTON_ATLAS_INDEX_CANCEL,
-                                        layout: button_layout.clone(),
-                                    },
-                                )
-                                .with_mode(NodeImageMode::Sliced(button_slicer.clone())),
+                                    button_layout.clone(),
+                                    HEIGHT_TITLE_BAR[ui_size],
+                                    margin1,
+                                ),
                             ), 
                         ]),
                 ]
@@ -266,14 +237,12 @@ pub fn get_window_node(
     mut current: Entity,
     parents: &Query<&ChildOf>,
 ) -> Option<Entity> {
-    loop {
-        if let Ok(window) = windows.get(current) {
-            return Some(window);
+    while let Ok(parent) = parents.get(current) {
+        if windows.contains(current) {
+            return Some(current);
         }
-        if let Ok(parent) = parents.get(current) {
-            current = parent.get();
-        } else {
-            return None;
-        }
+        current = parent.get();
     }
+
+    windows.contains(current).then_some(current)
 }

@@ -50,7 +50,7 @@ impl Plugin for UiWindowPlugin {
             .init_resource::<UiWindowFocused>()
             .init_resource::<UiWindowAtlas>()
             .add_observer(on_window_click_focus)
-            //.add_observer(on_window_titlebar_drag_start)
+            .add_observer(on_window_titlebar_drag_start)
             .add_observer(on_window_titlebar_drag)
             .add_observer(on_window_titlebar_drag_end)
             .add_observer(window_resize_system)
@@ -84,7 +84,7 @@ pub fn setup_window_bundle(
     let button_atlas_offset: u32 = 5;
 
     let atlas_layout =
-        TextureAtlasLayout::from_grid(UVec2::new(50, 50), 4, 4, Some(UVec2::splat(0)), None);
+        TextureAtlasLayout::from_grid(UVec2::new(70, 70), 4, 4, Some(UVec2::splat(0)), None);
     let window_atlas_handle = texture_atlases.add(atlas_layout);
     let atlas_layout =
         TextureAtlasLayout::from_grid(UVec2::new(60, 60), button_atlas_offset, 3, Some(UVec2::splat(4)), None);

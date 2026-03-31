@@ -16,52 +16,50 @@ pub fn on_window_click_focus(
 
     // climb hierarchy until we find UiWindow
     loop {
-        if let Ok(mut z) = z_query.get_mut(current) {
+        if z_query.contains(current) {
+            let mut z = z_query.get_mut(current).unwrap();
             z.0 = counter.inc();
             focus.set(current);
-            break;
+            return;
         }
 
-        if let Ok(parent) = parents.get(current) {
-            current = parent.get();
-        } else {
-            break;
-        }
+        current = match parents.get(current) {
+            Ok(p) => p.get(),
+            Err(_) => return,
+        };
     }
 }
 
-// pub fn on_window_titlebar_drag_start(
-//     on_drag_start: On<Pointer<DragStart>>,
-//     mut z_query: Query<&mut GlobalZIndex>,
-//     parents: Query<&ChildOf, With<UiWindowTitleBar>>,
-//     children: Query<&Children>,
-//     mut zindex: ResMut<UiWindowZCounter>,
-// ) {
-//     if let Ok(parent) = parents.get(on_drag_start.event_target()) {
+#[derive(Component)]
+pub struct UiWindowDragging(Entity);
 
-//     }
-// }
+pub fn on_window_titlebar_drag_start(
+    on_drag_start: On<Pointer<DragStart>>,
+    parents: Query<&ChildOf, With<UiWindowTitleBar>>,
+    mut commands: Commands,
+) {
+    if let Ok(parent) = parents.get(on_drag_start.event_target()) {
+        commands.entity(on_drag_start.event_target())
+            .insert(UiWindowDragging(parent.get()));
+    }
+}
 
 pub fn on_window_titlebar_drag(
     on_drag: On<Pointer<Drag>>,
-    mut query: Query<&mut UiTransform>,
-    parents: Query<(&UiWindowTitleBar, &ChildOf)>
+    mut query: Query<&mut UiTransform, With<UiWindow>>,
+    dragging: Query<&UiWindowDragging>,
 ) {
-    if let Ok((_bar, parent)) = parents.get(on_drag.event_target()) {
+    if let Ok(drag) = dragging.get(on_drag.event_target()) {
         //println!("name: {:?}", name);
-        if let Ok(mut transform) = query.get_mut(parent.get()) {
+        if let Ok(mut transform) = query.get_mut(drag.0) {
             // Extract the current values as f32
-            let current_x = match transform.translation.x {
-                Val::Px(v) => v,
-                _ => 0.0, // fallback if not px
-            };
-            let current_y = match transform.translation.y {
-                Val::Px(v) => v,
-                _ => 0.0,
-            };
-            let x = current_x + on_drag.delta.x;
-            let y = current_y + on_drag.delta.y;
-            transform.translation = Val2::px(x, y);
+            let Val::Px(x) = transform.translation.x else { return };
+            let Val::Px(y) = transform.translation.y else { return };
+
+            transform.translation = Val2::px(
+                x + on_drag.delta.x,
+                y + on_drag.delta.y
+            );
         }
     }
 }
@@ -69,12 +67,13 @@ pub fn on_window_titlebar_drag(
 pub fn on_window_titlebar_drag_end(
     on_drag_end: On<Pointer<DragEnd>>,
     mut query: Query<(&mut Node, &mut UiTransform)>,
-    parents: Query<(&UiWindowTitleBar,&ChildOf)>
+    dragging: Query<&UiWindowDragging>,
+    mut commands: Commands,
 ) {
-    if let Ok((_bar, parent)) = parents.get(on_drag_end.event_target()) {
-        if let Ok((mut node, mut transform)) = query.get_mut(parent.get()) {
-            let dx = match transform.translation.x { Val::Px(v) => v, _ => 0.0 };
-            let dy = match transform.translation.y { Val::Px(v) => v, _ => 0.0 };
+    if let Ok(drag) = dragging.get(on_drag_end.event_target()) {
+        if let Ok((mut node, mut transform)) = query.get_mut(drag.0) {
+            let Val::Px(dx) = transform.translation.x else { return };
+            let Val::Px(dy) = transform.translation.y else { return };
 
             if let Val::Px(left) = node.left {
                 node.left = Val::Px(left + dx);
@@ -85,5 +84,6 @@ pub fn on_window_titlebar_drag_end(
             }
             transform.translation = Val2::ZERO;
         }
+        commands.entity(on_drag_end.event_target()).remove::<UiWindowDragging>();
     }
 }
