@@ -6,6 +6,10 @@ pub mod component;
 pub mod bundle;
 pub mod resource;
 
+pub mod ui {
+    pub mod button;
+}
+
 pub mod window {
     pub mod window;
     pub mod window_observers;

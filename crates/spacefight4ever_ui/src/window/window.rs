@@ -7,6 +7,8 @@ use crate::bundle::*;
 use crate::structs::UiElementSize;
 use crate::component::*;
 
+use crate::ui::button::*;
+
 use crate::resource::UiWindowZCounter;
 
 const BUTTON_ATLAS_INDEX_CANCEL: usize = 1;
@@ -37,7 +39,9 @@ pub fn titlebar_button(index: usize,
         ImageNode::from_atlas_image(
             tex,
             TextureAtlas { index, layout },
-        )
+        ),
+        
+        Visibility::Inherited,
     )
 }
 
@@ -63,7 +67,7 @@ pub fn window_bundle(
     let border: f32 = 5.;
     let margin1 = UiRect {
         left: Val::Px(1.),
-        right: Val::Px(1.),
+        right: Val::Px(2.),
         top: Val::Px(1.),
         bottom: Val::Px(1.),
     };
@@ -117,13 +121,15 @@ pub fn window_bundle(
                 children![
                     (
                         UiWindowMenuButton,
-                        titlebar_button(
+                        UiAtlasButtonBuilder::new(
+                            "menu",
                             BUTTON_ATLAS_INDEX_MENU,
-                            button_atlas_texture.clone(),
-                            button_layout.clone(),
                             HEIGHT_TITLE_BAR[ui_size],
                             margin1,
-                        ),
+                            button_atlas_texture.clone(),
+                            button_layout.clone(),
+                        )
+                        .build(),
                     ), (
                         Node {
                             height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
@@ -137,6 +143,7 @@ pub fn window_bundle(
                             bar_height,
                             Color::WHITE
                         ),
+                        Visibility::Inherited,
                     ), (
                         Node {
                             display: Display::Flex,
@@ -144,35 +151,53 @@ pub fn window_bundle(
                             margin: UiRect { left: Val::Auto, ..default() },
                             ..default()
                         },
+                        Visibility::Inherited,
                         children![
                             (
-                                UiWindowMinimizeButton,
-                                titlebar_button(
-                                    BUTTON_ATLAS_INDEX_MINUS,
-                                    button_atlas_texture.clone(),
-                                    button_layout.clone(),
-                                    HEIGHT_TITLE_BAR[ui_size],
-                                    margin1,
-                                ),
-                            ), (
-                                UiWindowMaximizeButton,
-                                titlebar_button(
-                                    BUTTON_ATLAS_INDEX_PLUS,
-                                    button_atlas_texture.clone(),
-                                    button_layout.clone(),
-                                    HEIGHT_TITLE_BAR[ui_size],
-                                    margin1,
-                                ),
-                            ), (
-                                UiWindowCloseButton,
-                                titlebar_button(
-                                    BUTTON_ATLAS_INDEX_CANCEL,
-                                    button_atlas_texture.clone(),
-                                    button_layout.clone(),
-                                    HEIGHT_TITLE_BAR[ui_size],
-                                    margin1,
-                                ),
-                            ), 
+                                Name::new("WindowTitleBarButtons"),
+                                Node {
+                                    width: px(HEIGHT_TITLE_BAR[ui_size]*4.),
+                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
+                                    display: Display::Flex,
+                                    flex_direction: FlexDirection::Row,
+                                    justify_content: JustifyContent::FlexEnd,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgb_u8(44, 149, 192)),
+                                Visibility::Inherited,
+                                children![
+                                    (
+                                        Name::new("foobar"),
+                                        UiWindowMinimizeButton,
+                                        titlebar_button(
+                                            BUTTON_ATLAS_INDEX_MINUS,
+                                            button_atlas_texture.clone(),
+                                            button_layout.clone(),
+                                            HEIGHT_TITLE_BAR[ui_size],
+                                            margin1,
+                                        ),
+                                    ), (
+                                        UiWindowMaximizeButton,
+                                        titlebar_button(
+                                            BUTTON_ATLAS_INDEX_PLUS,
+                                            button_atlas_texture.clone(),
+                                            button_layout.clone(),
+                                            HEIGHT_TITLE_BAR[ui_size],
+                                            margin1,
+                                        ),
+                                    ), (
+                                        UiWindowCloseButton,
+                                        titlebar_button(
+                                            BUTTON_ATLAS_INDEX_CANCEL,
+                                            button_atlas_texture.clone(),
+                                            button_layout.clone(),
+                                            HEIGHT_TITLE_BAR[ui_size],
+                                            margin1,
+                                        ),
+                                    ),
+                                ],
+                            ),
                         ]),
                 ]
             ), (
