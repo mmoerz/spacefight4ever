@@ -7,7 +7,8 @@ use crate::bundle::*;
 use crate::structs::UiElementSize;
 use crate::component::*;
 
-use crate::ui::button::*;
+use crate::ui::assets::atlasbuttonskin::ButtonSkin;
+use crate::ui::atlasbutton::*;
 
 use crate::resource::UiWindowZCounter;
 
@@ -55,7 +56,8 @@ pub fn window_bundle(
     window_ninepatch_texture: Handle<Image>,
     button_atlas_texture: Handle<Image>,
     window_layout: Handle<TextureAtlasLayout>,
-    button_layout: Handle<TextureAtlasLayout>,
+    //button_layout: Handle<TextureAtlasLayout>,
+    menu_button_skin: Handle<ButtonSkin>,
 ) -> impl Bundle {
     let slicer = TextureSlicer {
         border: BorderRect::all(20.0),
@@ -72,6 +74,8 @@ pub fn window_bundle(
         bottom: Val::Px(1.),
     };
     let bar_height = HEIGHT_TITLE_BAR[ui_size] - 2.;
+
+
 
     (
         Name::new("Window"),
@@ -123,11 +127,10 @@ pub fn window_bundle(
                         UiWindowMenuButton,
                         UiAtlasButtonBuilder::new(
                             "menu",
-                            BUTTON_ATLAS_INDEX_MENU,
+                            skin,
                             HEIGHT_TITLE_BAR[ui_size],
                             margin1,
-                            button_atlas_texture.clone(),
-                            button_layout.clone(),
+                            
                         )
                         .build(),
                     ), (

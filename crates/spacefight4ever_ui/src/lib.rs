@@ -6,8 +6,17 @@ pub mod component;
 pub mod bundle;
 pub mod resource;
 
+
 pub mod ui {
+    pub mod assets {
+        pub mod asseterror;
+        pub mod atlasbuttonskin;
+        pub mod windowsskin;
+    }
     pub mod button;
+    pub mod disktheme;
+    pub mod theme;
+    pub mod atlasbutton;
 }
 
 pub mod window {

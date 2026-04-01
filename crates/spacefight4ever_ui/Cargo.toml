@@ -5,6 +5,10 @@ edition = "2024"
 
 [dependencies]
 bevy = { version = "0.18.1" }
+serde = { workspace = true}
+ron = { workspace = true }
+thiserror = "2.0.18"
+async-trait = { workspace = true }
 
 # If you use custom message types or other shared libs, add them here
 # spacefight4ever-lib = { path = "../../spacefight4ever-lib" }
