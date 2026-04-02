@@ -11,12 +11,15 @@ pub mod ui {
     pub mod assets {
         pub mod asseterror;
         pub mod atlasbuttonskin;
+        pub mod titlebarskin;
         pub mod windowsskin;
         pub mod disktheme;
         pub mod theme;
     }
     pub mod button;
     pub mod atlasbutton;
+    pub mod titlebar;
+    pub mod window;
 }
 
 pub mod window {

@@ -1,4 +1,3 @@
-use std::ops::{Index, IndexMut};
 use serde::{Deserialize, Serialize};
 use bevy::{
     asset::{io::Reader, AssetLoader, LoadContext},
@@ -6,95 +5,15 @@ use bevy::{
     reflect::TypePath,
 };
 
-use crate::ui::{assets::asseterror::UiAssetLoadError, button::WindowState};
+use crate::ui::{assets::asseterror::UiAssetLoadError};
 use super::atlasbuttonskin::DiskAtlasImage;
+use super::titlebarskin::{DiskTitlebarSkin, TitlebarSkin};
 
-/// Titlebar skin stored on disk
-#[derive(TypePath, Debug, Deserialize, Serialize)]
-pub struct DiskTitlebarSkin {
-    pub atlas: DiskAtlasImage,
-    pub mapping: [usize; 7],
-    pub buttons: usize,
-}
-
-impl DiskTitlebarSkin {
-    /// Validate the atlas first
-    pub fn validate(&self) -> Result<(), UiAssetLoadError> {
-        self.atlas.validate()?;
-        let max = self.atlas.max_index();
-
-        for (pos, &idx) in self.mapping.iter().enumerate() {
-            if idx >= max {
-                return Err(UiAssetLoadError::InvalidMapping { 
-                    origin: self.atlas.image_name.clone(),
-                    position: pos, index: idx, max: max - 1 
-                });
-            }
-        }
-        Ok(())
-    }
-
-    /// Convert to runtime
-    pub fn into_runtime(
-        self,
-        load_context: &mut LoadContext<'_>,
-    ) -> Result<TitlebarSkin, UiAssetLoadError> {
-        self.validate()?; // <-- validation lives here
-
-        let image_handle = self.atlas.load_image(load_context);
-        let layout = self.atlas.create_layout();
-        let layout_handle = 
-            load_context.add_labeled_asset(
-                format!("titlebar_layout_{}", self.atlas.image_name), layout
-            );
-
-        Ok(TitlebarSkin {
-            atlas: layout_handle,
-            image: image_handle,
-            mapping: self.mapping,
-            buttons: self.buttons,
-        })
-    }
-}
-
-/// Runtime titlebar skin
-#[derive(Debug, Clone)]
-pub struct TitlebarSkin {
-    pub atlas: Handle<TextureAtlasLayout>,
-    pub image: Handle<Image>,
-    pub mapping: [usize; 7],
-    pub buttons: usize,
-}
-
-impl Index<WindowState> for TitlebarSkin {
-    type Output = usize;
-
-    fn index(&self, state: WindowState) -> &Self::Output {
-        &self.mapping[state.index()]
-    }
-}
-
-impl IndexMut<WindowState> for TitlebarSkin {
-    fn index_mut(&mut self, state: WindowState) -> &mut Self::Output {
-        &mut self.mapping[state.index()]
-    }
-}
-
-impl Default for TitlebarSkin {
-    fn default() -> Self {
-        Self {
-            atlas: Handle::default(),
-            image: Handle::default(),
-            mapping: [0; 7],
-            buttons: 0,
-        }
-    }
-}
 
 /// Disk window skin
 #[derive(TypePath, Debug, Deserialize, Serialize)]
 pub struct DiskWindowSkin {
-    pub window_image: String,           // main window image
+    pub window_atlas: DiskAtlasImage,           // main window image
     pub titlebar: DiskTitlebarSkin,     // titlebar atlas & mapping
     pub default_size: [u32; 2],
     pub default_position: [u32; 2],
@@ -108,11 +27,19 @@ impl DiskWindowSkin {
         self,
         load_context: &mut LoadContext<'_>,
     ) -> Result<WindowSkin, UiAssetLoadError> {
-        let window_image_handle: Handle<Image> = load_context.load(&self.window_image);
+        self.window_atlas.validate()?;
+
+        let image_handle = self.window_atlas.load_image(load_context);
+        let layout = self.window_atlas.create_layout();
+        let layout_handle = 
+            load_context.add_labeled_asset(
+                format!("window_layout_{}", self.window_atlas.image_name), layout
+            );
         let titlebar = self.titlebar.into_runtime(load_context)?;
 
         Ok(WindowSkin {
-            window_image: window_image_handle,
+            image: image_handle,
+            atlas: layout_handle,
             titlebar,
             default_size: UVec2::from_array(self.default_size),
             default_position: UVec2::from_array(self.default_position),
@@ -124,7 +51,8 @@ impl DiskWindowSkin {
 /// Runtime window skin
 #[derive(Asset, TypePath, Debug)]
 pub struct WindowSkin {
-    pub window_image: Handle<Image>,
+    pub image: Handle<Image>,
+    pub atlas: Handle<TextureAtlasLayout>,
     pub titlebar: TitlebarSkin,
     pub default_size: UVec2,
     pub default_position: UVec2,
@@ -163,6 +91,7 @@ impl AssetLoader for WindowSkinLoader {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ui::button::WindowState;
 
     fn valid_atlas() -> DiskAtlasImage {
         DiskAtlasImage {
@@ -185,7 +114,17 @@ mod tests {
 
     fn valid_window() -> DiskWindowSkin {
         DiskWindowSkin {
-            window_image: "window.png".to_string(),
+            window_atlas: DiskAtlasImage {
+                image_name: "window.png".to_string(),
+                tile_size: UVec2::new(
+                    16,
+                    16,
+                ),
+                rows: 3,
+                cols: 3,
+                padding: UVec2::ZERO,
+                offset: UVec2::ZERO,
+            },
             titlebar: valid_titlebar(),
             default_size: [100, 50],
             default_position: [10, 20],

@@ -1,3 +1,6 @@
+use std::str::FromStr;
+use bevy::prelude::*;
+
 /// part of what a button is, the other part is the button component
 #[repr(usize)]
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -35,11 +38,42 @@ impl WindowState {
 }
 
 #[repr(usize)]
-#[derive(PartialEq, Eq, Clone, Copy)]
-pub enum TitlebarButtons {
+#[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
+pub enum UiButtonType {
     Menu = 1,
     Minimize = 2,
     Maximize = 4,
     Close = 8
 }
 
+/// enable loading from string for the UiButtonType
+impl FromStr for UiButtonType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "close" => Ok(UiButtonType::Close),
+            "minimize" => Ok(UiButtonType::Minimize),
+            "maximize" => Ok(UiButtonType::Maximize),
+            "menu" => Ok(UiButtonType::Menu),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
+pub enum UiWindowType {
+    Standard
+}
+
+/// enable loading from string for the UiWindowType
+impl FromStr for UiWindowType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "standard" => Ok(UiWindowType::Standard),
+            _ => Err(()),
+        }
+    }
+}

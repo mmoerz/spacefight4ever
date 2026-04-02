@@ -7,7 +7,6 @@ use crate::bundle::*;
 use crate::structs::UiElementSize;
 use crate::component::*;
 
-use crate::ui::assets::atlasbuttonskin::ButtonSkin;
 use crate::ui::atlasbutton::*;
 
 use crate::resource::UiWindowZCounter;
@@ -45,18 +44,21 @@ pub fn titlebar_button(index: usize,
     )
 }
 
+use crate::ui::assets::theme::*;
+use crate::ui::button::{UiButtonType, UiWindowType};
+
+/// Window bundle using UiTheme and UiButtonType
 pub fn window_bundle(
     title: &str,
-    left: f32, top: f32,
-    width: f32, height: f32,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
     ui_size: UiElementSize,
     font: Handle<Font>,
     mut z_index: ResMut<UiWindowZCounter>,
     window_ninepatch_texture: Handle<Image>,
-    button_atlas_texture: Handle<Image>,
-    window_layout: Handle<TextureAtlasLayout>,
-    //button_layout: Handle<TextureAtlasLayout>,
-    menu_button_skin: Handle<ButtonSkin>,
+    theme: &UiTheme, // pass theme here
 ) -> impl Bundle {
     let slicer = TextureSlicer {
         border: BorderRect::all(20.0),
@@ -65,7 +67,6 @@ pub fn window_bundle(
         max_corner_scale: 1.0,
     };
 
-    let border: f32 = 5.;
     let margin1 = UiRect {
         left: Val::Px(1.),
         right: Val::Px(2.),
@@ -73,6 +74,9 @@ pub fn window_bundle(
         bottom: Val::Px(1.),
     };
     let bar_height = HEIGHT_TITLE_BAR[ui_size] - 2.;
+
+    let window_layout = theme.get_window_skin(UiWindowType::Standard)
+        .unwrap();
 
     (
         Name::new("Window"),
@@ -93,7 +97,7 @@ pub fn window_bundle(
                 window_ninepatch_texture,
                 TextureAtlas {
                     index: 3,
-                    layout: window_layout.clone(),
+                    layout: ,
                 },
             )
             .with_mode(NodeImageMode::Sliced(slicer.clone())),
@@ -113,24 +117,16 @@ pub fn window_bundle(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                //BackgroundColor(Color::srgb(0.4, 0.2, 0.2)),
                 Pickable {
                     should_block_lower: true,
                     is_hoverable: true,
                     ..default()
                 },
                 children![
+                    // Menu button
+                    ui_thematic_button_bundle(UiButtonType::Menu, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
+                    // Title text
                     (
-                        UiWindowMenuButton,
-                        UiAtlasButtonBuilder::new(
-                            "menu",
-                            skin,
-                            HEIGHT_TITLE_BAR[ui_size],
-                            margin1,
-                            
-                        )
-                        .build(),
-                    ), (
                         Node {
                             height: Val::Px(HEIGHT_TITLE_BAR[ui_size]),
                             justify_content: JustifyContent::Stretch,
@@ -141,10 +137,12 @@ pub fn window_bundle(
                             title,
                             font.clone(),
                             bar_height,
-                            Color::WHITE
+                            theme.on_surface,
                         ),
                         Visibility::Inherited,
-                    ), (
+                    ),
+                    // Right buttons (minimize, maximize, close)
+                    (
                         Node {
                             display: Display::Flex,
                             flex_direction: FlexDirection::Row,
@@ -153,57 +151,18 @@ pub fn window_bundle(
                         },
                         Visibility::Inherited,
                         children![
-                            (
-                                Name::new("WindowTitleBarButtons"),
-                                Node {
-                                    width: px(HEIGHT_TITLE_BAR[ui_size]*4.),
-                                    height: px(HEIGHT_TITLE_BAR[ui_size]),
-                                    display: Display::Flex,
-                                    flex_direction: FlexDirection::Row,
-                                    justify_content: JustifyContent::FlexEnd,
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
-                                BackgroundColor(Color::srgb_u8(44, 149, 192)),
-                                Visibility::Inherited,
-                                children![
-                                    (
-                                        Name::new("foobar"),
-                                        UiWindowMinimizeButton,
-                                        titlebar_button(
-                                            BUTTON_ATLAS_INDEX_MINUS,
-                                            button_atlas_texture.clone(),
-                                            button_layout.clone(),
-                                            HEIGHT_TITLE_BAR[ui_size],
-                                            margin1,
-                                        ),
-                                    ), (
-                                        UiWindowMaximizeButton,
-                                        titlebar_button(
-                                            BUTTON_ATLAS_INDEX_PLUS,
-                                            button_atlas_texture.clone(),
-                                            button_layout.clone(),
-                                            HEIGHT_TITLE_BAR[ui_size],
-                                            margin1,
-                                        ),
-                                    ), (
-                                        UiWindowCloseButton,
-                                        titlebar_button(
-                                            BUTTON_ATLAS_INDEX_CANCEL,
-                                            button_atlas_texture.clone(),
-                                            button_layout.clone(),
-                                            HEIGHT_TITLE_BAR[ui_size],
-                                            margin1,
-                                        ),
-                                    ),
-                                ],
-                            ),
-                        ]),
+                            ui_thematic_button_bundle(UiButtonType::Minimize, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
+                            ui_thematic_button_bundle(UiButtonType::Maximize, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
+                            ui_thematic_button_bundle(UiButtonType::Close, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
+                        ],
+                    )
                 ]
-            ), (
+            ),
+            // Window body + resize handles
+            (
                 Node {
-                    width: percent(100.),
-                    height: percent(100.),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
                     ..default()
@@ -212,23 +171,25 @@ pub fn window_bundle(
                     (
                         UiWindowMain,
                         Node {
-                            width: percent(100.),
-                            height: percent(100.),
+                            width: Val::Percent(100.),
+                            height: Val::Percent(100.),
                             ..default()
                         },
-                    ), (
+                    ),
+                    (
                         Node {
-                            width: px(border),
-                            height: percent(100.),
+                            width: px(5.),
+                            height: Val::Percent(100.),
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::Right },
-                        //BackgroundColor(Color::BLACK)
-                    )],
-            ), (
+                    )
+                ]
+            ),
+            (
                 Node {
-                    width: percent(100.),
-                    height: px(border),
+                    width: Val::Percent(100.),
+                    height: px(5.),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
                     ..default()
@@ -237,21 +198,21 @@ pub fn window_bundle(
                     (
                         UiWindowMain,
                         Node {
-                            width: percent(100.),
-                            height: px(border),
+                            width: Val::Percent(100.),
+                            height: px(5.),
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::Bottom },
-                        //BackgroundColor(Color::srgb(0., 9., 0.))
-                    ), (
+                    ),
+                    (
                         Node {
-                            width: px(border),
-                            height: px(border),
+                            width: px(5.),
+                            height: px(5.),
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::BottomRight },
-                        //BackgroundColor(Color::srgb(0., 9., 0.))
-                    )],
+                    )
+                ]
             )
         ]
     )

@@ -6,6 +6,7 @@ use bevy::{
     reflect::TypePath,
 };
 
+use crate::ui::button::{UiButtonType, UiWindowType};
 use super::asseterror::UiAssetLoadError;
 use super::atlasbuttonskin::{ButtonSkin, DiskButtonSkin};
 use super::theme::*;
@@ -25,19 +26,29 @@ impl DiskUiTheme {
         load_context: &mut bevy::asset::LoadContext<'_>,
     ) -> Result<UiTheme, UiAssetLoadError> {
         // Load all button skins
-        let mut button_skins: HashMap<String, Handle<ButtonSkin>> = HashMap::new();
+        let mut button_skins: HashMap<UiButtonType, Handle<ButtonSkin>> = HashMap::new();
         for (name, disk_button) in self.button_skins {
             let skin = disk_button.into_runtime(load_context)?;
             let handle = load_context.add_labeled_asset(format!("button_skin_{}", name), skin);
-            button_skins.insert(name, handle);
+
+            if let Ok(button_type) = name.parse::<UiButtonType>() {
+                button_skins.insert(button_type, handle);
+            } else {
+                warn!("Unknown button type `{name}` in theme, skipping");
+            }
         }
 
         // Load all window skins
-        let mut window_skins: HashMap<String, Handle<WindowSkin>> = HashMap::new();
+        let mut window_skins: HashMap<UiWindowType, Handle<WindowSkin>> = HashMap::new();
         for (name, disk_window) in self.window_skins {
             let skin = disk_window.into_runtime(load_context)?;
             let handle = load_context.add_labeled_asset(format!("window_skin_{}", name), skin);
-            window_skins.insert(name, handle);
+
+            if let Ok(window_type) = name.parse::<UiWindowType>() {
+                window_skins.insert(window_type, handle);
+            } else {
+                warn!("Unknown button type `{name}` in theme, skipping");
+            }
         }
 
         // Convert colors
@@ -51,6 +62,8 @@ impl DiskUiTheme {
         Ok(UiTheme {
             mode: ThemeMode::Dark, // default, can be overwritten later
             color_scheme: ColorScheme::Default,
+            button_skins,
+            window_skins,
             primary: colors.get("primary").cloned().unwrap_or(hex("#D0BCFF")),
             on_primary: colors.get("on_primary").cloned().unwrap_or(hex("#381E72")),
             primary_container: colors.get("primary_container").cloned().unwrap_or(hex("#4F378B")),
