@@ -12,10 +12,10 @@ pub mod ui {
         pub mod asseterror;
         pub mod atlasbuttonskin;
         pub mod windowsskin;
+        pub mod disktheme;
+        pub mod theme;
     }
     pub mod button;
-    pub mod disktheme;
-    pub mod theme;
     pub mod atlasbutton;
 }
 
@@ -53,6 +53,14 @@ use crate::window::systems::resize::*;
 
 use crate::window::systems::window_atlas_switch::*;
 
+// for asset plugin
+use ui::assets::{
+    atlasbuttonskin::{ButtonSkinLoader, ButtonSkin},
+    windowsskin::{WindowSkinLoader, WindowSkin},
+    theme::UiTheme,
+    disktheme::UiThemeLoader
+};
+
 
 pub struct UiWindowPlugin;
 
@@ -86,6 +94,24 @@ impl Plugin for UiWindowExtensionPlugin {
             .init_resource::<UiWindowAtlasStatus>()
             .add_message::<UiWindowsSwitchAtlasRequest>()
             .add_systems(Update, window_atlas_switch_system);
+    }
+}
+
+
+/// Plugin for registering all UI assets
+pub struct UiAssetsPlugin;
+
+impl Plugin for UiAssetsPlugin {
+    fn build(&self, app: &mut App) {
+        // Register custom asset types
+        app.init_asset::<ButtonSkin>()
+           .init_asset_loader::<ButtonSkinLoader>();
+
+        app.init_asset::<WindowSkin>()
+           .init_asset_loader::<WindowSkinLoader>();
+
+        app.init_asset::<UiTheme>()
+           .init_asset_loader::<UiThemeLoader>();
     }
 }
 

@@ -19,7 +19,7 @@ pub struct DiskTitlebarSkin {
 
 impl DiskTitlebarSkin {
     /// Validate the atlas first
-    fn validate(&self) -> Result<(), UiAssetLoadError> {
+    pub fn validate(&self) -> Result<(), UiAssetLoadError> {
         self.atlas.validate()?;
         let max = self.atlas.max_index();
 
@@ -32,6 +32,28 @@ impl DiskTitlebarSkin {
             }
         }
         Ok(())
+    }
+
+    /// Convert to runtime
+    pub fn into_runtime(
+        self,
+        load_context: &mut LoadContext<'_>,
+    ) -> Result<TitlebarSkin, UiAssetLoadError> {
+        self.validate()?; // <-- validation lives here
+
+        let image_handle = self.atlas.load_image(load_context);
+        let layout = self.atlas.create_layout();
+        let layout_handle = 
+            load_context.add_labeled_asset(
+                format!("titlebar_layout_{}", self.atlas.image_name), layout
+            );
+
+        Ok(TitlebarSkin {
+            atlas: layout_handle,
+            image: image_handle,
+            mapping: self.mapping,
+            buttons: self.buttons,
+        })
     }
 }
 
@@ -69,28 +91,6 @@ impl Default for TitlebarSkin {
     }
 }
 
-impl TitlebarSkin {
-    /// Create a runtime titlebar skin from _disk data
-    pub fn from_disk(
-        disk: &DiskTitlebarSkin,
-        load_context: &mut LoadContext<'_>,
-    ) -> Self {
-        // Load the image handle
-        let image_handle: Handle<Image> = load_context.load(&disk.atlas.image_name);
-
-        // Create the atlas layout using the DiskAtlasImage helper
-        let layout = disk.atlas.create_layout();
-        let layout_handle = load_context.add_labeled_asset("titlebar_layout".into(), layout);
-
-        Self {
-            atlas: layout_handle,
-            image: image_handle,
-            mapping: disk.mapping,
-            buttons: disk.buttons,
-        }
-    }
-}
-
 /// Disk window skin
 #[derive(TypePath, Debug, Deserialize, Serialize)]
 pub struct DiskWindowSkin {
@@ -102,10 +102,22 @@ pub struct DiskWindowSkin {
 }
 
 impl DiskWindowSkin {
-    /// Validate the titlebar atlas & mapping
-    pub fn validate(&self) -> Result<(), UiAssetLoadError> {
-        self.titlebar.validate()?;
-        Ok(())
+
+    /// Convert to runtime
+    pub fn into_runtime(
+        self,
+        load_context: &mut LoadContext<'_>,
+    ) -> Result<WindowSkin, UiAssetLoadError> {
+        let window_image_handle: Handle<Image> = load_context.load(&self.window_image);
+        let titlebar = self.titlebar.into_runtime(load_context)?;
+
+        Ok(WindowSkin {
+            window_image: window_image_handle,
+            titlebar,
+            default_size: UVec2::from_array(self.default_size),
+            default_position: UVec2::from_array(self.default_position),
+            default_titlebar_position: UVec2::from_array(self.default_titlebar_position),
+        })
     }
 }
 
@@ -117,24 +129,6 @@ pub struct WindowSkin {
     pub default_size: UVec2,
     pub default_position: UVec2,
     pub default_titlebar_position: UVec2,
-}
-
-impl WindowSkin {
-    pub fn from_disk(
-        disk: DiskWindowSkin,
-        load_context: &mut LoadContext<'_>,
-    ) -> Self {
-        let window_image_handle: Handle<Image> = load_context.load(&disk.window_image);
-        let titlebar = TitlebarSkin::from_disk(&disk.titlebar, load_context);
-
-        Self {
-            window_image: window_image_handle,
-            titlebar,
-            default_size: UVec2::from_array(disk.default_size),
-            default_position: UVec2::from_array(disk.default_position),
-            default_titlebar_position: UVec2::from_array(disk.default_titlebar_position),
-        }
-    }
 }
 
 /// Asset loader
@@ -157,12 +151,115 @@ impl AssetLoader for WindowSkinLoader {
         reader.read_to_end(&mut bytes).await?;
 
         let disk: DiskWindowSkin = ron::de::from_bytes(&bytes)?;
-        disk.validate()?;
 
-        Ok(WindowSkin::from_disk(disk, load_context))
+        disk.into_runtime(load_context)
     }
 
     fn extensions(&self) -> &[&str] {
         &["winskin.ron"]
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn valid_atlas() -> DiskAtlasImage {
+        DiskAtlasImage {
+            image_name: "test.png".to_string(),
+            tile_size: UVec2::new(16, 16),
+            rows: 3,
+            cols: 3,
+            padding: UVec2::ZERO,
+            offset: UVec2::ZERO,
+        }
+    }
+
+    fn valid_titlebar() -> DiskTitlebarSkin {
+        DiskTitlebarSkin {
+            atlas: valid_atlas(),
+            mapping: [0, 1, 2, 3, 4, 5, 6],
+            buttons: 3,
+        }
+    }
+
+    fn valid_window() -> DiskWindowSkin {
+        DiskWindowSkin {
+            window_image: "window.png".to_string(),
+            titlebar: valid_titlebar(),
+            default_size: [100, 50],
+            default_position: [10, 20],
+            default_titlebar_position: [0, 0],
+        }
+    }
+
+    #[test]
+    fn titlebar_validation_passes() {
+        let titlebar = valid_titlebar();
+        assert!(titlebar.validate().is_ok());
+    }
+
+    #[test]
+    fn titlebar_validation_fails_mapping() {
+        let mut titlebar = valid_titlebar();
+        titlebar.mapping[3] = 99;
+
+        let err = titlebar.validate().unwrap_err();
+        match err {
+            UiAssetLoadError::InvalidMapping { position, index, max, .. } => {
+                assert_eq!(position, 3);
+                assert_eq!(index, 99);
+                assert_eq!(max, 8);
+            }
+            _ => panic!("Expected InvalidMapping"),
+        }
+    }
+
+    #[test]
+    fn titlebar_index_and_index_mut() {
+        use crate::ui::button::WindowState::*;
+
+        let mut runtime = TitlebarSkin {
+            atlas: Handle::default(),
+            image: Handle::default(),
+            mapping: [0,1,2,3,4,5,6],
+            buttons: 2,
+        };
+
+        assert_eq!(runtime[Normal], 0);
+        assert_eq!(runtime[WindowState::Closed], 1);
+
+        runtime[WindowState::Maximized] = 42;
+        assert_eq!(runtime[WindowState::Maximized], 42);
+    }
+
+    #[test]
+    fn titlebar_default() {
+        let def = TitlebarSkin::default();
+
+        assert_eq!(def.mapping, [0;7]);
+        assert_eq!(def.buttons, 0);
+        assert_eq!(def.atlas, Handle::default());
+        assert_eq!(def.image, Handle::default());
+    }
+
+    #[test]
+    fn window_struct_fields_are_correct() {
+        let disk = valid_window();
+
+        assert_eq!(disk.titlebar.mapping.len(), 7);
+        assert_eq!(disk.titlebar.buttons, 3);
+    }
+
+    #[test]
+    fn window_position_conversion() {
+    let disk = valid_window();
+
+    assert_eq!(UVec2::from_array(disk.default_size), UVec2::new(100, 50));
+    assert_eq!(UVec2::from_array(disk.default_position), UVec2::new(10, 20));
+    assert_eq!(
+        UVec2::from_array(disk.default_titlebar_position),
+        UVec2::new(0, 0)
+    );
+}
 }

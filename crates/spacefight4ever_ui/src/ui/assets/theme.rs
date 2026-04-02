@@ -42,7 +42,7 @@ pub enum ColorScheme {
 ///     ));
 /// }
 /// ```
-#[derive(TypePath,Asset, Debug, Clone)]
+#[derive(TypePath, Asset, Debug, Clone)]
 pub struct UiTheme {
     /// Current theme mode
     pub mode: ThemeMode,

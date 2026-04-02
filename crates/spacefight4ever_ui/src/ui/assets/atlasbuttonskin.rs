@@ -47,6 +47,13 @@ impl DiskAtlasImage {
         (self.rows * self.cols) as usize
     }
 
+    /// load the image from disk (get handle)
+    #[inline]
+    pub fn load_image(&self, load_context: &mut LoadContext<'_>) -> Handle<Image> {
+        load_context.load(&self.image_name)
+    }
+
+    /// create a layout from the supplied atlas information
     pub fn create_layout(&self) -> TextureAtlasLayout {
         TextureAtlasLayout::from_grid(
             self.tile_size,
@@ -56,6 +63,8 @@ impl DiskAtlasImage {
             Some(self.offset),
         )
     }
+
+    
 }
 
 /// Intermediate struct for deserializing button skin data from disk
@@ -66,7 +75,7 @@ pub struct DiskButtonSkin {
 }
 
 impl DiskButtonSkin {
-    fn validate(&self) -> Result<(), UiAssetLoadError> {
+    pub fn validate(&self) -> Result<(), UiAssetLoadError> {
         self.atlas.validate()?;
         let max = self.atlas.max_index();
         for (pos, &idx) in self.mapping.iter().enumerate() {
@@ -80,6 +89,27 @@ impl DiskButtonSkin {
             }
         }
         Ok(())
+    }
+
+    /// 
+    pub fn into_runtime(
+        self,
+        load_context: &mut LoadContext<'_>,
+    ) -> Result<ButtonSkin, UiAssetLoadError> {
+        self.validate()?; // <-- validation lives here
+
+        let image_handle = self.atlas.load_image(load_context);
+        let layout = self.atlas.create_layout();
+        let layout_handle = 
+            load_context.add_labeled_asset(
+                format!("button_layout_{}", &self.atlas.image_name), layout
+            );
+
+        Ok(ButtonSkin {
+            atlas: layout_handle,
+            image: image_handle,
+            mapping: self.mapping,
+        })
     }
 }
 
@@ -110,39 +140,6 @@ impl IndexMut<ButtonState> for ButtonSkin {
     }
 }
 
-impl ButtonSkin {
-    /// load from disk and validate
-    fn from_disk(
-        disk: DiskButtonSkin,
-        load_context: &mut LoadContext<'_>,
-    ) -> Result<Self, UiAssetLoadError> 
-    {
-        disk.validate()?;
-
-        // 👇 Load image dependency
-        let image_handle=
-            load_context.load::<Image>(&disk.atlas.image_name);
-
-        // 👇 Create atlas layout
-        // yeah this really needs to be separate from the image because
-        // ImageNode needs both the image and the atlas layout
-        let layout = disk.atlas.create_layout();
-
-        // 👇 Register layout as sub-asset
-        let layout_handle = load_context.add_labeled_asset(
-            "layout".into(),
-            layout,
-        );
-        
-        // 👇 Return runtime asset
-        Ok(ButtonSkin {
-            atlas: layout_handle,
-            image: image_handle,
-            mapping: disk.mapping,
-        })
-    }
-}
-
 /// custom asset loader for ButtonSkin, 
 /// which reads from a RON file and loads the associated texture
 #[derive(Default, TypePath)]
@@ -166,7 +163,7 @@ impl AssetLoader for ButtonSkinLoader {
         
         let disk: DiskButtonSkin = ron::de::from_bytes(&bytes)?;
 
-        ButtonSkin::from_disk(disk, load_context)
+        disk.into_runtime(load_context)
     }
 
     fn extensions(&self) -> &[&str] {

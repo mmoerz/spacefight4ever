@@ -18,7 +18,6 @@ const BUTTON_ATLAS_INDEX_MINUS: usize = 3;
 const BUTTON_ATLAS_INDEX_PLUS: usize = 2;
 const BUTTON_ATLAS_INDEX_MENU: usize = 4;
 
-
 pub fn titlebar_button(index: usize,
     tex: Handle<Image>,
     layout: Handle<TextureAtlasLayout>,
@@ -74,8 +73,6 @@ pub fn window_bundle(
         bottom: Val::Px(1.),
     };
     let bar_height = HEIGHT_TITLE_BAR[ui_size] - 2.;
-
-
 
     (
         Name::new("Window"),
