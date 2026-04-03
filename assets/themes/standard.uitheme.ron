@@ -1,0 +1,79 @@
+(
+    button_skins: {
+        "Close": (
+            atlas: (
+                image_name: "textures/window/button_atlas.png",
+                tile_size: (64, 64),
+                cols: 5,
+                rows: 4,
+                padding: (2, 2),
+                offset: (0,0)
+            ),
+            states: ( 1, 6, 11, 16, )
+        ),
+
+        "Minimize": (
+            atlas: (
+                image_name: "textures/window/button_atlas.png",
+                tile_size: (64, 64),
+                cols: 5,
+                rows: 4,
+                padding: (2, 2),
+                offset: (0,0)
+            ),
+            states: ( 3, 8, 13, 18, )
+        ),
+
+        "Maximize": (
+            atlas: (
+                image_name: "textures/window/button_atlas.png",
+                tile_size: (64, 64),
+                cols: 5,
+                rows: 4,
+                padding: (2, 2),
+                offset: (0,0)
+            ),
+            states: ( 2, 7, 12, 17 )
+        ),
+    },
+
+    window_skins: {
+        "Standard": (
+            window_atlas: (
+                image_name: "textures/window/windows_atlas.png",
+                tile_size: (70, 70),
+                rows: 1,
+                cols: 4,
+                padding: (0, 0),
+                offset: (0, 0),
+            ),
+
+            titlebar: (
+                atlas: (
+                    image_name: "textures/window/windows_atlas.png",
+                    tile_size: (70, 70),
+                    rows: 1,
+                    cols: 4,
+                    padding: (0, 0),
+                    offset: (0, 0),
+                ),
+                mapping: (0, 1, 2, 1, 0, 1, 2),
+                buttons: 15,
+            ),
+
+            default_size: (320, 240),
+            default_position: (100, 100),
+            default_titlebar_position: (0, 0),
+        ),
+    },
+
+    colors: {
+        "primary": (0.82, 0.74, 1.0, 1.0),
+        "on_primary": (0.22, 0.12, 0.45, 1.0),
+        "surface": (0.07, 0.07, 0.07, 1.0),
+        "on_surface": (0.9, 0.88, 0.9, 1.0),
+        "outline": (0.58, 0.56, 0.6, 1.0),
+        "shadow": (0.0, 0.0, 0.0, 0.2),
+        "scrim": (0.0, 0.0, 0.0, 0.5),
+    }
+)

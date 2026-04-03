@@ -119,15 +119,15 @@ pub fn spawn_ui_titlebar(
     ).id()
 }
 
-/// Spawn a titlebar using a `UiTheme`
-pub fn ui_thematic_titlebar_bundle(
-    theme: &UiTheme,
-    width: f32,
-    height: f32,
-    margin: UiRect,
-    skins: &Assets<TitlebarSkin>,
-) -> Option<impl Bundle> {
-    theme.titlebar_skins.get(&theme.default_titlebar).map(|skin| {
-        UiTitleBarBuilder::new(skin.clone(), width, height, margin, skins).build()
-    })
-}
+// Spawn a titlebar using a `UiTheme`
+// pub fn ui_thematic_titlebar_bundle(
+//     theme: &UiTheme,
+//     width: f32,
+//     height: f32,
+//     margin: UiRect,
+//     skins: &Assets<TitlebarSkin>,
+// ) -> Option<impl Bundle> {
+//     theme.titlebar_skins.get(&theme.default_titlebar).map(|skin| {
+//         UiTitleBarBuilder::new(skin.clone(), width, height, margin, skins).build()
+//     })
+// }

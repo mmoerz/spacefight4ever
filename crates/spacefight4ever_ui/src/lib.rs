@@ -15,11 +15,12 @@ pub mod ui {
         pub mod windowsskin;
         pub mod disktheme;
         pub mod theme;
+        pub mod assets;
     }
     pub mod button;
     pub mod atlasbutton;
     pub mod titlebar;
-    pub mod window;
+    //pub mod window;
 }
 
 pub mod window {
@@ -42,6 +43,8 @@ pub mod prelude {
     pub use crate::bundle::*;
     pub use crate::resource::*;
     pub use crate::window::window::*;
+    pub use crate::ui::atlasbutton::UiAtlasButtonPlugin;
+    pub use crate::ui::assets::assets::setup_ui_theme;
 }
 
 pub use bundle::*;

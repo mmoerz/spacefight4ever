@@ -1,18 +1,23 @@
 use bevy::prelude::*;
-use spacefight4ever_ui::prelude::{UiElementSize, UiWindowAtlas, UiWindowZCounter, window_bundle};
+use spacefight4ever_ui::{
+    prelude::{UiElementSize, UiWindowZCounter, window_bundle},
+    ui::assets::{assets::UiResources, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin},
+};
 
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
     parent: Entity,
     asset_server: &Res<AssetServer>,
-    mut z_index: ResMut<UiWindowZCounter>,
-    window_atlas: &Res<UiWindowAtlas>,
+    z_index: ResMut<UiWindowZCounter>,
+    ui_resources: &Res<UiResources>,
+    skins: &Assets<ButtonSkin>, // pass skins here
+    window_skins: &Assets<WindowSkin>, // pass skins here
 ) -> Entity {
+    let theme = &ui_resources.theme;
     let font_handle: Handle<Font> =
         asset_server.load("fonts/FiraSans-Bold.ttf");
  
     let texture_handle: Handle<Image> = asset_server.load("textures/window/windows_atlas.png");
-    let buttons_handle: Handle<Image> = asset_server.load("textures/window/button_atlas.png");
 
     match asset_server.get_load_state(&font_handle) {
         Some(bevy::asset::LoadState::Loaded) => println!("Loaded"),
@@ -36,9 +41,9 @@ pub fn spawn_ship_equipment_dialog(
                         font_handle.clone(),
                         z_index,
                         texture_handle.clone(),
-                        buttons_handle.clone(),
-                        window_atlas.window_layout.clone(),
-                        window_atlas.button_layout.clone()
+                        theme,
+                        skins,
+                        window_skins,
                     ),
                     )
                 ).id();

@@ -105,8 +105,6 @@ impl DiskUiTheme {
             unselected: colors.get("unselected").cloned().unwrap_or(hex("#CCC2DC")),
         })
     }
-
-    
 }
 
 /// Convenience hex parser

@@ -71,14 +71,14 @@ impl DiskAtlasImage {
 #[derive(TypePath, Debug, Deserialize, Serialize)]
 pub struct DiskButtonSkin {
     pub atlas: DiskAtlasImage,
-    pub mapping: [usize; 4], // Normal, Hovered, Pressed, Disabled
+    pub states: [usize; 4], // Normal, Hovered, Pressed, Disabled
 }
 
 impl DiskButtonSkin {
     pub fn validate(&self) -> Result<(), UiAssetLoadError> {
         self.atlas.validate()?;
         let max = self.atlas.max_index();
-        for (pos, &idx) in self.mapping.iter().enumerate() {
+        for (pos, &idx) in self.states.iter().enumerate() {
             if idx >= max {
                 return Err(UiAssetLoadError::InvalidMapping {
                     origin: self.atlas.image_name.clone(),
@@ -108,7 +108,7 @@ impl DiskButtonSkin {
         Ok(ButtonSkin {
             atlas: layout_handle,
             image: image_handle,
-            mapping: self.mapping,
+            states: self.states,
         })
     }
 }
@@ -120,7 +120,7 @@ impl DiskButtonSkin {
 pub struct ButtonSkin {
     pub atlas: Handle<TextureAtlasLayout>,
     pub image: Handle<Image>,
-    pub mapping: [usize; 4], // Normal, Hovered, Pressed, Disabled
+    pub states: [usize; 4], // Normal, Hovered, Pressed, Disabled
 }
 
 impl Index<ButtonState> for ButtonSkin {
@@ -129,14 +129,14 @@ impl Index<ButtonState> for ButtonSkin {
     /// Get the atlas index for a given button state
     /// This allows us to easily switch button appearances based on interaction state
     fn index(&self, state: ButtonState) -> &Self::Output {
-        &self.mapping[state.index()]
+        &self.states[state.index()]
     }
 }
 
 impl IndexMut<ButtonState> for ButtonSkin {
     /// Set the atlas index for a given button state
     fn index_mut(&mut self, state: ButtonState) -> &mut Self::Output {
-        &mut self.mapping[state.index()]
+        &mut self.states[state.index()]
     }
 }
 
@@ -241,7 +241,7 @@ mod tests {
     fn valid_disk_button_skin() -> DiskButtonSkin {
         DiskButtonSkin {
             atlas: valid_atlas(),
-            mapping: [0, 1, 2, 3],
+            states: [0, 1, 2, 3],
         }
     }
 
@@ -254,7 +254,7 @@ mod tests {
     #[test]
     fn button_skin_validation_fails_for_out_of_bounds_index() {
         let mut disk = valid_disk_button_skin();
-        disk.mapping[1] = 10; // out of bounds
+        disk.states[1] = 10; // out of bounds
         let err = disk.validate().unwrap_err();
         if let UiAssetLoadError::InvalidMapping { origin, position, index, max } = err {
             assert_eq!(origin, disk.atlas.image_name.to_string());
@@ -272,7 +272,7 @@ mod tests {
         let skin = ButtonSkin {
             atlas: Handle::default(),
             image: Handle::default(),
-            mapping: [0, 1, 2, 3],
+            states: [0, 1, 2, 3],
         };
 
         use crate::ui::button::ButtonState::*;

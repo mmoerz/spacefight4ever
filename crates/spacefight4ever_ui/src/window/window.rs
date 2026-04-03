@@ -11,12 +11,6 @@ use crate::ui::atlasbutton::*;
 
 use crate::resource::UiWindowZCounter;
 
-const BUTTON_ATLAS_INDEX_CANCEL: usize = 1;
-const BUTTON_ATLAS_INDEX_OK: usize = 0;
-const BUTTON_ATLAS_INDEX_MINUS: usize = 3;
-const BUTTON_ATLAS_INDEX_PLUS: usize = 2;
-const BUTTON_ATLAS_INDEX_MENU: usize = 4;
-
 pub fn titlebar_button(index: usize,
     tex: Handle<Image>,
     layout: Handle<TextureAtlasLayout>,
@@ -44,7 +38,7 @@ pub fn titlebar_button(index: usize,
     )
 }
 
-use crate::ui::assets::theme::*;
+use crate::ui::assets::{theme::*, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin};
 use crate::ui::button::{UiButtonType, UiWindowType};
 
 /// Window bundle using UiTheme and UiButtonType
@@ -59,6 +53,8 @@ pub fn window_bundle(
     mut z_index: ResMut<UiWindowZCounter>,
     window_ninepatch_texture: Handle<Image>,
     theme: &UiTheme, // pass theme here
+    skins: &Assets<ButtonSkin>, // pass skins here
+    window_skins: &Assets<WindowSkin>, // pass skins here
 ) -> impl Bundle {
     let slicer = TextureSlicer {
         border: BorderRect::all(20.0),
@@ -77,6 +73,8 @@ pub fn window_bundle(
 
     let window_layout = theme.get_window_skin(UiWindowType::Standard)
         .unwrap();
+
+    let win_l: &WindowSkin = window_skins.get(window_layout).unwrap();
 
     (
         Name::new("Window"),
@@ -97,7 +95,7 @@ pub fn window_bundle(
                 window_ninepatch_texture,
                 TextureAtlas {
                     index: 3,
-                    layout: ,
+                    layout: win_l.atlas.clone(),
                 },
             )
             .with_mode(NodeImageMode::Sliced(slicer.clone())),
@@ -124,7 +122,7 @@ pub fn window_bundle(
                 },
                 children![
                     // Menu button
-                    ui_thematic_button_bundle(UiButtonType::Menu, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
+                    ui_thematic_button_bundle(UiButtonType::Menu, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
                     // Title text
                     (
                         Node {
@@ -151,9 +149,9 @@ pub fn window_bundle(
                         },
                         Visibility::Inherited,
                         children![
-                            ui_thematic_button_bundle(UiButtonType::Minimize, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
-                            ui_thematic_button_bundle(UiButtonType::Maximize, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
-                            ui_thematic_button_bundle(UiButtonType::Close, theme, HEIGHT_TITLE_BAR[ui_size], margin1).unwrap(),
+                            ui_thematic_button_bundle(UiButtonType::Minimize, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
+                            ui_thematic_button_bundle(UiButtonType::Maximize, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
+                            ui_thematic_button_bundle(UiButtonType::Close, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
                         ],
                     )
                 ]

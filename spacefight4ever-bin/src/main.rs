@@ -21,7 +21,14 @@ use spacefight4ever_lib::prelude::*;
 
 use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
-use spacefight4ever_ui::{UiWindowPlugin, UiWindowExtensionPlugin};
+use spacefight4ever_ui::ui::titlebar::UiTitleBarPlugin;
+use spacefight4ever_ui::{
+    UiWindowPlugin,
+    UiWindowExtensionPlugin,
+    UiAssetsPlugin,
+    prelude::UiAtlasButtonPlugin,
+    ui::assets::assets::setup_ui_theme,
+};
 
 fn main() {
     App::new()
@@ -34,13 +41,21 @@ fn main() {
             }),
             PhysicsPlugins::default()) 
         )
-        .add_plugins(UiPlugin)
+        // -ui crate plugins
+        .add_plugins(UiAssetsPlugin)
+        .add_plugins(UiAtlasButtonPlugin)
+        //.add_plugins(UiTitleBarPlugin)
         .add_plugins(UiWindowPlugin)
         .add_plugins(UiWindowExtensionPlugin)
         //.add_plugins(UiWindowNinePlugin)
+
+        // -lib plugins
+        .add_plugins(UiPlugin)
         .add_plugins(GamePlugin)
 
+        .add_systems(Startup, setup_ui_theme)
         .add_systems(Startup, setup)
 
         .run();
 }
+

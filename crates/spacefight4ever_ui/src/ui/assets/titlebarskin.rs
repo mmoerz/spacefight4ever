@@ -64,7 +64,7 @@ pub struct TitlebarSkin {
     pub atlas: Handle<TextureAtlasLayout>,
     pub image: Handle<Image>,
     pub mapping: [usize; 7],
-    pub buttons: usize,
+    pub buttons: usize, // bitwise or of UiButtonType
 }
 
 impl Index<WindowState> for TitlebarSkin {
