@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use crate::ui::button::{UiButtonType, UiWindowType};
 use super::atlasbuttonskin::ButtonSkin;
 use super::windowsskin::WindowSkin;
+use super::atlasbuttonskin::UiButtonTypesAllHandles;
 
 /// Theme mode (light or dark)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -54,7 +55,8 @@ pub struct UiTheme {
     pub color_scheme: ColorScheme,
 
     /// theme stuff for themeable entities
-    pub button_skins: HashMap<UiButtonType, Handle<ButtonSkin>>,
+    pub button_skins: UiButtonTypesAllHandles,
+    //pub button_skins: HashMap<UiButtonType, Handle<ButtonSkin>>,
     pub window_skins: HashMap<UiWindowType, Handle<WindowSkin>>,
 
     // Primary colors
@@ -159,8 +161,8 @@ impl UiTheme {
     }
 
     /// retrieve the button skin for a button type
-    pub fn get_button_skin(&self, button_type: UiButtonType) -> Option<&Handle<ButtonSkin>> {
-        self.button_skins.get(&button_type)
+    pub fn get_button_skin(&self, button_type: UiButtonType) -> Handle<ButtonSkin> {
+        self.button_skins[button_type].clone()
     }
 
     /// retrieve the window skin for a window type
@@ -173,7 +175,7 @@ impl UiTheme {
         Self {
             mode: ThemeMode::Light,
             color_scheme: ColorScheme::Default,
-            button_skins: HashMap::new(),
+            button_skins: UiButtonTypesAllHandles{ types: [Handle::default(),  Handle::default(), Handle::default(), Handle::default()] },
             window_skins: HashMap::new(),
 
             primary: Color::from(Srgba::hex("#6750A4").unwrap()),
@@ -223,7 +225,7 @@ impl UiTheme {
         Self {
             mode: ThemeMode::Dark,
             color_scheme: ColorScheme::Default,
-            button_skins: HashMap::new(),
+            button_skins: UiButtonTypesAllHandles{ types: [Handle::default(),  Handle::default(), Handle::default(), Handle::default()] },
             window_skins: HashMap::new(),
 
             primary: hex("#D0BCFF"),

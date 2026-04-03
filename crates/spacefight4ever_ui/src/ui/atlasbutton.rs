@@ -233,10 +233,9 @@ pub fn ui_thematic_button_bundle(
     size: f32,
     margin: UiRect,
     skins: &Assets<ButtonSkin>, // <- pass assets
-) -> Option<impl Bundle> {
-    theme.button_skins.get(&button_type).map(|skin| {
-        ui_button_bundle(skin.clone(), size, margin, skins)
-    })
+) -> impl Bundle {
+    let skin = theme.button_skins[button_type].clone();
+    ui_button_bundle(skin, size, margin, skins)
 }
 
 // ============================================================================
@@ -260,7 +259,7 @@ pub trait ChildButtonSpawner {
         size: f32,
         margin: UiRect,
         skins: &Assets<ButtonSkin>,
-    ) -> Option<Entity>;
+    ) -> Entity;
 }
 
 impl ChildButtonSpawner for ChildSpawnerCommands<'_> {
@@ -281,9 +280,7 @@ impl ChildButtonSpawner for ChildSpawnerCommands<'_> {
         size: f32,
         margin: UiRect,
         skins: &Assets<ButtonSkin>,
-    ) -> Option<Entity> {
-        theme.button_skins.get(&button_type).map(|skin| {
-            self.spawn_button(skin.clone(), size, margin, skins)
-        })
+    ) -> Entity {
+        self.spawn(ui_thematic_button_bundle(button_type, theme, size, margin, skins)).id()
     }
 }

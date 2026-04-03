@@ -113,18 +113,19 @@ impl DiskButtonSkin {
     }
 }
 
-pub struct ButtonTypesAll {
-    pub types: [ButtonSkin; 4],
+#[derive(Debug, Clone)]
+pub struct UiButtonTypesAllHandles {
+    pub types: [Handle<ButtonSkin>; 4],
 }
 
-impl Index<UiButtonType> for ButtonTypesAll {
-    type Output = ButtonSkin;
+impl Index<UiButtonType> for UiButtonTypesAllHandles {
+    type Output = Handle<ButtonSkin>;
     fn index(&self, index: UiButtonType) -> &Self::Output {
         &self.types[index.index()]
     }
 }
 
-impl IndexMut<UiButtonType> for ButtonTypesAll {
+impl IndexMut<UiButtonType> for UiButtonTypesAllHandles {
     fn index_mut(&mut self, index: UiButtonType) -> &mut Self::Output {
         &mut self.types[index.index()]
     }

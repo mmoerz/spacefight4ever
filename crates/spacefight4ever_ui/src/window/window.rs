@@ -122,7 +122,7 @@ pub fn window_bundle(
                 },
                 children![
                     // Menu button
-                    ui_thematic_button_bundle(UiButtonType::Menu, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
+                    ui_thematic_button_bundle(UiButtonType::Menu, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins),
                     // Title text
                     (
                         Node {
@@ -149,9 +149,9 @@ pub fn window_bundle(
                         },
                         Visibility::Inherited,
                         children![
-                            ui_thematic_button_bundle(UiButtonType::Minimize, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
-                            ui_thematic_button_bundle(UiButtonType::Maximize, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
-                            ui_thematic_button_bundle(UiButtonType::Close, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins).unwrap(),
+                            ui_thematic_button_bundle(UiButtonType::Minimize, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins),
+                            ui_thematic_button_bundle(UiButtonType::Maximize, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins),
+                            ui_thematic_button_bundle(UiButtonType::Close, theme, HEIGHT_TITLE_BAR[ui_size], margin1, skins),
                         ],
                     )
                 ]

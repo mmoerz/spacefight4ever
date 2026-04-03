@@ -6,7 +6,7 @@ use bevy::{
     reflect::TypePath,
 };
 
-use crate::ui::button::{UiButtonType, UiWindowType};
+use crate::ui::{assets::atlasbuttonskin::UiButtonTypesAllHandles, button::{UiButtonType, UiWindowType}};
 use super::asseterror::UiAssetLoadError;
 use super::atlasbuttonskin::{ButtonSkin, DiskButtonSkin};
 use super::theme::*;
@@ -26,13 +26,13 @@ impl DiskUiTheme {
         load_context: &mut bevy::asset::LoadContext<'_>,
     ) -> Result<UiTheme, UiAssetLoadError> {
         // Load all button skins
-        let mut button_skins: HashMap<UiButtonType, Handle<ButtonSkin>> = HashMap::new();
+        let mut button_skins = UiButtonTypesAllHandles{ types: [Handle::default(),  Handle::default(), Handle::default(), Handle::default()] };
         for (name, disk_button) in self.button_skins {
             let skin = disk_button.into_runtime(load_context)?;
             let handle = load_context.add_labeled_asset(format!("button_skin_{}", name), skin);
 
             if let Ok(button_type) = name.parse::<UiButtonType>() {
-                button_skins.insert(button_type, handle);
+                button_skins[button_type] = handle;
             } else {
                 warn!("Unknown button type `{name}` in theme, skipping");
             }
