@@ -95,11 +95,23 @@ impl UiTitleBarBuilder {
             Node {
                 width: Val::Px(self.width),
                 height: Val::Px(self.height),
-                margin: self.margin,
+                //margin: self.margin,
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
                 ..default()
             },
-            ImageNode::default(), // populated by system
+            self.initial_image_node,
             Visibility::Inherited,
+            Pickable {
+                should_block_lower: true,
+                is_hoverable: true,
+                ..default()
+            },
+            children![(
+
+            )],
         )
     }
 }

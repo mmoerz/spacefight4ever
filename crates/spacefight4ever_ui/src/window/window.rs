@@ -66,7 +66,7 @@ pub fn window_bundle(
     let margin1 = UiRect {
         left: Val::Px(1.),
         right: Val::Px(2.),
-        top: Val::Px(1.),
+        top: Val::Px(4.),
         bottom: Val::Px(1.),
     };
     let bar_height = HEIGHT_TITLE_BAR[ui_size] - 2.;

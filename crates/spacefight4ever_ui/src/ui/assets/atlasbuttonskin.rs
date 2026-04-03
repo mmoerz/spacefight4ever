@@ -6,7 +6,7 @@ use bevy::{
     reflect::TypePath,
 };
 
-use crate::ui::button::ButtonState;
+use crate::ui::{atlasbutton::UiAtlasButton, button::{ButtonState, UiButtonType}};
 use super::asseterror::UiAssetLoadError;
 
 /// Intermediate struct for loading from disk
@@ -110,6 +110,23 @@ impl DiskButtonSkin {
             image: image_handle,
             states: self.states,
         })
+    }
+}
+
+pub struct ButtonTypesAll {
+    pub types: [ButtonSkin; 4],
+}
+
+impl Index<UiButtonType> for ButtonTypesAll {
+    type Output = ButtonSkin;
+    fn index(&self, index: UiButtonType) -> &Self::Output {
+        &self.types[index.index()]
+    }
+}
+
+impl IndexMut<UiButtonType> for ButtonTypesAll {
+    fn index_mut(&mut self, index: UiButtonType) -> &mut Self::Output {
+        &mut self.types[index.index()]
     }
 }
 

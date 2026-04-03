@@ -37,6 +37,8 @@ impl WindowState {
     }
 }
 
+/// we need bitwise | or able values so that we can define
+/// a list of buttons in a variable
 #[repr(usize)]
 #[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum UiButtonType {
@@ -58,6 +60,13 @@ impl FromStr for UiButtonType {
             "menu" => Ok(UiButtonType::Menu),
             _ => Err(()),
         }
+    }
+}
+
+/// create an index from the type
+impl UiButtonType {
+    pub fn index(self) -> usize {
+        (self as usize).trailing_zeros() as usize
     }
 }
 

@@ -63,6 +63,7 @@ pub fn button_interaction_system(
 }
 
 /// This system updates the button's image based on its current state and skin.
+// TODO: maybe optimize this away by moving it to interaction system?
 fn button_update_atlas_system(
     skins: Res<Assets<ButtonSkin>>,
     mut query: Query<(&UiAtlasButton, &mut ImageNode), Changed<UiAtlasButton>>,
@@ -70,10 +71,8 @@ fn button_update_atlas_system(
     for (button, mut image_node) in &mut query {
         if let Some(skin) = skins.get(&button.skin) {
             if let Some(atlas) = &mut image_node.texture_atlas {
-                atlas.layout = skin.atlas.clone();
                 atlas.index = skin[button.state];
             }
-            image_node.image = skin.image.clone();
         }
     }
 }
@@ -115,6 +114,7 @@ impl Plugin for UiAtlasButtonPlugin {
             // assets are initialized in the assets plugin
             .add_systems(Update, (
                 button_interaction_system,
+                button_update_atlas_system,
                 button_update_atlas_on_event,
             ));
     }
