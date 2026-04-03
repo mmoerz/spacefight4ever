@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+#spacefight4ever_ui = { path = "../crates/spacefight4ever_ui", features = ["dynamic_linking", "debug"] }
 spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "dynamic_linking", "debug" ] }
 
 bevy = { workspace = true, features = [ "dynamic_linking", "debug" ] }

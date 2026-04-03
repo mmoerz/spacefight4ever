@@ -3,23 +3,20 @@ use super::theme::UiTheme;
 
 #[derive(Resource, Default, Debug)]
 pub struct UiResources {
-    pub theme:UiTheme,
+    pub theme_handle: Handle<UiTheme>,
 }
 
 pub fn setup_ui_theme (
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    themes: Res<Assets<UiTheme>>,
 ) {
     let theme_handle: Handle<UiTheme> =
         asset_server.load("themes/standard.uitheme.ron");
     
     // store the handle of the uitheme
-    if let Some(theme) = themes.get(&theme_handle) {
-        commands.insert_resource(UiResources{
-            theme: theme.clone()
-        });
-    }
+    commands.insert_resource(UiResources{
+        theme_handle
+    });
 }
 
 pub struct UiThemePlugin;

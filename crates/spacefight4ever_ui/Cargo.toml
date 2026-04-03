@@ -21,3 +21,12 @@ debug = [
 dynamic_linking = [
     "bevy/dynamic_linking",
 ]
+
+[profile.dev]
+debug = true
+opt-level = 2   # Ensure no overly strong optimization
+split-debuginfo = 'unpacked'
+
+[profile.release]
+debug = true
+opt-level = 3   # Keep release optimizations, but debug info can be included

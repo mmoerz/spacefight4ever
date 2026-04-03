@@ -44,6 +44,7 @@ pub mod prelude {
     pub use crate::resource::*;
     pub use crate::window::window::*;
     pub use crate::ui::atlasbutton::UiAtlasButtonPlugin;
+    pub use crate::ui::assets::theme::UiTheme;
     pub use crate::ui::assets::assets::setup_ui_theme;
 }
 

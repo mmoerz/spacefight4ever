@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+#spacefight4ever_ui = { path = "../crates/spacefight4ever_ui", features = ["dynamic_linking", "debug"] }
+
 avian3d = { version = "0.6.0", features = [ "simd" ] }
 bevy = { workspace = true }
 bevy_prototype_lyon = { workspace = true, features = []}

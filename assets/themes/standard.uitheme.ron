@@ -1,5 +1,17 @@
 (
     button_skins: {
+        "Menu": (
+            atlas: (
+                image_name: "textures/window/button_atlas.png",
+                tile_size: (64, 64),
+                cols: 5,
+                rows: 4,
+                padding: (2, 2),
+                offset: (0,0)
+            ),
+            states: ( 4, 9, 14, 19, )
+        ),
+
         "Close": (
             atlas: (
                 image_name: "textures/window/button_atlas.png",

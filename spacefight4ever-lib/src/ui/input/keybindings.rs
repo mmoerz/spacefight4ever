@@ -27,6 +27,7 @@ pub fn trigger_ship_equipment_dialog(
     z_index: ResMut<UiWindowZCounter>,
     //mut events: MessageWriter<UiWindowsSwitchAtlasRequest>,
     if_theme: If<Res<UiResources>>,
+    themes: Res<Assets<UiTheme>>,
     skins: Res<Assets<ButtonSkin>>, // pass skins here
     window_skins: Res<Assets<WindowSkin>>, // pass skins here
 ) {
@@ -39,6 +40,7 @@ pub fn trigger_ship_equipment_dialog(
             &asset_server,
             z_index,
             theme,
+            &themes,
             &skins,
             &window_skins,
         );
