@@ -128,6 +128,7 @@ impl Plugin for UiAtlasButtonPlugin {
 /// ```
 pub struct UiAtlasButtonBuilder {
     state: ButtonState,
+    button_type: UiButtonType,
     skin: Handle<ButtonSkin>,
     width: f32,
     height: f32,
@@ -155,6 +156,7 @@ impl UiAtlasButtonBuilder {
 
         Self {
             state: ButtonState::Normal,
+            button_type: UiButtonType::None,
             skin,
             width: size,
             height: size,
@@ -174,6 +176,11 @@ impl UiAtlasButtonBuilder {
         self
     }
 
+    pub fn set_type(mut self, button_type: UiButtonType) -> Self {
+        self.button_type = button_type;
+        self
+    }
+
     /// Builds the button as a Bevy bundle
     pub fn build(self) -> impl Bundle {
         (
@@ -182,6 +189,7 @@ impl UiAtlasButtonBuilder {
                 skin: self.skin,
             },
             Button,
+            self.button_type,
             Node {
                 width: Val::Px(self.width),
                 height: Val::Px(self.height),
@@ -249,7 +257,9 @@ pub fn ui_thematic_button_bundle(
     skins: &Assets<ButtonSkin>, // <- pass assets
 ) -> impl Bundle {
     let skin = theme.button_skins[button_type].clone();
-    ui_button_bundle(skin, size, margin, skins)
+    UiAtlasButtonBuilder::new(skin, size, margin, skins)
+        .set_type(button_type)
+        .build()
 }
 
 // ============================================================================

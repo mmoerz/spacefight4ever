@@ -45,6 +45,7 @@ impl UiWindowState {
 #[repr(usize)]
 #[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum UiButtonType {
+    None = 0,
     Menu = 1,
     Minimize = 2,
     Maximize = 4,
