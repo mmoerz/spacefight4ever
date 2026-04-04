@@ -53,8 +53,4 @@ impl UiWindowState {
     }
 }
 
-/// what side of the window gets resized
-#[derive(Component)]
-pub struct UiWindowResizeHandle {
-    pub side: ResizeSide,
-}
+

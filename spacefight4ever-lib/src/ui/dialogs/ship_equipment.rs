@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use spacefight4ever_ui::{
-    prelude::{UiElementSize, UiWindowZCounter, window_bundle, UiTheme},
+    prelude::{UiElementSize, UiWindowZCounter, UiTheme},
     ui::assets::{assets::UiResources, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin},
 };
 

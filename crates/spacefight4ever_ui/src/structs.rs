@@ -56,15 +56,3 @@ pub enum UiWindowStatus {
     Maximized,
 }
 
-/// enum for expressing the side of the window that gets resized
-#[derive(Clone, Copy)]
-pub enum ResizeSide {
-    Top,
-    Bottom,
-    Left,
-    Right,
-    TopLeft,
-    TopRight,
-    BottomLeft,
-    BottomRight,
-}

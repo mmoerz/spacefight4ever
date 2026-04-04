@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::ui;
 use crate::ui::layers::UiLayers;
 use spacefight4ever_ui::{
-    prelude::{UiWindowZCounter},
+    prelude::*,
     ui::assets::{atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin},
 };
 use spacefight4ever_ui::window::systems::window_atlas_switch::{UiWindowsSwitchAtlasRequest, UiWindowAtlasStatus};

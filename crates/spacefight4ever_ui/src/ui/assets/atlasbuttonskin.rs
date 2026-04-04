@@ -6,7 +6,7 @@ use bevy::{
     reflect::TypePath,
 };
 
-use crate::ui::{atlasbutton::UiAtlasButton, button::{ButtonState, UiButtonType}};
+use crate::ui::{button::{ButtonState, UiButtonType}};
 use super::asseterror::UiAssetLoadError;
 
 /// Intermediate struct for loading from disk

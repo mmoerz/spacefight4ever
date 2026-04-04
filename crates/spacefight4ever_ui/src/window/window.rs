@@ -9,8 +9,6 @@ use crate::component::*;
 
 use crate::ui::atlasbutton::*;
 
-use crate::resource::UiWindowZCounter;
-
 use crate::ui::assets::{theme::*, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin};
 use crate::ui::button::{UiButtonType, UiWindowType};
 

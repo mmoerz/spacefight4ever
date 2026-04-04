@@ -10,21 +10,3 @@ pub struct UiWindowAtlas {
     pub button_offset: usize,
 }
 
-/// resource to track the focused window
-#[derive(Resource, Debug)]
-pub struct UiWindowFocused(Entity);
-
-impl Default for UiWindowFocused {
-    fn default() -> Self {
-        Self(Entity::PLACEHOLDER)
-    }
-}
-
-impl UiWindowFocused {
-    pub fn set(&mut self, entity: Entity) {
-        self.0 = entity;
-    }
-    pub fn get(&self) -> Entity {
-        self.0
-    }
-}

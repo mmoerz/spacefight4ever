@@ -51,7 +51,7 @@ impl DiskWindowSkin {
             },
             titlebar,
             default_size: UVec2::from_array(self.default_size),
-            default_position: UVec2::from_array(self.default_position),
+            default_pos: UVec2::from_array(self.default_position),
             default_titlebar_position: UVec2::from_array(self.default_titlebar_position),
         })
     }
@@ -66,7 +66,7 @@ pub struct WindowSkin {
     pub atlas_slicer: TextureSlicer,
     pub titlebar: TitlebarSkin,
     pub default_size: UVec2,
-    pub default_position: UVec2,
+    pub default_pos: UVec2,
     pub default_titlebar_position: UVec2,
 }
 
