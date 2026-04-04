@@ -104,20 +104,19 @@ mod tests {
     use super::*;
     use crate::ui::button::{UiWindowState, WINDOW_STATE_COUNT};
 
-    fn valid_atlas() -> DiskAtlasImage {
-        DiskAtlasImage {
-            image_name: "test.png".to_string(),
-            tile_size: UVec2::new(16, 16),
-            rows: 3,
-            cols: 3,
-            padding: UVec2::ZERO,
-            offset: UVec2::ZERO,
-        }
-    }
+    // fn valid_atlas() -> DiskAtlasImage {
+    //     DiskAtlasImage {
+    //         image_name: "test.png".to_string(),
+    //         tile_size: UVec2::new(16, 16),
+    //         rows: 3,
+    //         cols: 3,
+    //         padding: UVec2::ZERO,
+    //         offset: UVec2::ZERO,
+    //     }
+    // }
 
     fn valid_titlebar() -> DiskTitlebarSkin {
         DiskTitlebarSkin {
-            atlas: valid_atlas(),
             height: 15.0,
             font_name: "font.ttf".to_string(),
             font_size: 12.0,
@@ -150,34 +149,34 @@ mod tests {
         }
     }
 
-    #[test]
-    fn titlebar_validation_passes() {
-        let titlebar = valid_titlebar();
-        assert!(titlebar.validate().is_ok());
-    }
+    // TODO: add window -> titlebar atlas index validation and test
+    // #[test]
+    // fn titlebar_validation_passes() {
+    //     let titlebar = valid_titlebar();
+    //     assert!(titlebar.validate().is_ok());
+    // }
 
-    #[test]
-    fn titlebar_validation_fails_mapping() {
-        let mut titlebar = valid_titlebar();
-        titlebar.mapping[3] = 99;
+    // #[test]
+    // fn titlebar_validation_fails_mapping() {
+    //     let mut titlebar = valid_titlebar();
+    //     titlebar.mapping[3] = 99;
 
-        let err = titlebar.validate().unwrap_err();
-        match err {
-            UiAssetLoadError::InvalidMapping { position, index, max, .. } => {
-                assert_eq!(position, 3);
-                assert_eq!(index, 99);
-                assert_eq!(max, 8);
-            }
-            _ => panic!("Expected InvalidMapping"),
-        }
-    }
+    //     let err = titlebar.validate().unwrap_err();
+    //     match err {
+    //         UiAssetLoadError::InvalidMapping { position, index, max, .. } => {
+    //             assert_eq!(position, 3);
+    //             assert_eq!(index, 99);
+    //             assert_eq!(max, 8);
+    //         }
+    //         _ => panic!("Expected InvalidMapping"),
+    //     }
+    // }
 
     #[test]
     fn titlebar_index_and_index_mut() {
         use crate::ui::button::UiWindowState::*;
 
         let mut runtime = TitlebarSkin {
-            atlas: Handle::default(),
             //image: Handle::default(),
             height: 15.0,
             font: Handle::default(),
@@ -201,8 +200,6 @@ mod tests {
 
         assert_eq!(def.mapping, [0;WINDOW_STATE_COUNT]);
         assert_eq!(def.buttons, 0);
-        assert_eq!(def.atlas, Handle::default());
-        //assert_eq!(def.image, Handle::default());
     }
 
     #[test]

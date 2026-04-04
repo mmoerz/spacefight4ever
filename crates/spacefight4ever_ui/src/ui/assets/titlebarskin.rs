@@ -8,7 +8,6 @@ use bevy::{
 
 use crate::ui::button::WINDOW_STATE_COUNT;
 use crate::ui::{assets::asseterror::UiAssetLoadError, button::UiWindowState};
-use super::atlasbuttonskin::DiskAtlasImage;
 
 /// Titlebar skin stored on disk
 #[derive(TypePath, Debug, Deserialize, Serialize)]
@@ -17,50 +16,23 @@ pub struct DiskTitlebarSkin {
     pub font_name: String,
     pub font_size: f32,
     pub font_color: [f32; 4],
-    pub atlas: DiskAtlasImage,
+    // atlas image stems from parent window skin
     pub padding: [f32; 4],
     pub mapping: [usize; WINDOW_STATE_COUNT],
     pub buttons: usize,
 }
 
 impl DiskTitlebarSkin {
-    /// Validate the atlas first
-    pub fn validate(&self) -> Result<(), UiAssetLoadError> {
-        self.atlas.validate()?;
-        let max = self.atlas.max_index();
-
-        for (pos, &idx) in self.mapping.iter().enumerate() {
-            if idx > max {
-                return Err(UiAssetLoadError::InvalidMapping { 
-                    origin: self.atlas.image_name.clone(),
-                    position: pos, index: idx, max: max - 1 
-                });
-            }
-        }
-        Ok(())
-    }
-
     /// Convert to runtime
     pub fn into_runtime(
         self,
         load_context: &mut LoadContext<'_>,
     ) -> Result<TitlebarSkin, UiAssetLoadError> {
-        self.validate()?; // <-- validation lives here
-
         let font = load_context.load(&self.font_name);
         let font_size = self.font_size;
         let font_color = Color::srgba(self.font_color[0], self.font_color[1], self.font_color[2], self.font_color[3]);
 
-        //let image_handle = self.atlas.load_image(load_context);
-        let layout = self.atlas.create_layout();
-        let layout_handle = 
-            load_context.add_labeled_asset(
-                format!("titlebar_layout_{}", self.atlas.image_name), layout
-            );
-
         Ok(TitlebarSkin {
-            atlas: layout_handle,
-            //image: image_handle,
             height: self.height,
             font,
             font_size,
@@ -84,8 +56,6 @@ fn convert_padding(padding: [f32; 4]) -> UiRect {
 /// Runtime titlebar skin
 #[derive(Asset, TypePath, Debug, Clone)]
 pub struct TitlebarSkin {
-    pub atlas: Handle<TextureAtlasLayout>,
-    //pub image: Handle<Image>,
     pub height: f32,
     pub font: Handle<Font>,
     pub font_size: f32,
@@ -112,8 +82,6 @@ impl IndexMut<UiWindowState> for TitlebarSkin {
 impl Default for TitlebarSkin {
     fn default() -> Self {
         Self {
-            atlas: Handle::default(),
-            //image: Handle::default(),
             height: 15.0,
             font: Handle::default(),
             font_size: 12.0,
