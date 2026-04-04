@@ -4,7 +4,6 @@ pub mod consts;
 pub mod structs;
 pub mod component;
 pub mod bundle;
-pub mod resource;
 
 pub mod ui {
     pub mod assets {
@@ -33,7 +32,6 @@ pub mod prelude {
     pub use crate::structs::*;
     pub use crate::component::*;
     pub use crate::bundle::*;
-    pub use crate::resource::*;
     pub use crate::ui::assets::theme::UiTheme;
     pub use crate::ui::assets::assets::setup_ui_theme;
     pub use crate::ui::window::{UiAtlasWindow, UiWindowFocused, UiWindowCurrentState, UiWindowZCounter, ui_window_bundle};

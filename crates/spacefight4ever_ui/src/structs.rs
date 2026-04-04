@@ -46,13 +46,3 @@ impl UiElementSizeHeights {
     pub fn medium(&self) -> f32 { self[UiElementSize::Medium] }
     pub fn large(&self) -> f32 { self[UiElementSize::Large] }
 }
-
-/// windows 
-#[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
-pub enum UiWindowStatus {
-    #[default]
-    Normal,
-    Minimized,
-    Maximized,
-}
-

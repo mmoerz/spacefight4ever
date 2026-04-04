@@ -1,21 +1,5 @@
 use bevy::prelude::*;
-use super::component::*;
 
-#[derive(Default, Bundle)]
-pub struct UiWindowBundle {
-    pub window: UiWindow,
-    pub state: UiWindowState,
-
-    pub node: Node,
-    pub background: BackgroundColor,
-    pub image_node: ImageNode,
-
-    pub transform: Transform,
-    pub global_transform: GlobalTransform,
-    pub visibility: Visibility,
-    pub inherited_visibility: InheritedVisibility,
-    pub z_index: GlobalZIndex,
-}
 
 #[derive(Bundle)]
 pub struct  UiButtonBundle {
