@@ -6,9 +6,9 @@ use bevy::{
     reflect::TypePath,
 };
 
+use crate::ui::button::WINDOW_STATE_COUNT;
 use crate::ui::{assets::asseterror::UiAssetLoadError, button::UiWindowState};
 use super::atlasbuttonskin::DiskAtlasImage;
-
 
 /// Titlebar skin stored on disk
 #[derive(TypePath, Debug, Deserialize, Serialize)]
@@ -19,7 +19,7 @@ pub struct DiskTitlebarSkin {
     pub font_color: [f32; 4],
     pub atlas: DiskAtlasImage,
     pub padding: [f32; 4],
-    pub mapping: [usize; 7],
+    pub mapping: [usize; WINDOW_STATE_COUNT],
     pub buttons: usize,
 }
 
@@ -51,7 +51,7 @@ impl DiskTitlebarSkin {
         let font_size = self.font_size;
         let font_color = Color::srgba(self.font_color[0], self.font_color[1], self.font_color[2], self.font_color[3]);
 
-        let image_handle = self.atlas.load_image(load_context);
+        //let image_handle = self.atlas.load_image(load_context);
         let layout = self.atlas.create_layout();
         let layout_handle = 
             load_context.add_labeled_asset(
@@ -60,7 +60,7 @@ impl DiskTitlebarSkin {
 
         Ok(TitlebarSkin {
             atlas: layout_handle,
-            image: image_handle,
+            //image: image_handle,
             height: self.height,
             font,
             font_size,
@@ -85,13 +85,13 @@ fn convert_padding(padding: [f32; 4]) -> UiRect {
 #[derive(Asset, TypePath, Debug, Clone)]
 pub struct TitlebarSkin {
     pub atlas: Handle<TextureAtlasLayout>,
-    pub image: Handle<Image>,
+    //pub image: Handle<Image>,
     pub height: f32,
     pub font: Handle<Font>,
     pub font_size: f32,
     pub font_color: Color,
     pub padding: UiRect,
-    pub mapping: [usize; 7],
+    pub mapping: [usize; WINDOW_STATE_COUNT],
     pub buttons: usize, // bitwise or of UiButtonType
 }
 
@@ -113,13 +113,13 @@ impl Default for TitlebarSkin {
     fn default() -> Self {
         Self {
             atlas: Handle::default(),
-            image: Handle::default(),
+            //image: Handle::default(),
             height: 15.0,
             font: Handle::default(),
             font_size: 12.0,
             font_color: Color::srgb(1.0, 0., 0.),
             padding: convert_padding([0.,0.,0.,0.]),
-            mapping: [0; 7],
+            mapping: [0; WINDOW_STATE_COUNT],
             buttons: 0,
         }
     }

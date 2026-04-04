@@ -47,31 +47,27 @@ impl UiAtlasButton {
 /// system for responding to button interactions
 /// 
 pub fn button_interaction_system(
-    mut query: Query<(&Interaction, &mut UiAtlasButton), Changed<Interaction>>,
+    skins: Res<Assets<ButtonSkin>>,
+    mut query: Query<(&Interaction, &mut UiAtlasButton, &mut ImageNode), Changed<Interaction>>,
 ) {
-    for (interaction, mut button) in &mut query {
+    for (interaction, mut button, mut image_node) in &mut query {
         if button.state == ButtonState::Disabled {
             continue; // ignore interactions
         }
 
-        button.state = match *interaction {
+        let new_state = match *interaction {
             Interaction::Pressed => ButtonState::Pressed,
             Interaction::Hovered => ButtonState::Hovered,
             Interaction::None => ButtonState::Normal,
         };
-    }
-}
 
-/// This system updates the button's image based on its current state and skin.
-// TODO: maybe optimize this away by moving it to interaction system?
-fn button_update_atlas_system(
-    skins: Res<Assets<ButtonSkin>>,
-    mut query: Query<(&UiAtlasButton, &mut ImageNode), Changed<UiAtlasButton>>,
-) {
-    for (button, mut image_node) in &mut query {
-        if let Some(skin) = skins.get(&button.skin) {
-            if let Some(atlas) = &mut image_node.texture_atlas {
-                atlas.index = skin[button.state];
+        if button.state != new_state {
+            button.state = new_state;
+
+            if let Some(skin) = skins.get(&button.skin) {
+                if let Some(atlas) = &mut image_node.texture_atlas {
+                    atlas.index = skin[button.state];
+                }
             }
         }
     }
@@ -114,7 +110,6 @@ impl Plugin for UiAtlasButtonPlugin {
             // assets are initialized in the assets plugin
             .add_systems(Update, (
                 button_interaction_system,
-                button_update_atlas_system,
                 button_update_atlas_on_event,
             ));
     }
@@ -137,8 +132,8 @@ pub struct UiAtlasButtonBuilder {
     width: f32,
     height: f32,
     margin: UiRect,
-    //atlas_index: usize,
-    initial_image_node: ImageNode,
+    image: Handle<Image>,
+    texture_atlas: TextureAtlas,
 }
 
 impl UiAtlasButtonBuilder {
@@ -146,15 +141,16 @@ impl UiAtlasButtonBuilder {
     pub fn new(skin: Handle<ButtonSkin>, size: f32, margin: UiRect,
         skins: &Assets<ButtonSkin>, // <- pass assets
     ) -> Self {
-        let mut image_node = ImageNode::default();
+        let mut image = Handle::default();
+        let mut texture_atlas = TextureAtlas::default();
 
         // if the skin is loaded, prefill the image and atlas
         if let Some(skin) = skins.get(&skin) {
-            image_node.image = skin.image.clone();
-            image_node.texture_atlas = Some(TextureAtlas {
+            image = skin.image.clone();
+            texture_atlas = TextureAtlas {
                 layout: skin.atlas.clone(),
                 index: skin[ButtonState::Normal],
-            });
+            };
         }
 
         Self {
@@ -163,7 +159,8 @@ impl UiAtlasButtonBuilder {
             width: size,
             height: size,
             margin,
-            initial_image_node: image_node, // new field
+            image,
+            texture_atlas,
         }
     }
 
@@ -191,11 +188,16 @@ impl UiAtlasButtonBuilder {
                 margin: self.margin,
                 ..default()
             },
-            // TextureAtlas {
-            //     layout: skin.atlas.clone(),
-            //     index: skin[ButtonState::Normal],
-            // },
-            self.initial_image_node,
+            ImageNode {
+                image: self.image,
+                texture_atlas: Some(self.texture_atlas),
+                ..default()
+            },
+            Pickable {
+                should_block_lower: true,
+                is_hoverable: true,
+                ..default()
+            },
             Visibility::Inherited,
         )
     }

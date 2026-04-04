@@ -18,6 +18,9 @@ impl ButtonState {
     }
 }
 
+/// actual size of UiWindowState - count of windowstates
+pub const WINDOW_STATE_COUNT: usize = 5;
+
 /// part of what a window is
 #[repr(usize)]
 #[derive(PartialEq, Eq, Clone, Copy)]

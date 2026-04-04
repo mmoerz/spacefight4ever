@@ -102,7 +102,7 @@ impl AssetLoader for WindowSkinLoader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ui::button::UiWindowState;
+    use crate::ui::button::{UiWindowState, WINDOW_STATE_COUNT};
 
     fn valid_atlas() -> DiskAtlasImage {
         DiskAtlasImage {
@@ -123,7 +123,7 @@ mod tests {
             font_size: 12.0,
             font_color: [1.0, 0.0, 0.0, 1.0],
             padding: [0., 0., 0., 0.],
-            mapping: [0, 1, 2, 3, 4, 5, 6],
+            mapping: [0, 1, 2, 3, 4],
             buttons: 3,
         }
     }
@@ -178,13 +178,13 @@ mod tests {
 
         let mut runtime = TitlebarSkin {
             atlas: Handle::default(),
-            image: Handle::default(),
+            //image: Handle::default(),
             height: 15.0,
             font: Handle::default(),
             font_size: 12.0,
             font_color: Color::srgb(1.0, 0.,0.),
             padding: UiRect { left: px(0), right: px(0), top: px(0), bottom: px(0) },
-            mapping: [0,1,2,3,4,5,6],
+            mapping: [0,1,2,3,4],
             buttons: 2,
         };
 
@@ -199,10 +199,10 @@ mod tests {
     fn titlebar_default() {
         let def = TitlebarSkin::default();
 
-        assert_eq!(def.mapping, [0;7]);
+        assert_eq!(def.mapping, [0;WINDOW_STATE_COUNT]);
         assert_eq!(def.buttons, 0);
         assert_eq!(def.atlas, Handle::default());
-        assert_eq!(def.image, Handle::default());
+        //assert_eq!(def.image, Handle::default());
     }
 
     #[test]

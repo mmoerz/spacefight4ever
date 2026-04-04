@@ -65,28 +65,29 @@ pub struct UiTitleBarBuilder {
     titlebar: UiTitleBar,
     height: f32,
     padding: UiRect,
-    initial_image_node: ImageNode,
+    image: Handle<Image>,
+    texture_atlas: TextureAtlas,
 }
 
 impl UiTitleBarBuilder {
-    pub fn new(title: String, skin: Handle<WindowSkin>, skins: &Assets<WindowSkin>, ) -> Self {
-        let mut image_node = ImageNode::default();
-        let window_skin = skins.get(&skin)
-            .expect("windowskin not found");
+    pub fn new(title: String, theme: &UiTheme, window_type: UiWindowType, window_skins: &Assets<WindowSkin>, ) -> Self {
+        let help = theme.get_window_skin(window_type).expect("Missing window skin in theme");
+        let window_skin = window_skins.get(help).expect("Window skin handle not loaded");
 
         // Prefill the image and atlas for immediate display
-        image_node.image = window_skin.titlebar.image.clone();
-        image_node.texture_atlas = Some(TextureAtlas {
+        let image = window_skin.image.clone();
+        let texture_atlas = TextureAtlas {
             layout: window_skin.atlas.clone(),
             index: window_skin.atlas_index, // default state
-        });
+        };
 
         Self {
             title,
-            titlebar: UiTitleBar::new(skin),
+            titlebar: UiTitleBar::new(help.clone()),
             height: window_skin.titlebar.height,
             padding: window_skin.titlebar.padding,
-            initial_image_node: image_node,
+            image,
+            texture_atlas,
         }
     }
 
@@ -99,8 +100,8 @@ impl UiTitleBarBuilder {
         UiRect {
             left: self.padding.left,
             right: self.padding.right,
-            top: px(0.),
-            bottom: px(0.),
+            top: Val::ZERO,
+            bottom: Val::ZERO,
         }
     }            
 
@@ -127,7 +128,11 @@ impl UiTitleBarBuilder {
                 align_items: AlignItems::Center,
                 ..default()
             },
-            self.initial_image_node,
+            ImageNode {
+                image: self.image,
+                texture_atlas: Some(self.texture_atlas),
+                ..default()
+            },
             Visibility::Inherited,
             Pickable {
                 should_block_lower: true,
@@ -141,7 +146,7 @@ impl UiTitleBarBuilder {
             // Title text
             (
                 Node {
-                    height: Val::Px(self.height.clone()),
+                    height: Val::Px(self.height),
                     justify_content: JustifyContent::Stretch,
                     align_self: AlignSelf::Stretch,
                     ..default()
@@ -179,14 +184,13 @@ impl UiTitleBarBuilder {
 pub fn spawn_ui_titlebar(
     commands: &mut Commands,
     title: String,
-    skin: Handle<WindowSkin>,
     theme: &UiTheme,
     window_type: UiWindowType,
     button_skins: &Assets<ButtonSkin>,
     window_skins: &Assets<WindowSkin>
 ) -> Entity {
     commands.spawn(
-        UiTitleBarBuilder::new(title, skin, window_skins)
+        UiTitleBarBuilder::new(title, theme, window_type, window_skins)
             .build_with_theme(theme, window_type, button_skins, window_skins)
     ).id()
 }
@@ -206,12 +210,11 @@ pub fn spawn_ui_titlebar(
 
 pub fn ui_titlebar_bundle(
     title: String,
-    skin: Handle<WindowSkin>,
     theme: &UiTheme,
     window_type: UiWindowType,
     button_skins: &Assets<ButtonSkin>,
     window_skins: &Assets<WindowSkin>, // <- pass assets
 ) -> impl Bundle {
-    UiTitleBarBuilder::new(title, skin, window_skins)
+    UiTitleBarBuilder::new(title, theme, window_type, window_skins)
             .build_with_theme(theme, window_type, button_skins, window_skins)
 }

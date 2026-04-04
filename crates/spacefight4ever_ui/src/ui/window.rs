@@ -483,7 +483,6 @@ impl UiAtlasWindowBuilder {
             children![(
                 ui_titlebar_bundle(
                     self.title,
-                    self.skin.clone(),
                     theme,
                     self.window_type,
                     button_skins,

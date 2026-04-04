@@ -3,7 +3,7 @@
         "Menu": (
             atlas: (
                 image_name: "textures/window/button_atlas.png",
-                tile_size: (64, 64),
+                tile_size: (62, 62),
                 cols: 5,
                 rows: 4,
                 padding: (2, 2),
@@ -15,7 +15,7 @@
         "Close": (
             atlas: (
                 image_name: "textures/window/button_atlas.png",
-                tile_size: (64, 64),
+                tile_size: (62, 62),
                 cols: 5,
                 rows: 4,
                 padding: (2, 2),
@@ -27,7 +27,7 @@
         "Minimize": (
             atlas: (
                 image_name: "textures/window/button_atlas.png",
-                tile_size: (64, 64),
+                tile_size: (62, 62),
                 cols: 5,
                 rows: 4,
                 padding: (2, 2),
@@ -39,7 +39,7 @@
         "Maximize": (
             atlas: (
                 image_name: "textures/window/button_atlas.png",
-                tile_size: (64, 64),
+                tile_size: (62, 62),
                 cols: 5,
                 rows: 4,
                 padding: (2, 2),
@@ -53,13 +53,13 @@
         "Standard": (
             window_atlas: (
                 image_name: "textures/window/windows_atlas.png",
-                tile_size: (70, 70),
+                tile_size: (70, 53),
                 rows: 1,
                 cols: 4,
                 padding: (0, 0),
-                offset: (0, 0),
+                offset: (0, 17),
             ),
-            window_atlas_index: 0,
+            window_atlas_index: 2,
             slice_border: ((25, 25), (25, 25)),
             titlebar: (
                 height: 17.0,
@@ -67,15 +67,15 @@
                 font_size: 13.0,
                 font_color: (1.0, 1.0, 1.0, 1.0),
                 atlas: (
-                    image_name: "textures/window/windows_atlas.png",
-                    tile_size: (70, 70),
+                    image_name: "ignored",
+                    tile_size: (70, 17),
                     rows: 1,
                     cols: 4,
                     padding: (0, 0),
                     offset: (0, 0),
                 ),
                 padding: (1, 1 , 2, 2),
-                mapping: (0, 1, 2, 1, 0, 1, 2),
+                mapping: (2, 2, 2, 2, 0),
                 buttons: 15,
             ),
             default_size: (320, 240),
