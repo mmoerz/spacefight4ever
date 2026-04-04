@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use super::structs::{UiElementSize, UiWindowStatus, ResizeSide};
+use super::structs::{UiElementSize, UiWindowStatus};
 
 /// window marker
 #[derive(Default, Component)]

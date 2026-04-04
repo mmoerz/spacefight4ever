@@ -407,9 +407,10 @@ pub struct UiAtlasWindowBuilder {
 }
 
 impl UiAtlasWindowBuilder {
-    pub fn new(title: String, skin: Handle<WindowSkin>, skins: &Assets<WindowSkin>) -> Self {
+    pub fn new(title: String, window_type: UiWindowType, theme: &UiTheme, skins: &Assets<WindowSkin>) -> Self {
         //let image_node = ImageNode::default();
-        let window_skin  = skins.get(&skin).unwrap();
+        let skin_handle = theme.get_window_skin(window_type).unwrap().clone();
+        let window_skin  = skins.get(&skin_handle).unwrap();
 
         let initial_image_node  = 
             ImageNode::from_atlas_image(
@@ -424,7 +425,7 @@ impl UiAtlasWindowBuilder {
         Self {
             window_type: UiWindowType::Standard,
             title,
-            skin,
+            skin: skin_handle,
             width: window_skin.default_size.x as f32,
             height: window_skin.default_size.y as f32,
             top: window_skin.default_pos.y as f32,
@@ -511,13 +512,13 @@ pub fn get_window_node(
 pub fn spawn_ui_window(
     commands: &mut Commands,
     title: String,
-    skin: Handle<WindowSkin>,
+    window_type: UiWindowType,
     theme: &UiTheme,
     button_skins: &Assets<ButtonSkin>,
     window_skins: &Assets<WindowSkin>,
 ) -> Entity {
     commands.spawn(
-        UiAtlasWindowBuilder::new(title, skin, window_skins)
+        UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
             .build_with_theme(theme, button_skins, window_skins)
     ).id()
 }
@@ -537,11 +538,11 @@ pub fn spawn_ui_window(
 
 pub fn ui_window_bundle(
     title: String,
-    skin: Handle<WindowSkin>,
+    window_type: UiWindowType,
     theme: &UiTheme,
     button_skins: &Assets<ButtonSkin>,
     window_skins: &Assets<WindowSkin>, // <- pass assets
 ) -> impl Bundle {
-    UiAtlasWindowBuilder::new(title, skin, window_skins)
+    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
             .build_with_theme(theme, button_skins, window_skins)
 }
