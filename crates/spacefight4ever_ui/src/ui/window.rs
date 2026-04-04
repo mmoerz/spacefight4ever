@@ -394,6 +394,9 @@ impl Plugin for UiAtlasWindowPlugin {
     }
 }
 
+#[derive(Component)]
+pub struct UiWindowMain;
+
 pub struct UiAtlasWindowBuilder {
     pub window_type: UiWindowType,
     pub title: String,
@@ -487,7 +490,63 @@ impl UiAtlasWindowBuilder {
                     self.window_type,
                     button_skins,
                     window_skins)
-            )]
+            ),
+            // Window body + resize handles
+            (
+                Node {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    ..default()
+                },
+                children![
+                    (
+                        UiWindowMain,
+                        Node {
+                            width: Val::Percent(100.),
+                            height: Val::Percent(100.),
+                            ..default()
+                        },
+                    ),
+                    (
+                        Node {
+                            width: px(5.),
+                            height: Val::Percent(100.),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::Right },
+                    )
+                ]
+            ),
+            (
+                Node {
+                    width: Val::Percent(100.),
+                    height: px(5.),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    ..default()
+                },
+                children![
+                    (
+                        Node {
+                            width: Val::Percent(100.),
+                            height: px(5.),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::Bottom },
+                    ),
+                    (
+                        Node {
+                            width: px(5.),
+                            height: px(5.),
+                            ..default()
+                        },
+                        UiWindowResizeHandle { side: ResizeSide::BottomRight },
+                    )
+                ]
+            )
+            ]
         )
     }
 }
