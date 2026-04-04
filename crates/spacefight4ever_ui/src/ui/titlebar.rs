@@ -117,6 +117,7 @@ impl UiTitleBarBuilder {
         let window_skin = window_skins.get(help).expect("Window skin handle not loaded");
         
         // TODO: calculate text title size and report that back to the window
+        // TODO: add slicer to properly use and align the pattern free parts of the image in the corners for the buttons
         (
             self.titlebar,
             Node {
