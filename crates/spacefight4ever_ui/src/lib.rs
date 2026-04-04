@@ -20,7 +20,7 @@ pub mod ui {
     pub mod button;
     pub mod atlasbutton;
     pub mod titlebar;
-    //pub mod window;
+    pub mod window;
 }
 
 pub mod window {

@@ -21,16 +21,16 @@ impl ButtonState {
 /// part of what a window is
 #[repr(usize)]
 #[derive(PartialEq, Eq, Clone, Copy)]
-pub enum WindowState {
+pub enum UiWindowState {
     Normal,
     Minimized,
     Maximized,
     Closed,
     Disabled,
-    Focused,
+    //Focused, // not a good idea, min/max/normal info is overwritten
 }
 
-impl WindowState {
+impl UiWindowState {
     #[inline]
     pub fn index(self) -> usize {
         self as usize
@@ -72,6 +72,7 @@ impl UiButtonType {
 
 #[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum UiWindowType {
+    Simple,
     Standard
 }
 
@@ -84,5 +85,21 @@ impl FromStr for UiWindowType {
             "standard" => Ok(UiWindowType::Standard),
             _ => Err(()),
         }
+    }
+}
+
+// state components for last used window size-index
+//
+//
+#[derive(Resource, Default, Debug)]
+pub struct UiWindowZCounter(i32);
+
+impl UiWindowZCounter {
+    pub fn inc(&mut self) -> i32 {
+        self.0 += 1;
+        self.0
+    }
+    pub fn get(&self) -> i32 {
+        self.0
     }
 }

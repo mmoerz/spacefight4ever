@@ -1,20 +1,6 @@
 use bevy::prelude::*;
 
-// state components for last used window size-index
-//
-//
-#[derive(Resource, Default, Debug)]
-pub struct UiWindowZCounter(i32);
 
-impl UiWindowZCounter {
-    pub fn inc(&mut self) -> i32 {
-        self.0 += 1;
-        self.0
-    }
-    pub fn get(&self) -> i32 {
-        self.0
-    }
-}
 
 /// resource helps 
 #[derive(Resource, Default, Debug)]

@@ -11,33 +11,6 @@ use crate::ui::atlasbutton::*;
 
 use crate::resource::UiWindowZCounter;
 
-pub fn titlebar_button(index: usize,
-    tex: Handle<Image>,
-    layout: Handle<TextureAtlasLayout>,
-    size: f32,
-    margin: UiRect,
-) -> impl Bundle {
-    (
-        UiImageButtonBundle {
-            button: Button,
-            node: Node {
-                width: Val::Px(size),
-                height: Val::Px(size),
-                margin,
-                ..default()
-            },
-            ..default()
-        },
-        UiAtlasButtonIndex(index),
-        ImageNode::from_atlas_image(
-            tex,
-            TextureAtlas { index, layout },
-        ),
-        
-        Visibility::Inherited,
-    )
-}
-
 use crate::ui::assets::{theme::*, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin};
 use crate::ui::button::{UiButtonType, UiWindowType};
 

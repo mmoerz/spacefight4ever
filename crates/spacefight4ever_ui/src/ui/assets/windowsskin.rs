@@ -9,11 +9,12 @@ use crate::ui::{assets::asseterror::UiAssetLoadError};
 use super::atlasbuttonskin::DiskAtlasImage;
 use super::titlebarskin::{DiskTitlebarSkin, TitlebarSkin};
 
-
 /// Disk window skin
 #[derive(TypePath, Debug, Deserialize, Serialize)]
 pub struct DiskWindowSkin {
     pub window_atlas: DiskAtlasImage,           // main window image
+    pub window_atlas_index: usize,
+    pub slice_border: [Vec2;2],
     pub titlebar: DiskTitlebarSkin,     // titlebar atlas & mapping
     pub default_size: [u32; 2],
     pub default_position: [u32; 2],
@@ -21,13 +22,13 @@ pub struct DiskWindowSkin {
 }
 
 impl DiskWindowSkin {
-
     /// Convert to runtime
     pub fn into_runtime(
         self,
         load_context: &mut LoadContext<'_>,
     ) -> Result<WindowSkin, UiAssetLoadError> {
         self.window_atlas.validate()?;
+        // TODO: validate that window_atlas_index is inside the atlas
 
         let image_handle = self.window_atlas.load_image(load_context);
         let layout = self.window_atlas.create_layout();
@@ -40,6 +41,14 @@ impl DiskWindowSkin {
         Ok(WindowSkin {
             image: image_handle,
             atlas: layout_handle,
+            atlas_index: self.window_atlas_index,
+            atlas_slicer: TextureSlicer {
+                border: BorderRect { 
+                    min_inset: self.slice_border[0], 
+                    max_inset: self.slice_border[1], 
+                },
+                ..Default::default()
+            },
             titlebar,
             default_size: UVec2::from_array(self.default_size),
             default_position: UVec2::from_array(self.default_position),
@@ -53,6 +62,8 @@ impl DiskWindowSkin {
 pub struct WindowSkin {
     pub image: Handle<Image>,
     pub atlas: Handle<TextureAtlasLayout>,
+    pub atlas_index: usize,
+    pub atlas_slicer: TextureSlicer,
     pub titlebar: TitlebarSkin,
     pub default_size: UVec2,
     pub default_position: UVec2,
@@ -91,7 +102,7 @@ impl AssetLoader for WindowSkinLoader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ui::button::WindowState;
+    use crate::ui::button::UiWindowState;
 
     fn valid_atlas() -> DiskAtlasImage {
         DiskAtlasImage {
@@ -107,6 +118,11 @@ mod tests {
     fn valid_titlebar() -> DiskTitlebarSkin {
         DiskTitlebarSkin {
             atlas: valid_atlas(),
+            height: 15.0,
+            font_name: "font.ttf".to_string(),
+            font_size: 12.0,
+            font_color: [1.0, 0.0, 0.0, 1.0],
+            padding: [0., 0., 0., 0.],
             mapping: [0, 1, 2, 3, 4, 5, 6],
             buttons: 3,
         }
@@ -125,6 +141,8 @@ mod tests {
                 padding: UVec2::ZERO,
                 offset: UVec2::ZERO,
             },
+            window_atlas_index: 0,
+            slice_border: [Vec2::ZERO; 2],
             titlebar: valid_titlebar(),
             default_size: [100, 50],
             default_position: [10, 20],
@@ -156,20 +174,25 @@ mod tests {
 
     #[test]
     fn titlebar_index_and_index_mut() {
-        use crate::ui::button::WindowState::*;
+        use crate::ui::button::UiWindowState::*;
 
         let mut runtime = TitlebarSkin {
             atlas: Handle::default(),
             image: Handle::default(),
+            height: 15.0,
+            font: Handle::default(),
+            font_size: 12.0,
+            font_color: Color::srgb(1.0, 0.,0.),
+            padding: UiRect { left: px(0), right: px(0), top: px(0), bottom: px(0) },
             mapping: [0,1,2,3,4,5,6],
             buttons: 2,
         };
 
         assert_eq!(runtime[Normal], 0);
-        assert_eq!(runtime[WindowState::Closed], 1);
+        assert_eq!(runtime[UiWindowState::Closed], 1);
 
-        runtime[WindowState::Maximized] = 42;
-        assert_eq!(runtime[WindowState::Maximized], 42);
+        runtime[UiWindowState::Maximized] = 42;
+        assert_eq!(runtime[UiWindowState::Maximized], 42);
     }
 
     #[test]

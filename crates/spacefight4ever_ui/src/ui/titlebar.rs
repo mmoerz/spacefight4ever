@@ -1,24 +1,30 @@
 use bevy::prelude::*;
-use crate::ui::assets::theme::UiTheme;
-use crate::ui::assets::titlebarskin::TitlebarSkin;
-use crate::ui::button::WindowState;
+use crate::ui::button::UiWindowType;
+use crate::ui::assets::{
+    theme::UiTheme,
+    atlasbuttonskin::ButtonSkin,
+    windowsskin::WindowSkin,
+};
+use crate::ui::button::UiWindowState;
+use crate::ui::atlasbutton::ui_thematic_button_bundle;
+use crate::ui::button::UiButtonType;
 
 /// Component for a titlebar that uses a TitlebarSkin atlas
 #[derive(Component, Clone)]
 pub struct UiTitleBar {
-    pub state: WindowState,
-    pub skin: Handle<TitlebarSkin>,
+    pub state: UiWindowState,
+    pub skin: Handle<WindowSkin>,
 }
 
 impl UiTitleBar {
-    pub fn new(skin: Handle<TitlebarSkin>) -> Self {
+    pub fn new(skin: Handle<WindowSkin>) -> Self {
         Self {
-            state: WindowState::Normal,
+            state: UiWindowState::Normal,
             skin,
         }
     }
 
-    pub fn set_state(mut self, state: WindowState) -> Self {
+    pub fn set_state(mut self, state: UiWindowState) -> Self {
         self.state = state;
         self
     }
@@ -26,14 +32,14 @@ impl UiTitleBar {
 
 /// System to update the titlebar visuals based on the current state
 pub fn titlebar_update_system(
-    skins: Res<Assets<TitlebarSkin>>,
+    skins: Res<Assets<WindowSkin>>,
     mut query: Query<(&UiTitleBar, &mut ImageNode), Changed<UiTitleBar>>,
 ) {
     for (titlebar, mut image_node) in &mut query {
         if let Some(skin) = skins.get(&titlebar.skin) {
             if let Some(atlas) = &mut image_node.texture_atlas {
                 atlas.layout = skin.atlas.clone();
-                atlas.index = skin[titlebar.state];
+                atlas.index = skin.atlas_index;
             }
             image_node.image = skin.image.clone();
         }
@@ -55,46 +61,65 @@ impl Plugin for UiTitleBarPlugin {
 
 /// Builder for creating a titlebar
 pub struct UiTitleBarBuilder {
+    title: String,
     titlebar: UiTitleBar,
-    width: f32,
     height: f32,
-    margin: UiRect,
+    padding: UiRect,
     initial_image_node: ImageNode,
 }
 
 impl UiTitleBarBuilder {
-    pub fn new(skin: Handle<TitlebarSkin>, width: f32, height: f32, margin: UiRect, skins: &Assets<TitlebarSkin>) -> Self {
+    pub fn new(title: String, skin: Handle<WindowSkin>, skins: &Assets<WindowSkin>, ) -> Self {
         let mut image_node = ImageNode::default();
+        let window_skin = skins.get(&skin)
+            .expect("windowskin not found");
 
-        if let Some(skin) = skins.get(&skin) {
-            // Prefill the image and atlas for immediate display
-            image_node.image = skin.image.clone();
-            image_node.texture_atlas = Some(TextureAtlas {
-                layout: skin.atlas.clone(),
-                index: skin[WindowState::Normal], // default state
-            });
-        }
+        // Prefill the image and atlas for immediate display
+        image_node.image = window_skin.titlebar.image.clone();
+        image_node.texture_atlas = Some(TextureAtlas {
+            layout: window_skin.atlas.clone(),
+            index: window_skin.atlas_index, // default state
+        });
 
         Self {
+            title,
             titlebar: UiTitleBar::new(skin),
-            width,
-            height,
-            margin,
+            height: window_skin.titlebar.height,
+            padding: window_skin.titlebar.padding,
             initial_image_node: image_node,
         }
     }
 
-    pub fn state(mut self, state: WindowState) -> Self {
+    pub fn state(mut self, state: UiWindowState) -> Self {
         self.titlebar.state = state;
         self
     }
 
-    pub fn build(self) -> impl Bundle {
+    fn button_margin(&self) -> UiRect {
+        UiRect {
+            left: self.padding.left,
+            right: self.padding.right,
+            top: px(0.),
+            bottom: px(0.),
+        }
+    }            
+
+    pub fn build_with_theme(
+        self,
+        theme: &UiTheme,
+        window_type: UiWindowType,
+        button_skins: &Assets<ButtonSkin>,
+        window_skins: &Assets<WindowSkin>
+    ) -> impl Bundle {
+        let b_margin = self.button_margin();
+        let help = theme.get_window_skin(window_type).expect("Missing window skin in theme");
+        let window_skin = window_skins.get(help).expect("Window skin handle not loaded");
+        
         (
             self.titlebar,
             Node {
-                width: Val::Px(self.width),
-                height: Val::Px(self.height),
+                width: percent(100.),
+                height: px(self.height),
                 //margin: self.margin,
                 display: Display::Flex,
                 flex_direction: FlexDirection::Row,
@@ -110,7 +135,40 @@ impl UiTitleBarBuilder {
                 ..default()
             },
             children![(
-
+            // Menu button
+                ui_thematic_button_bundle(UiButtonType::Menu, theme, self.height, b_margin, button_skins),
+                // Title text
+                (
+                    Node {
+                        height: Val::Px(self.height.clone()),
+                        justify_content: JustifyContent::Stretch,
+                        align_self: AlignSelf::Stretch,
+                        ..default()
+                    },
+                    Text::new(self.title),
+                    TextFont {
+                        font: window_skin.titlebar.font.clone(),
+                        font_size: window_skin.titlebar.font_size.clone(),
+                        ..default()
+                    },
+                    TextColor(window_skin.titlebar.font_color.clone()),
+                    Visibility::Inherited,
+                ),
+                // Right buttons (minimize, maximize, close)
+                (
+                    Node {
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Row,
+                        margin: UiRect { left: Val::Auto, ..default() },
+                        ..default()
+                    },
+                    Visibility::Inherited,
+                    children![
+                        ui_thematic_button_bundle(UiButtonType::Minimize, theme, self.height, b_margin, button_skins),
+                        ui_thematic_button_bundle(UiButtonType::Maximize, theme, self.height, b_margin, button_skins),
+                        ui_thematic_button_bundle(UiButtonType::Close, theme, self.height, b_margin, button_skins),
+                    ],
+                )
             )],
         )
     }
@@ -119,15 +177,16 @@ impl UiTitleBarBuilder {
 /// Helper for spawning a titlebar
 pub fn spawn_ui_titlebar(
     commands: &mut Commands,
-    skin: Handle<TitlebarSkin>,
-    width: f32,
-    height: f32,
-    margin: UiRect,
-    skins: &Assets<TitlebarSkin>,
+    title: String,
+    skin: Handle<WindowSkin>,
+    theme: &UiTheme,
+    window_type: UiWindowType,
+    button_skins: &Assets<ButtonSkin>,
+    window_skins: &Assets<WindowSkin>
 ) -> Entity {
     commands.spawn(
-        UiTitleBarBuilder::new(skin, width, height, margin, skins)
-            .build()
+        UiTitleBarBuilder::new(title, skin, window_skins)
+            .build_with_theme(theme, window_type, button_skins, window_skins)
     ).id()
 }
 
@@ -143,3 +202,15 @@ pub fn spawn_ui_titlebar(
 //         UiTitleBarBuilder::new(skin.clone(), width, height, margin, skins).build()
 //     })
 // }
+
+pub fn ui_titlebar_bundle(
+    title: String,
+    skin: Handle<WindowSkin>,
+    theme: &UiTheme,
+    window_type: UiWindowType,
+    button_skins: &Assets<ButtonSkin>,
+    window_skins: &Assets<WindowSkin>, // <- pass assets
+) -> impl Bundle {
+    UiTitleBarBuilder::new(title, skin, window_skins)
+            .build_with_theme(theme, window_type, button_skins, window_skins)
+}

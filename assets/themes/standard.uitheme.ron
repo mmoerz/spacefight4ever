@@ -59,9 +59,13 @@
                 padding: (0, 0),
                 offset: (0, 0),
             ),
-
+            window_atlas_index: 0,
             titlebar: (
                 atlas: (
+                    height: 15.0,
+                    font_name:"fonts/FiraSans-Bold.ttf",
+                    font_size: 13.0,
+                    font_color: (1.0, 1.0, 1.0, 1.0),
                     image_name: "textures/window/windows_atlas.png",
                     tile_size: (70, 70),
                     rows: 1,
