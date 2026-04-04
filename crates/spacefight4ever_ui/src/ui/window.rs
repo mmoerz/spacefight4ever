@@ -88,7 +88,8 @@ impl UiWindowCurrentState {
 pub struct UiAtlasWindow {
     pub window_type: UiWindowType,
     pub skin: Handle<WindowSkin>,
-    //pub main_node: Entity,
+    pub min_width: f32,
+    pub min_height: f32,
 }
 
 pub fn on_window_click_focus(
@@ -341,6 +342,7 @@ pub fn window_resize_system(
     on_drag: On<Pointer<Drag>>,
     resize_query: Query<(&UiWindowResizeHandle, &ChildOf)>,
     windows: Query<Entity, With<UiAtlasWindow>>,
+    atlas_windows: Query<&UiAtlasWindow>,
     parents: Query<&ChildOf>,
     mut node_query: Query<&mut Node>,
 ) {
@@ -348,24 +350,26 @@ pub fn window_resize_system(
     let target = on_drag.event_target();
 
     if let Ok((handle, child_parent)) = resize_query.get(target) {
-        if let Some(window) = get_window_node(&windows, child_parent.get(), &parents) {
-            if let Ok(mut node) = node_query.get_mut(window) {
-                match handle.side {
-                    ResizeSide::BottomRight => {
-                        let w = match node.width { Val::Px(v) => v, _ => 300.0 };
-                        let h = match node.height { Val::Px(v) => v, _ => 200.0 };
-                        node.width = Val::Px((w + on_drag.delta.x).max(50.0));
-                        node.height = Val::Px((h + on_drag.delta.y).max(50.0));
-                    },
-                    ResizeSide::Right => {
-                        let w = match node.width { Val::Px(v) => v, _ => 300.0 };
-                        node.width = Val::Px((w + on_drag.delta.x).max(50.0));
-                    },
-                    ResizeSide::Bottom => {
-                        let h = match node.height { Val::Px(v) => v, _ => 200.0 };
-                        node.height = Val::Px((h + on_drag.delta.y).max(50.0));
-                    },
-                    _ => {}
+        if let Some(window_entity) = get_window_node(&windows, child_parent.get(), &parents) {
+            if let Ok(mut node) = node_query.get_mut(window_entity) {
+                if let Ok(window) = atlas_windows.get(window_entity) {
+                    match handle.side {
+                        ResizeSide::BottomRight => {
+                            let w = match node.width { Val::Px(v) => v, _ => window.min_width };
+                            let h = match node.height { Val::Px(v) => v, _ => window.min_height };
+                            node.width = Val::Px((w + on_drag.delta.x).max(window.min_width));
+                            node.height = Val::Px((h + on_drag.delta.y).max(window.min_height));
+                        },
+                        ResizeSide::Right => {
+                            let w = match node.width { Val::Px(v) => v, _ => window.min_width };
+                            node.width = Val::Px((w + on_drag.delta.x).max(window.min_width));
+                        },
+                        ResizeSide::Bottom => {
+                            let h = match node.height { Val::Px(v) => v, _ => window.min_height };
+                            node.height = Val::Px((h + on_drag.delta.y).max(window.min_height));
+                        },
+                        _ => {}
+                    }
                 }
             }
         }
@@ -405,6 +409,8 @@ pub struct UiAtlasWindowBuilder {
     pub height: f32,
     pub top: f32,
     pub left: f32,
+    pub min_width: f32,
+    pub min_height: f32,
     pub initial_image_node: ImageNode,
     pub z_index: i32,
 }
@@ -433,6 +439,8 @@ impl UiAtlasWindowBuilder {
             height: window_skin.default_size.y as f32,
             top: window_skin.default_pos.y as f32,
             left: window_skin.default_pos.x as f32,
+            min_width: window_skin.min_size.x as f32,
+            min_height: window_skin.min_size.y as f32,
             initial_image_node,
             z_index: 0,
         }
@@ -458,6 +466,8 @@ impl UiAtlasWindowBuilder {
             UiAtlasWindow {
                 window_type: self.window_type,
                 skin: self.skin.clone(),
+                min_width: self.min_width,
+                min_height: self.min_height,
             },
             UiWindowCurrentState {
                 state: UiWindowState::Normal,

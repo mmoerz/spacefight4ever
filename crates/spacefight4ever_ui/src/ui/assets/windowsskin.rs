@@ -17,6 +17,7 @@ pub struct DiskWindowSkin {
     pub slice_border: [Vec2;2],
     pub titlebar: DiskTitlebarSkin,     // titlebar atlas & mapping
     pub default_size: [u32; 2],
+    pub min_size: [u32; 2],
     pub default_position: [u32; 2],
     pub default_titlebar_position: [u32; 2],
 }
@@ -51,6 +52,7 @@ impl DiskWindowSkin {
             },
             titlebar,
             default_size: UVec2::from_array(self.default_size),
+            min_size: UVec2::from_array(self.min_size),
             default_pos: UVec2::from_array(self.default_position),
             default_titlebar_position: UVec2::from_array(self.default_titlebar_position),
         })
@@ -66,6 +68,7 @@ pub struct WindowSkin {
     pub atlas_slicer: TextureSlicer,
     pub titlebar: TitlebarSkin,
     pub default_size: UVec2,
+    pub min_size: UVec2,
     pub default_pos: UVec2,
     pub default_titlebar_position: UVec2,
 }
@@ -144,6 +147,7 @@ mod tests {
             slice_border: [Vec2::ZERO; 2],
             titlebar: valid_titlebar(),
             default_size: [100, 50],
+            min_size: [50, 50],
             default_position: [10, 20],
             default_titlebar_position: [0, 0],
         }

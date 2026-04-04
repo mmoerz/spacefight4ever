@@ -71,6 +71,7 @@
                 buttons: 15,
             ),
             default_size: (320, 240),
+            min_size: (160, 50),
             default_position: (100, 100),
             default_titlebar_position: (0, 0),
         ),

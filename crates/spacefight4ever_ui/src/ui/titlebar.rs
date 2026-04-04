@@ -116,6 +116,7 @@ impl UiTitleBarBuilder {
         let help = theme.get_window_skin(window_type).expect("Missing window skin in theme");
         let window_skin = window_skins.get(help).expect("Window skin handle not loaded");
         
+        // TODO: calculate text title size and report that back to the window
         (
             self.titlebar,
             Node {
