@@ -137,39 +137,40 @@ impl UiTitleBarBuilder {
             children![(
             // Menu button
                 ui_thematic_button_bundle(UiButtonType::Menu, theme, self.height, b_margin, button_skins),
-                // Title text
-                (
-                    Node {
-                        height: Val::Px(self.height.clone()),
-                        justify_content: JustifyContent::Stretch,
-                        align_self: AlignSelf::Stretch,
-                        ..default()
-                    },
-                    Text::new(self.title),
-                    TextFont {
-                        font: window_skin.titlebar.font.clone(),
-                        font_size: window_skin.titlebar.font_size.clone(),
-                        ..default()
-                    },
-                    TextColor(window_skin.titlebar.font_color.clone()),
-                    Visibility::Inherited,
-                ),
-                // Right buttons (minimize, maximize, close)
-                (
-                    Node {
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Row,
-                        margin: UiRect { left: Val::Auto, ..default() },
-                        ..default()
-                    },
-                    Visibility::Inherited,
-                    children![
-                        ui_thematic_button_bundle(UiButtonType::Minimize, theme, self.height, b_margin, button_skins),
-                        ui_thematic_button_bundle(UiButtonType::Maximize, theme, self.height, b_margin, button_skins),
-                        ui_thematic_button_bundle(UiButtonType::Close, theme, self.height, b_margin, button_skins),
-                    ],
-                )
-            )],
+            ),
+            // Title text
+            (
+                Node {
+                    height: Val::Px(self.height.clone()),
+                    justify_content: JustifyContent::Stretch,
+                    align_self: AlignSelf::Stretch,
+                    ..default()
+                },
+                Text::new(self.title),
+                TextFont {
+                    font: window_skin.titlebar.font.clone(),
+                    font_size: window_skin.titlebar.font_size.clone(),
+                    ..default()
+                },
+                TextColor(window_skin.titlebar.font_color.clone()),
+                Visibility::Inherited,
+            ),
+            // Right buttons (minimize, maximize, close)
+            (
+                Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    margin: UiRect { left: Val::Auto, ..default() },
+                    ..default()
+                },
+                Visibility::Inherited,
+                children![
+                    ui_thematic_button_bundle(UiButtonType::Minimize, theme, self.height, b_margin, button_skins),
+                    ui_thematic_button_bundle(UiButtonType::Maximize, theme, self.height, b_margin, button_skins),
+                    ui_thematic_button_bundle(UiButtonType::Close, theme, self.height, b_margin, button_skins),
+                ],
+            )
+            ],
         )
     }
 }

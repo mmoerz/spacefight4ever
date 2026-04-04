@@ -132,9 +132,12 @@ impl Plugin for UiAtlasButtonPlugin {
 ///     )
 /// ```
 pub struct UiAtlasButtonBuilder {
-    button: UiAtlasButton,
-    size: f32,
+    state: ButtonState,
+    skin: Handle<ButtonSkin>,
+    width: f32,
+    height: f32,
     margin: UiRect,
+    //atlas_index: usize,
     initial_image_node: ImageNode,
 }
 
@@ -155,34 +158,43 @@ impl UiAtlasButtonBuilder {
         }
 
         Self {
-            button: UiAtlasButton { state: ButtonState::Normal, skin },
-            size,
+            state: ButtonState::Normal,
+            skin,
+            width: size,
+            height: size,
             margin,
             initial_image_node: image_node, // new field
         }
     }
 
     pub fn disabled(mut self) -> Self {
-        self.button.state = ButtonState::Disabled;
+        self.state = ButtonState::Disabled;
         self
     }
 
     pub fn enabled(mut self) -> Self {
-        self.button.state = ButtonState::Normal;
+        self.state = ButtonState::Normal;
         self
     }
 
     /// Builds the button as a Bevy bundle
     pub fn build(self) -> impl Bundle {
         (
-            self.button,
+            UiAtlasButton {
+                state: self.state,
+                skin: self.skin,
+            },
             Button,
             Node {
-                width: Val::Px(self.size),
-                height: Val::Px(self.size),
+                width: Val::Px(self.width),
+                height: Val::Px(self.height),
                 margin: self.margin,
                 ..default()
             },
+            // TextureAtlas {
+            //     layout: skin.atlas.clone(),
+            //     index: skin[ButtonState::Normal],
+            // },
             self.initial_image_node,
             Visibility::Inherited,
         )
