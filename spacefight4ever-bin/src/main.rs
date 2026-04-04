@@ -22,7 +22,6 @@ use spacefight4ever_lib::prelude::*;
 use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
 use spacefight4ever_ui::{
-    UiWindowExtensionPlugin,
     ui::assets::assets::setup_ui_theme,
     plugins::{UiAssetsPlugin, UiAtlasButtonPlugin, UiAtlasWindowPlugin}
 };
@@ -41,10 +40,7 @@ fn main() {
         // -ui crate plugins
         .add_plugins(UiAssetsPlugin)
         .add_plugins(UiAtlasButtonPlugin)
-        //.add_plugins(UiTitleBarPlugin)
         .add_plugins(UiAtlasWindowPlugin)
-        .add_plugins(UiWindowExtensionPlugin)
-        //.add_plugins(UiWindowNinePlugin)
 
         // -lib plugins
         .add_plugins(UiPlugin)

@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 pub mod consts;
 pub mod structs;
-pub mod component;
 pub mod bundle;
 
 pub mod ui {
@@ -21,16 +20,9 @@ pub mod ui {
     pub mod window;
 }
 
-pub mod window {
-    pub mod systems {
-        pub mod window_atlas_switch;
-    }
-}
-
 pub mod prelude {
     pub use crate::consts::*;
     pub use crate::structs::*;
-    pub use crate::component::*;
     pub use crate::bundle::*;
     pub use crate::ui::assets::theme::UiTheme;
     pub use crate::ui::assets::assets::setup_ui_theme;
@@ -38,8 +30,6 @@ pub mod prelude {
 }
 
 pub use bundle::*;
-
-use crate::window::systems::window_atlas_switch::*;
 
 // for asset plugin
 use ui::assets::{
@@ -56,14 +46,4 @@ pub mod plugins {
         titlebar::UiTitleBarPlugin,
         window::UiAtlasWindowPlugin,
     };
-}
-
-pub struct UiWindowExtensionPlugin;
-impl Plugin for UiWindowExtensionPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .init_resource::<UiWindowAtlasStatus>()
-            .add_message::<UiWindowsSwitchAtlasRequest>()
-            .add_systems(Update, window_atlas_switch_system);
-    }
 }

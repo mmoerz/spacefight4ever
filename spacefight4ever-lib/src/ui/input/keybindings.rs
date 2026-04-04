@@ -5,7 +5,6 @@ use spacefight4ever_ui::{
     prelude::*,
     ui::assets::{atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin},
 };
-use spacefight4ever_ui::window::systems::window_atlas_switch::{UiWindowsSwitchAtlasRequest, UiWindowAtlasStatus};
 use spacefight4ever_ui::ui::assets::{theme::UiTheme, assets::UiResources};
 
 pub struct UiPlugin;

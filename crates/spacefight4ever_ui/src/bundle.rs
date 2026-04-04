@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-
 #[derive(Bundle)]
 pub struct  UiButtonBundle {
     pub button: Button,

@@ -401,6 +401,10 @@ impl Plugin for UiAtlasWindowPlugin {
 #[derive(Component)]
 pub struct UiWindowMain;
 
+/// status bar marker
+#[derive(Default, Component)]
+pub struct UiWindowStatusBar;
+
 pub struct UiAtlasWindowBuilder {
     pub window_type: UiWindowType,
     pub title: String,
@@ -545,6 +549,7 @@ impl UiAtlasWindowBuilder {
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::Bottom },
+                        UiWindowStatusBar,
                     ),
                     (
                         Node {
