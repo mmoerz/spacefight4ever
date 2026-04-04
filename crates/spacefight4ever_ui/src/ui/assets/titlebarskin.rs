@@ -30,7 +30,7 @@ impl DiskTitlebarSkin {
         let max = self.atlas.max_index();
 
         for (pos, &idx) in self.mapping.iter().enumerate() {
-            if idx >= max {
+            if idx > max {
                 return Err(UiAssetLoadError::InvalidMapping { 
                     origin: self.atlas.image_name.clone(),
                     position: pos, index: idx, max: max - 1 

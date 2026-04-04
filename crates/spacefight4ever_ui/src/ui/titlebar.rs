@@ -78,7 +78,7 @@ impl UiTitleBarBuilder {
         let image = window_skin.image.clone();
         let texture_atlas = TextureAtlas {
             layout: window_skin.atlas.clone(),
-            index: window_skin.atlas_index, // default state
+            index: window_skin.titlebar[UiWindowState::Normal], // default state
         };
 
         Self {
