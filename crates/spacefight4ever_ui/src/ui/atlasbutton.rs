@@ -238,7 +238,10 @@ pub fn spawn_ui_button(
 ///
 /// fn setup(mut commands: Commands, theme: Res<MaterialTheme>) {
 ///     commands.spawn((
-/// 
+///         ui_button_bundle(skin, size, margin, skins)
+///     ));
+/// }
+///
 pub fn ui_button_bundle(
     skin: Handle<ButtonSkin>,
     size: f32,

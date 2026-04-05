@@ -26,7 +26,7 @@ pub mod prelude {
     pub use crate::bundle::*;
     pub use crate::ui::assets::theme::UiTheme;
     pub use crate::ui::assets::assets::setup_ui_theme;
-    pub use crate::ui::window::{UiAtlasWindow, UiWindowFocused, UiWindowCurrentState, UiWindowZCounter, ui_window_bundle};
+    pub use crate::ui::window::{UiAtlasWindow, UiWindowFocused, UiWindowCurrentState, UiWindowZCounter, spawn_ui_window, spawn_ui_window_with_z_index};
 }
 
 pub use bundle::*;

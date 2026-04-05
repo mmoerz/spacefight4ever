@@ -53,7 +53,7 @@ pub fn spawn_ui_roots(
     let ui_root = commands.spawn((
         UiRoot, UiNode::new(
             percent(100),
-            percent(100), Color::WHITE,
+            percent(100), Color::srgba(0.0, 0.0, 0.0, 0.0),
             JustifyContent::Stretch,
             AlignItems::Stretch
         ), Name::new("UiRoot"))
@@ -84,14 +84,3 @@ pub fn spawn_ui_roots(
     next_state.set(UiInitState::Ready)
 }
 
-/// spawn the ui camera
-pub fn spawn_ui_camera(mut commands: Commands) {
-    commands.spawn((
-        Camera2d {
-            //TODO: make 2d cam render above 3d
-            ..default()
-        }, 
-        Name::new("Camera2d"),
-        
-    ));
-}

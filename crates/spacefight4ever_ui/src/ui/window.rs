@@ -90,6 +90,8 @@ pub struct UiAtlasWindow {
     pub skin: Handle<WindowSkin>,
     pub min_width: f32,
     pub min_height: f32,
+    pub content_main: Entity, // main content node
+    pub content_status_bar: Option<Entity>, // optional status bar
 }
 
 pub fn on_window_click_focus(
@@ -175,6 +177,7 @@ pub fn on_window_titlebar_drag_end(
     }
 }
 
+/// TODO: implement hide as well?
 pub fn close_windows(
     mut commands: Commands,
     interaction_query: Query<(Entity, &UiButtonType, &Interaction), (Changed<Interaction>, With<UiButtonType>)>,
@@ -221,7 +224,6 @@ pub fn minimize_windows(
 }
 
 /// separate system, so that windows can be minimized by other means as well
-/// TODO: implement hide as well?
 pub fn apply_window_state_change(
     mut change_message: MessageReader<UiWindowsStatusChangeRequest>,
     mut q: Query<(&UiAtlasWindow, &mut UiWindowCurrentState, &mut Node), With<UiAtlasWindow>>,
@@ -405,6 +407,7 @@ pub struct UiWindowMain;
 #[derive(Default, Component)]
 pub struct UiWindowStatusBar;
 
+#[derive(Debug)]
 pub struct UiAtlasWindowBuilder {
     pub window_type: UiWindowType,
     pub title: String,
@@ -420,6 +423,14 @@ pub struct UiAtlasWindowBuilder {
 }
 
 impl UiAtlasWindowBuilder {
+    /// create the builder
+    /// 
+    /// # Arguments
+    /// 
+    /// * `title` - the title of the window
+    /// * `window_type` - type  of the window
+    /// * `theme` - the theme to use
+    /// * `skins` - the (asset) skins to use
     pub fn new(title: String, window_type: UiWindowType, theme: &UiTheme, skins: &Assets<WindowSkin>) -> Self {
         //let image_node = ImageNode::default();
         let skin_handle = theme.get_window_skin(window_type).unwrap().clone();
@@ -434,7 +445,6 @@ impl UiAtlasWindowBuilder {
                     },
             )
             .with_mode(NodeImageMode::Sliced(window_skin.atlas_slicer.clone()));
-
         Self {
             window_type: UiWindowType::Standard,
             title,
@@ -460,20 +470,15 @@ impl UiAtlasWindowBuilder {
         self
     }
 
-
-    // TODO: i think z_index is missing to have it spawn in the foreground
-    pub fn build_with_theme(
-        self,
-        theme: &UiTheme,
-        button_skins: &Assets<ButtonSkin>,
-        window_skins: &Assets<WindowSkin>,
-    ) -> impl Bundle {
+    //pub fn with_titlebar(mut self,)
+    fn window_main_node(&self) -> impl Bundle {
         (
             UiAtlasWindow {
-                window_type: self.window_type,
-                skin: self.skin.clone(),
-                min_width: self.min_width,
+                window_type: self.window_type.clone(),
+                skin: self.skin.clone(),                min_width: self.min_width,
                 min_height: self.min_height,
+                content_main: Entity::PLACEHOLDER,
+                content_status_bar: None,
             },
             UiWindowCurrentState {
                 state: UiWindowState::Normal,
@@ -493,81 +498,213 @@ impl UiAtlasWindowBuilder {
                 top: Val::Px(self.top),
                 ..default()
             },
-            self.initial_image_node,
+            self.initial_image_node.clone(),
             GlobalZIndex(self.z_index),
 
             Transform::default(),
             GlobalTransform::default(),
             Visibility::Inherited,
-            children![(
-                ui_titlebar_bundle(
-                    self.title,
-                    theme,
-                    self.window_type,
-                    button_skins,
-                    window_skins)
-            ),
-            // Window body + resize handles
-            (
-                Node {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                },
-                children![
-                    (
+        )
+    }
+
+    pub fn build(
+        self, 
+        commands: &mut Commands,
+        theme: &UiTheme,
+        button_skins: &Assets<ButtonSkin>,
+        window_skins: &Assets<WindowSkin>,
+    ) -> Entity {
+        let mut window_main: Entity = Entity::PLACEHOLDER;
+        let mut statusbar: Option<Entity> = None;
+        let result = commands.spawn(self.window_main_node()).id();
+
+        commands.entity(result)
+            .with_children(|parent| {
+                parent.spawn(ui_titlebar_bundle(
+                        self.title,
+                        theme,
+                        self.window_type,
+                        button_skins,
+                        window_skins));
+                parent.spawn((
+                    Node {
+                        width: Val::Percent(100.),
+                        height: Val::Percent(100.),
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Row,
+                        ..default()
+                    },
+                )).with_children(|mainbody| {
+                    window_main =
+                    mainbody.spawn((
                         UiWindowMain,
                         Node {
                             width: Val::Percent(100.),
                             height: Val::Percent(100.),
                             ..default()
                         },
-                    ),
-                    (
+                    )).id();
+                    mainbody.spawn((
                         Node {
                             width: px(5.),
                             height: Val::Percent(100.),
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::Right },
-                    )
-                ]
-            ),
-            (
-                Node {
-                    width: Val::Percent(100.),
-                    height: px(5.),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                },
-                children![
-                    (
-                        Node {
-                            width: Val::Percent(100.),
-                            height: px(5.),
-                            ..default()
-                        },
-                        UiWindowResizeHandle { side: ResizeSide::Bottom },
-                        UiWindowStatusBar,
-                    ),
-                    (
+                    ));
+                });
+                parent.spawn((
+                    Node {
+                        width: Val::Percent(100.),
+                        height: px(5.),
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Row,
+                        ..default()
+                    },
+                )).with_children(|mainbody| {
+                    statusbar =  Some(
+                        mainbody.spawn((
+                                Node {
+                                    width: Val::Percent(100.),
+                                    height: px(5.),
+                                    ..default()
+                                },
+                                UiWindowResizeHandle { side: ResizeSide::Bottom },
+                                UiWindowStatusBar,
+                            )).id()
+                    );
+                    mainbody.spawn((
                         Node {
                             width: px(5.),
                             height: px(5.),
                             ..default()
                         },
                         UiWindowResizeHandle { side: ResizeSide::BottomRight },
-                    )
-                ]
-            )
-            ]
-        )
+                    ));
+                });
+            });
+
+        // 👇 now update component on root
+        commands.entity(result).insert(UiAtlasWindow {
+            window_type: self.window_type,
+            skin: self.skin,
+            min_width: self.min_width,
+            min_height: self.min_height,
+            content_main: window_main,
+            content_status_bar: statusbar,
+        });
+        
+        result
     }
+
+    // pub fn build_with_theme(
+    //     self,
+    //     theme: &UiTheme,
+    //     button_skins: &Assets<ButtonSkin>,
+    //     window_skins: &Assets<WindowSkin>,
+    // ) -> impl Bundle {
+    //     (
+    //         UiAtlasWindow {
+    //             window_type: self.window_type.clone(),
+    //             skin: self.skin.clone(),
+    //             min_width: self.min_width,
+    //             min_height: self.min_height,
+    //         },
+    //         UiWindowCurrentState {
+    //             state: UiWindowState::Normal,
+    //             normal_size: Vec2::new(self.width, self.height),
+    //             normal_pos: Vec2::new(self.left, self.top),
+    //             focused: false,
+    //         },
+    //         Node {
+    //             width: Val::Px(self.width),
+    //             height: Val::Px(self.height),
+    //             display: Display::Flex,
+    //             flex_direction: FlexDirection::Column,
+    //             justify_content: JustifyContent::FlexStart,
+    //             align_items: AlignItems::FlexStart,
+    //             position_type: PositionType::Absolute,
+    //             left: Val::Px(self.left),
+    //             top: Val::Px(self.top),
+    //             ..default()
+    //         },
+    //         self.initial_image_node.clone(),
+    //         GlobalZIndex(self.z_index),
+
+    //         Transform::default(),
+    //         GlobalTransform::default(),
+    //         Visibility::Inherited,
+    //         children![(
+    //             ui_titlebar_bundle(
+    //                 self.title,
+    //                 theme,
+    //                 self.window_type,
+    //                 button_skins,
+    //                 window_skins)
+    //         ),
+    //         // Window body + resize handles
+    //         (
+    //             Node {
+    //                 width: Val::Percent(100.),
+    //                 height: Val::Percent(100.),
+    //                 display: Display::Flex,
+    //                 flex_direction: FlexDirection::Row,
+    //                 ..default()
+    //             },
+    //             children![
+    //                 (
+    //                     UiWindowMain,
+    //                     Node {
+    //                         width: Val::Percent(100.),
+    //                         height: Val::Percent(100.),
+    //                         ..default()
+    //                     },
+    //                 ),
+    //                 (
+    //                     Node {
+    //                         width: px(5.),
+    //                         height: Val::Percent(100.),
+    //                         ..default()
+    //                     },
+    //                     UiWindowResizeHandle { side: ResizeSide::Right },
+    //                 )
+    //             ]
+    //         ),
+    //         (
+    //             Node {
+    //                 width: Val::Percent(100.),
+    //                 height: px(5.),
+    //                 display: Display::Flex,
+    //                 flex_direction: FlexDirection::Row,
+    //                 ..default()
+    //             },
+    //             children![
+    //                 (
+    //                     Node {
+    //                         width: Val::Percent(100.),
+    //                         height: px(5.),
+    //                         ..default()
+    //                     },
+    //                     UiWindowResizeHandle { side: ResizeSide::Bottom },
+    //                     UiWindowStatusBar,
+    //                 ),
+    //                 (
+    //                     Node {
+    //                         width: px(5.),
+    //                         height: px(5.),
+    //                         ..default()
+    //                     },
+    //                     UiWindowResizeHandle { side: ResizeSide::BottomRight },
+    //                 )
+    //             ]
+    //         )
+    //         ]
+    //     )
+    // }
 }
 
+/// helper function to retrieve the parent UiAtlasWindow entity
+/// is used when dragging a titlebar, to obtain the parent window
 pub fn get_window_node(
     windows: &Query<Entity, With<UiAtlasWindow>>,
     mut current: Entity,
@@ -592,10 +729,22 @@ pub fn spawn_ui_window(
     button_skins: &Assets<ButtonSkin>,
     window_skins: &Assets<WindowSkin>,
 ) -> Entity {
-    commands.spawn(
-        UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
-            .build_with_theme(theme, button_skins, window_skins)
-    ).id()
+    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
+        .build(commands, theme, button_skins, window_skins)
+}
+
+pub fn spawn_ui_window_with_z_index(
+    commands: &mut Commands,
+    title: String,
+    window_type: UiWindowType,
+    theme: &UiTheme,
+    button_skins: &Assets<ButtonSkin>,
+    window_skins: &Assets<WindowSkin>,
+    mut z_index: ResMut<UiWindowZCounter>,
+) -> Entity {
+    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
+        .with_z_index(&mut z_index)
+        .build(commands, theme, button_skins, window_skins)
 }
 
 // Spawn a titlebar using a `UiTheme`
@@ -611,26 +760,27 @@ pub fn spawn_ui_window(
 //     })
 // }
 
-pub fn ui_window_bundle(
-    title: String,
-    window_type: UiWindowType,
-    theme: &UiTheme,
-    button_skins: &Assets<ButtonSkin>,
-    window_skins: &Assets<WindowSkin>, // <- pass assets
-) -> impl Bundle {
-    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
-        .build_with_theme(theme, button_skins, window_skins)
-}
+// pub fn ui_window_bundle(
+//     title: String,
+//     window_type: UiWindowType,
+//     theme: &UiTheme,
+//     button_skins: &Assets<ButtonSkin>,
+//     window_skins: &Assets<WindowSkin>, // <- pass assets
+// ) -> impl Bundle {
+//     UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
+//         .build_with_theme(theme, button_skins, window_skins)
+// }
 
-pub fn ui_window_bundle_with_z_index(
-    title: String,
-    window_type: UiWindowType,
-    theme: &UiTheme,
-    button_skins: &Assets<ButtonSkin>,
-    window_skins: &Assets<WindowSkin>, // <- pass assets
-    mut z_index: ResMut<UiWindowZCounter>,
-) -> impl Bundle {
-    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
-        .with_z_index(&mut z_index)
-        .build_with_theme(theme, button_skins, window_skins)
-}
+// pub fn ui_window_bundle_with_z_index(
+//     title: String,
+//     window_type: UiWindowType,
+//     theme: &UiTheme,
+//     button_skins: &Assets<ButtonSkin>,
+//     window_skins: &Assets<WindowSkin>, // <- pass assets
+//     mut z_index: ResMut<UiWindowZCounter>,
+// ) -> impl Bundle {
+//     UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
+//         .with_z_index(&mut z_index)
+//         .build_with_theme(theme, button_skins, window_skins)
+// }
+

@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::ui;
 use crate::ui::messages::*;
-//use crate::ui::layers::UiLayers;
 
 pub struct UiPlugin;
 
@@ -18,7 +17,7 @@ impl Plugin for UiPlugin {
             .add_message::<DialogResult>()
 
             .add_systems(Startup, (
-                ui::layers::spawn_ui_camera,
+                ui::camera::spawn_ui_camera,
                 ui::layers::spawn_ui_roots
             ))
             .add_systems(OnEnter(ui::state::UiInitState::Ready),

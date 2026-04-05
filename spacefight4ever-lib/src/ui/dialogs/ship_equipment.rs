@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use spacefight4ever_ui::{
-    prelude::{UiElementSize, UiTheme, UiWindowZCounter, ui_window_bundle},
-    ui::{assets::{assets::UiResources, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin}, button::UiWindowType, window::ui_window_bundle_with_z_index},
+    prelude::{UiTheme, UiWindowZCounter, spawn_ui_window_with_z_index},
+    ui::{assets::{assets::UiResources, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin}, button::UiWindowType},
 };
 
 pub fn spawn_ship_equipment_dialog(
@@ -15,25 +15,14 @@ pub fn spawn_ship_equipment_dialog(
     window_skins: &Assets<WindowSkin>, // pass skins here
 ) -> Entity {
     let theme = themes.get(&ui_resources.theme_handle).unwrap();
-    let mut window_id = Entity::PLACEHOLDER;
+    let window_id = spawn_ui_window_with_z_index(
+        commands, "Ship Equipment".into(), UiWindowType::Standard, theme, button_skins, window_skins, z_index
+    );
 
     // Spawn dialog panel under DialogRoot
     commands
         .entity(parent)
-        .with_children(|parent| {
-            window_id =
-                parent.spawn(
-                    ui_window_bundle_with_z_index(
-                    "Ship Equipment".into(),
-                    UiWindowType::Standard,
-                    theme,
-                    button_skins,
-                    window_skins,
-                    z_index,
-                    ),
-                )
-                .id();
-        });
+        .add_child(window_id);
 
     window_id
 }

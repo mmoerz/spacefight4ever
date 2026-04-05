@@ -9,6 +9,8 @@ pub mod dialog_manager;
 
 pub mod debug;
 
+pub mod camera;
+
 pub mod input {
     pub mod keybindings;
 }
