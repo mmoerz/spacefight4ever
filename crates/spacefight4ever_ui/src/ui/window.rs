@@ -460,6 +460,8 @@ impl UiAtlasWindowBuilder {
         self
     }
 
+
+    // TODO: i think z_index is missing to have it spawn in the foreground
     pub fn build_with_theme(
         self,
         theme: &UiTheme,
@@ -617,5 +619,18 @@ pub fn ui_window_bundle(
     window_skins: &Assets<WindowSkin>, // <- pass assets
 ) -> impl Bundle {
     UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
-            .build_with_theme(theme, button_skins, window_skins)
+        .build_with_theme(theme, button_skins, window_skins)
+}
+
+pub fn ui_window_bundle_with_z_index(
+    title: String,
+    window_type: UiWindowType,
+    theme: &UiTheme,
+    button_skins: &Assets<ButtonSkin>,
+    window_skins: &Assets<WindowSkin>, // <- pass assets
+    mut z_index: ResMut<UiWindowZCounter>,
+) -> impl Bundle {
+    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
+        .with_z_index(&mut z_index)
+        .build_with_theme(theme, button_skins, window_skins)
 }

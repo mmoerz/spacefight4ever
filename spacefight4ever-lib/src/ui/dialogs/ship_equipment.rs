@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use spacefight4ever_ui::{
     prelude::{UiElementSize, UiTheme, UiWindowZCounter, ui_window_bundle},
-    ui::{assets::{assets::UiResources, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin}, button::UiWindowType},
+    ui::{assets::{assets::UiResources, atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin}, button::UiWindowType, window::ui_window_bundle_with_z_index},
 };
 
 pub fn spawn_ship_equipment_dialog(
@@ -23,12 +23,14 @@ pub fn spawn_ship_equipment_dialog(
         .with_children(|parent| {
             window_id =
                 parent.spawn(
-                    ui_window_bundle(
+                    ui_window_bundle_with_z_index(
                     "Ship Equipment".into(),
                     UiWindowType::Standard,
                     theme,
                     button_skins,
-                    window_skins),
+                    window_skins,
+                    z_index,
+                    ),
                 )
                 .id();
         });
