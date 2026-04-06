@@ -82,6 +82,29 @@ pub fn orbit_camera_input_system(
     }
 }
 
+// zoom in and out system
+pub fn orbit_camera_zoom_system(
+    mut scroll_evr: MessageReader<MouseWheel>,
+    mut query: Query<&mut OrbitCamera>,
+) {
+    let mut scroll = 0.0;
+
+    for ev in scroll_evr.read() {
+        scroll += ev.y;
+    }
+
+    if scroll == 0.0 {
+        return;
+    }
+
+    for mut orbit in &mut query {
+        orbit.distance -= scroll * 0.5;
+
+        // clamp zoom range
+        orbit.distance = orbit.distance.clamp(2.0, 50.0);
+    }
+}
+
 pub fn orbit_camera_transform_system(
     mut query: Query<(&mut Transform, &OrbitCamera)>,
     target_query: Query<&Transform, (With<OrbitCameraTarget>, Without<OrbitCamera>)>,
