@@ -53,12 +53,14 @@ impl OrbitCamera {
     }
 }
 
+/// mouse camera movement
+/// TODO: I need a way to configure the sensitivity of the camera movement
 pub fn orbit_camera_input_system(
     mouse_input: Res<ButtonInput<MouseButton>>,
     mut motion_evr: MessageReader<MouseMotion>,
     mut query: Query<&mut OrbitCamera>,
 ) {
-    if !mouse_input.pressed(MouseButton::Right) {
+    if !mouse_input.pressed(MouseButton::Middle) {
         return;
     }
 
@@ -83,6 +85,7 @@ pub fn orbit_camera_input_system(
 }
 
 // zoom in and out system
+// TODO: logarithmic zoom probably feels more natural
 pub fn orbit_camera_zoom_system(
     mut scroll_evr: MessageReader<MouseWheel>,
     mut query: Query<&mut OrbitCamera>,
@@ -98,7 +101,7 @@ pub fn orbit_camera_zoom_system(
     }
 
     for mut orbit in &mut query {
-        orbit.distance -= scroll * 0.5;
+        orbit.distance -= scroll * 0.85;
 
         // clamp zoom range
         orbit.distance = orbit.distance.clamp(2.0, 50.0);
