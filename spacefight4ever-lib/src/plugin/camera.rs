@@ -12,7 +12,7 @@ impl Plugin for GameCameraPlugin {
                 orbit_camera_transform_system
                     .after(orbit_camera_input_system)
                     .after(orbit_camera_zoom_system),
-                orbit_camera_transform_system,
+                //orbit_camera_transform_system,
             ));
     }
 }

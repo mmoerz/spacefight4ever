@@ -7,6 +7,8 @@ use bevy::{
     prelude::*,
 };
 
+use crate::config::environment::AppConfig;
+
 /// spawn the cameras
 pub fn spawn_ui_camera(mut commands: Commands) {
     commands.spawn((

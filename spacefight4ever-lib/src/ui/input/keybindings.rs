@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, state::commands};
 use crate::ui;
 use crate::ui::layers::UiLayers;
 use spacefight4ever_ui::{
@@ -46,5 +46,16 @@ pub fn trigger_ship_equipment_dialog(
     }
     if keyboard.just_pressed(KeyCode::KeyW) {
         //events.write(UiWindowsSwitchAtlasRequest(window_atlas_status.current + 1));
+    }
+}
+
+pub fn trigger_settings(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    ui_layers: Res<UiLayers>,
+    asset_server: Res<AssetServer>,
+) {
+    if keyboard.just_pressed(KeyCode::KeyS) {
+        
     }
 }

@@ -26,6 +26,7 @@ use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
 use spacefight4ever_lib::plugin::camera::GameCameraPlugin;
 use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget};
+use spacefight4ever_lib::config::environment::ConfigPlugin;
 
 
 // to consider:
@@ -38,13 +39,16 @@ fn main() {
         .add_plugins((
             DefaultPlugins.set(
             bevy::asset::AssetPlugin {
-            file_path: get_s4fe_config().asset_path.into(),
+            file_path: AppConfig::default().asset_path.into(),
             ..default()
             }),
             PhysicsPlugins::default()) 
         )
         // camera setup
         .add_plugins(GameCameraPlugin)
+
+        // config and settings plugins
+        .add_plugins(ConfigPlugin)
 
         // -ui crate plugins
         .add_plugins(UiAssetsPlugin)
