@@ -86,7 +86,7 @@ pub fn orbit_camera_transform_system(
     mut query: Query<(&mut Transform, &OrbitCamera)>,
     target_query: Query<&Transform, (With<OrbitCameraTarget>, Without<OrbitCamera>)>,
 ) {
-    println!("camera count: {}", query.iter().count());
+    //println!("camera count: {}", query.iter().count());
     for (mut transform, orbit) in &mut query {
         let Ok(target_transform) = target_query.get(orbit.target) else {
             continue;
