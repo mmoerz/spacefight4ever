@@ -85,7 +85,11 @@ pub fn vertical_slider() -> impl Bundle {
     )
 }
 
-pub fn horizontal_slider() -> impl Bundle {
+pub fn horizontal_slider(
+    value_start: f32,
+    value_end: f32,
+    value_default: f32,
+) -> impl Bundle {
     (
         Node {
             display: Display::Flex,
@@ -102,8 +106,8 @@ pub fn horizontal_slider() -> impl Bundle {
         Slider {
             track_click: TrackClick::Snap,
         },
-        SliderValue(50.0),
-        SliderRange::new(0.0, 100.0),
+        SliderValue(value_default),
+        SliderRange::new(value_start, value_end),
         TabIndex(0),
         Children::spawn((
             Spawn((
@@ -194,7 +198,11 @@ fn update_value_labels(
 ) {
     for (value, label) in sliders.iter() {
         if let Ok(mut text) = texts.get_mut(label.0) {
-            **text = format!("{:.0}", value.0);
+            if value.0 > 0.5 {
+                **text = format!("{:.0}", value.0);
+            } else {
+                **text = format!("{:.3}", value.0);
+            }
         }
     }
 }

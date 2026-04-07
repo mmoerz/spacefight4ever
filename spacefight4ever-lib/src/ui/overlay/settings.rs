@@ -86,7 +86,7 @@ pub fn spawn_settings(
                         .id();
 
                     tabrow.spawn((
-                        horizontal_slider(),
+                        horizontal_slider(0., 0.05, 0.005),
                         ValueLabel(label_id),
                         observe(slider_self_update),
                     ));
@@ -94,4 +94,19 @@ pub fn spawn_settings(
             );
         });
     });
+}
+
+fn update_value_labels(
+    sliders: Query<(&SliderValue, &ValueLabel), (Changed<SliderValue>, With<UiSlider>)>,
+    mut texts: Query<&mut Text>,
+) {
+    for (value, label) in sliders.iter() {
+        if let Ok(mut text) = texts.get_mut(label.0) {
+            if value.0 > 0.5 {
+                **text = format!("{:.0}", value.0);
+            } else {
+                **text = format!("{:.3}", value.0);
+            }
+        }
+    }
 }
