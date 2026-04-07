@@ -33,7 +33,9 @@ impl Plugin for UiPlugin {
             .add_systems(Update, ui::state::input_routing_system)
             .add_systems(Update, ui::dialog_manager::exit_on_confirm)
             .add_systems(Update, ui::input::keybindings::trigger_exit_dialog)
+            
             .add_systems(Update,ui::input::keybindings::trigger_ship_equipment_dialog)
+            .add_systems(Update,ui::input::keybindings::trigger_settings)
                     
             .add_systems(Update, ui::debug::debug_print_ui_tree)
             ;

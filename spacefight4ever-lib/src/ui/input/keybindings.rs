@@ -6,6 +6,7 @@ use spacefight4ever_ui::{
     ui::assets::{atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin},
 };
 use spacefight4ever_ui::ui::assets::{theme::UiTheme, assets::UiResources};
+use crate::ui::overlay::settings::spawn_settings;
 
 pub struct UiPlugin;
 
@@ -56,6 +57,10 @@ pub fn trigger_settings(
     asset_server: Res<AssetServer>,
 ) {
     if keyboard.just_pressed(KeyCode::KeyS) {
-        
+        spawn_settings(
+            &mut commands,
+            ui_layers.window_root,
+            &asset_server,
+        );
     }
 }

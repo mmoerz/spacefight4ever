@@ -13,8 +13,13 @@
 // }
 
 
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    input_focus::{tab_navigation::TabNavigationPlugin, InputDispatchPlugin}
+};
 use avian3d::prelude::*;
+use bevy_ui_widgets::UiWidgetsPlugins;
+
 
 use spacefight4ever_ui::{
     ui::assets::assets::setup_ui_theme,
@@ -27,6 +32,7 @@ use spacefight4ever_lib::config::environment::*;
 use spacefight4ever_lib::plugin::camera::GameCameraPlugin;
 use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget};
 use spacefight4ever_lib::config::environment::ConfigPlugin;
+use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
 
 
 // to consider:
@@ -42,8 +48,11 @@ fn main() {
             file_path: AppConfig::default().asset_path.into(),
             ..default()
             }),
-            PhysicsPlugins::default()) 
-        )
+            PhysicsPlugins::default(),
+            UiWidgetsPlugins,
+            InputDispatchPlugin,
+            TabNavigationPlugin
+        ))
         // camera setup
         .add_plugins(GameCameraPlugin)
 
@@ -58,6 +67,8 @@ fn main() {
         // -lib plugins
         .add_plugins(UiPlugin)
         .add_plugins(GamePlugin)
+
+        .add_plugins(UiSliderPlugin)
 
         .add_systems(Startup, setup_ui_theme)
         .add_systems(Startup, setup)
