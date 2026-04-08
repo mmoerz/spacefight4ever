@@ -29,7 +29,7 @@ pub struct Sf4eConfigMouse {
 impl Default for Sf4eConfigMouse {
     fn default() -> Self {
         Self {
-            sensitivity: 0.9,
+            sensitivity: 0.001,
             scroll_sensitivity: 0.95,
         }
     }

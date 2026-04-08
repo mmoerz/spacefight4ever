@@ -201,7 +201,7 @@ fn update_value_labels(
             if value.0 > 0.5 {
                 **text = format!("{:.0}", value.0);
             } else {
-                **text = format!("{:.3}", value.0);
+                **text = format!("{:.4}", value.0);
             }
         }
     }

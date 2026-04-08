@@ -79,10 +79,12 @@ pub fn orbit_camera_input_system(
 
     for mut orbit in &mut query {
         // logarithmic scaling based on distance
-        let scale = orbit.distance.max(0.001).ln_1p();
+        //let scale = orbit.distance.max(0.001).ln_1p();
+        let speed =
+    config.mouse.sensitivity * orbit.distance.sqrt() * 1.6;
 
-        orbit.yaw -= delta.x * sensitivity * scale;
-        orbit.pitch -= delta.y * sensitivity * scale;
+        orbit.yaw -= delta.x * speed;
+        orbit.pitch -= delta.y * speed;
 
         orbit.pitch = orbit.pitch.clamp(
             -89.9_f32.to_radians(),
@@ -112,7 +114,7 @@ pub fn orbit_camera_zoom_system(
 
     for mut orbit in &mut query {
                 // exponential zoom (logarithmic feel)
-        let speed = base * orbit.distance * 4.0;
+        let speed = base * (orbit.distance + 1.0) * 4.0;
 
         let zoom_factor = (-scroll * speed).exp();
 

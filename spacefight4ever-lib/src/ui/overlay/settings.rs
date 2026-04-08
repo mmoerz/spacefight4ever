@@ -19,6 +19,7 @@ pub fn spawn_settings(
     commands: &mut Commands, 
     parent: Entity,
     asset_server: &Res<AssetServer>,
+    config: &Res<AppConfig>,
 ) {
     commands.entity(parent)
         .with_children(|top| {
@@ -90,7 +91,7 @@ pub fn spawn_settings(
                         .id();
 
                     tabrow.spawn((
-                        horizontal_slider(0., 0.05, 0.005),
+                        horizontal_slider(0., 0.005, config.mouse.sensitivity),
                         ValueLabel(label_id),
                         Camera_Sensitivity_Slider,
                         observe(slider_self_update),

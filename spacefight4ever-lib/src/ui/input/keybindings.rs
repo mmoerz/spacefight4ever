@@ -1,3 +1,4 @@
+use avian3d::parry::either::Either::Right;
 use bevy::{prelude::*, state::commands};
 use crate::ui;
 use crate::ui::layers::UiLayers;
@@ -5,6 +6,7 @@ use spacefight4ever_ui::{
     prelude::*,
     ui::assets::{atlasbuttonskin::ButtonSkin, windowsskin::WindowSkin},
 };
+use crate::config::environment::AppConfig;
 use spacefight4ever_ui::ui::assets::{theme::UiTheme, assets::UiResources};
 use crate::ui::overlay::settings::spawn_settings;
 
@@ -55,12 +57,14 @@ pub fn trigger_settings(
     mut commands: Commands,
     ui_layers: Res<UiLayers>,
     asset_server: Res<AssetServer>,
+    config: Res<AppConfig>,
 ) {
     if keyboard.just_pressed(KeyCode::KeyS) {
         spawn_settings(
             &mut commands,
             ui_layers.window_root,
             &asset_server,
+            &config,
         );
     }
 }
