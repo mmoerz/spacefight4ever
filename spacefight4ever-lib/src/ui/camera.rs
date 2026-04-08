@@ -1,10 +1,9 @@
 
 use bevy::{
-    input::{
+    anti_alias::fxaa::Sensitivity, input::{
         gestures::*,
         mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-    },
-    prelude::*,
+    }, prelude::*
 };
 
 use crate::config::environment::AppConfig;
@@ -61,6 +60,7 @@ pub fn orbit_camera_input_system(
     mouse_input: Res<ButtonInput<MouseButton>>,
     mut motion_evr: MessageReader<MouseMotion>,
     mut query: Query<&mut OrbitCamera>,
+    config: Res<AppConfig>,
 ) {
     if !mouse_input.pressed(MouseButton::Middle) {
         return;
@@ -75,9 +75,14 @@ pub fn orbit_camera_input_system(
         return;
     }
 
+    let sensitivity = config.mouse.sensitivity;
+
     for mut orbit in &mut query {
-        orbit.yaw -= delta.x * orbit.sensitivity;
-        orbit.pitch -= delta.y * orbit.sensitivity;
+        // logarithmic scaling based on distance
+        let scale = orbit.distance.max(0.001).ln_1p();
+
+        orbit.yaw -= delta.x * sensitivity * scale;
+        orbit.pitch -= delta.y * sensitivity * scale;
 
         orbit.pitch = orbit.pitch.clamp(
             -89.9_f32.to_radians(),
@@ -91,6 +96,7 @@ pub fn orbit_camera_input_system(
 pub fn orbit_camera_zoom_system(
     mut scroll_evr: MessageReader<MouseWheel>,
     mut query: Query<&mut OrbitCamera>,
+    config: Res<AppConfig>,
 ) {
     let mut scroll = 0.0;
 
@@ -102,11 +108,18 @@ pub fn orbit_camera_zoom_system(
         return;
     }
 
+    let base = config.mouse.sensitivity;
+
     for mut orbit in &mut query {
-        orbit.distance -= scroll * 0.85;
+                // exponential zoom (logarithmic feel)
+        let speed = base * orbit.distance * 4.0;
+
+        let zoom_factor = (-scroll * speed).exp();
+
+        orbit.distance *= zoom_factor;
 
         // clamp zoom range
-        orbit.distance = orbit.distance.clamp(2.0, 50.0);
+        orbit.distance = orbit.distance.clamp(2.0, 100.0);
     }
 }
 

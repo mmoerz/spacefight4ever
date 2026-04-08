@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 
 use bevy_ui_widgets::{
-    observe, slider_self_update,
+    observe, slider_self_update, SliderValue
 };
 
-use crate::ui::overlay::slider::{horizontal_slider, ValueLabel};
+use crate::config::environment::AppConfig;
+use crate::ui::overlay::slider::{horizontal_slider, ValueLabel, UiSlider};
 
 const TEXT_COLOR_LESSWHITE: Color = Color::srgb(0.8, 0.8, 0.8);
+
+#[derive(Component)]
+struct Camera_Sensitivity_Slider;
 
 #[derive(Component)]
 pub struct Settings;
@@ -88,6 +92,7 @@ pub fn spawn_settings(
                     tabrow.spawn((
                         horizontal_slider(0., 0.05, 0.005),
                         ValueLabel(label_id),
+                        Camera_Sensitivity_Slider,
                         observe(slider_self_update),
                     ));
                 }
@@ -97,16 +102,20 @@ pub fn spawn_settings(
 }
 
 fn update_value_labels(
-    sliders: Query<(&SliderValue, &ValueLabel), (Changed<SliderValue>, With<UiSlider>)>,
-    mut texts: Query<&mut Text>,
+    sliders: Query<&SliderValue, (Changed<SliderValue>, With<Camera_Sensitivity_Slider>)>,
+    mut config: ResMut<AppConfig>,
 ) {
-    for (value, label) in sliders.iter() {
-        if let Ok(mut text) = texts.get_mut(label.0) {
-            if value.0 > 0.5 {
-                **text = format!("{:.0}", value.0);
-            } else {
-                **text = format!("{:.3}", value.0);
-            }
-        }
+    if let Ok(value) = sliders.single() {
+        config.mouse.sensitivity = value.0;
+    }
+}
+
+pub struct UiSettingsPlugin;
+
+impl Plugin for UiSettingsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, (
+            update_value_labels
+        ));
     }
 }

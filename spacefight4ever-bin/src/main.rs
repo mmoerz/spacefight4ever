@@ -32,6 +32,7 @@ use spacefight4ever_lib::config::environment::*;
 use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget, GameCameraPlugin};
 use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
+use spacefight4ever_lib::ui::overlay::settings::UiSettingsPlugin;
 
 
 // to consider:
@@ -68,6 +69,7 @@ fn main() {
         .add_plugins(GamePlugin)
 
         .add_plugins(UiSliderPlugin)
+        .add_plugins(UiSettingsPlugin)
 
         .add_systems(Startup, setup_ui_theme)
         .add_systems(Startup, setup)

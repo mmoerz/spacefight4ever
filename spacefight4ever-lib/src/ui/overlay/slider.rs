@@ -15,7 +15,7 @@ use bevy_ui_widgets::{
 pub struct ValueLabel(pub Entity);
 
 #[derive(Component)]
-struct UiSlider;
+pub struct UiSlider;
 
 #[derive(Component)]
 struct UiSliderThumb;
