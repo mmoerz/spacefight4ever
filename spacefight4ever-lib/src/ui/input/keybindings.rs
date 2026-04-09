@@ -1,6 +1,6 @@
 use avian3d::parry::either::Either::Right;
 use bevy::{prelude::*, state::commands};
-use crate::ui;
+use crate::ui::{self, overlay::settings::UiSettingsOpened};
 use crate::ui::layers::UiLayers;
 use spacefight4ever_ui::{
     prelude::*,
@@ -58,13 +58,24 @@ pub fn trigger_settings(
     ui_layers: Res<UiLayers>,
     asset_server: Res<AssetServer>,
     config: Res<AppConfig>,
+    mut opened: ResMut<UiSettingsOpened>,
 ) {
     if keyboard.just_pressed(KeyCode::KeyS) {
-        spawn_settings(
-            &mut commands,
-            ui_layers.window_root,
-            &asset_server,
-            &config,
-        );
+        if ! opened.opened {
+            opened.entity =
+                spawn_settings(
+                    &mut commands,
+                    ui_layers.window_root,
+                    &asset_server,
+                    &config,
+                );
+            opened.opened = true;
+            println!("Opened settings {:?}", opened.entity)
+        } else {
+            println!("Closing settings {:?}", opened.entity);
+            commands.entity(opened.entity).despawn();
+            opened.entity = Entity::PLACEHOLDER;
+            opened.opened = false;
+        }
     }
-}
+} 

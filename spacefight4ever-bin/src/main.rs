@@ -72,7 +72,7 @@ fn main() {
         .add_plugins(UiSettingsPlugin)
 
         .add_systems(Startup, setup_ui_theme)
-        .add_systems(Startup, setup)
+        //.add_systems(Startup, setup)
         .add_systems(Startup, testsetup)
         .add_systems(Update, assign_camera_target_system)
 

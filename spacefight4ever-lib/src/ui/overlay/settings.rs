@@ -20,10 +20,12 @@ pub fn spawn_settings(
     parent: Entity,
     asset_server: &Res<AssetServer>,
     config: &Res<AppConfig>,
-) {
+) -> Entity {
+    let mut result = Entity::PLACEHOLDER;
+
     commands.entity(parent)
         .with_children(|top| {
-            top.spawn((
+            result = top.spawn((
                 Node {
                     width: percent(50.0),
                     height: percent(100.0),
@@ -70,6 +72,10 @@ pub fn spawn_settings(
                     },
                 )).with_children(|tabrow| {
                     tabrow.spawn((
+                        Node {
+                            width: percent(50.0),
+                            ..default()
+                        },
                         Text::new("Mouse Sensitivity: "),
                         TextFont {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
@@ -80,6 +86,10 @@ pub fn spawn_settings(
                     ));
                     let label_id = tabrow
                         .spawn((
+                            Node {
+                                width: px(45.0),
+                                ..default()
+                            },
                             Text::new("50"),
                             TextFont {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
@@ -98,8 +108,10 @@ pub fn spawn_settings(
                     ));
                 }
             );
-        });
+        }).id();
     });
+
+    result
 }
 
 fn update_value_labels(
@@ -111,11 +123,28 @@ fn update_value_labels(
     }
 }
 
+#[derive(Resource)]
+pub struct UiSettingsOpened {
+    pub entity: Entity,
+    pub opened: bool,
+}
+
+impl Default for UiSettingsOpened {
+    fn default() -> Self {
+        Self {
+            entity: Entity::PLACEHOLDER,
+            opened: false,
+        }
+    }
+}
+
 pub struct UiSettingsPlugin;
 
 impl Plugin for UiSettingsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (
+        app
+            .init_resource::<UiSettingsOpened>()
+            .add_systems(Update, (
             update_value_labels
         ));
     }
