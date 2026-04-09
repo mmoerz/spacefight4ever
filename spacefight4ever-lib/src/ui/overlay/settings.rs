@@ -73,7 +73,7 @@ pub fn spawn_settings(
                 )).with_children(|tabrow| {
                     tabrow.spawn((
                         Node {
-                            width: percent(50.0),
+                            width: px(160.0),
                             ..default()
                         },
                         Text::new("Mouse Sensitivity: "),

@@ -70,9 +70,9 @@ pub fn trigger_settings(
                     &config,
                 );
             opened.opened = true;
-            println!("Opened settings {:?}", opened.entity)
+            //println!("Opened settings {:?}", opened.entity)
         } else {
-            println!("Closing settings {:?}", opened.entity);
+            //println!("Closing settings {:?}", opened.entity);
             commands.entity(opened.entity).despawn();
             opened.entity = Entity::PLACEHOLDER;
             opened.opened = false;
