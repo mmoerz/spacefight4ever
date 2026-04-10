@@ -56,7 +56,6 @@ impl OrbitCamera {
 }
 
 /// mouse camera movement
-/// TODO: I need a way to configure the sensitivity of the camera movement
 pub fn orbit_camera_input_system(
     mouse_input: Res<ButtonInput<MouseButton>>,
     mut motion_evr: MessageReader<MouseMotion>,
@@ -81,8 +80,7 @@ pub fn orbit_camera_input_system(
     for mut orbit in &mut query {
         // logarithmic scaling based on distance
         //let scale = orbit.distance.max(0.001).ln_1p();
-        let speed =
-    config.mouse.sensitivity * orbit.distance.sqrt() * 1.6;
+        let speed = sensitivity * orbit.distance.sqrt() * 1.6;
 
         orbit.yaw -= delta.x * speed;
         orbit.pitch -= delta.y * speed;
@@ -95,7 +93,7 @@ pub fn orbit_camera_input_system(
 }
 
 // zoom in and out system
-// TODO: logarithmic zoom probably feels more natural
+// TODO: maybe add a modifier key to multiply camera zoom
 pub fn orbit_camera_zoom_system(
     mut scroll_evr: MessageReader<MouseWheel>,
     mut query: Query<&mut OrbitCamera>,
