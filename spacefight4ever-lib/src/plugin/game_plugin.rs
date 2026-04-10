@@ -9,21 +9,6 @@ use crate::game::physics::raycast_damage::*;
 use crate::game::ship::weapon_definition::*;
 use crate::game::ship::ammunition_definitions::*;
 
-/// game plugin
-/// currently only contains player spawn
-/// might 
-pub struct GamePlugin;
-
-impl Plugin for GamePlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(Startup, spawn_player);
-
-            
-    }
-}
-
-
 pub struct CombatPlugin;
 impl Plugin for CombatPlugin {
     fn build(&self, app: &mut App) {

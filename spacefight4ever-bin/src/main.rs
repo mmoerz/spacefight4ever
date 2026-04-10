@@ -27,8 +27,9 @@ use spacefight4ever_ui::{
 };
 
 use spacefight4ever_lib::prelude::*;
-use spacefight4ever_lib::setup;
 use spacefight4ever_lib::config::environment::*;
+use spacefight4ever_lib::game::player::gameassets::GameAssetsPlugin;
+use spacefight4ever_lib::game::player::player::PlayerPlugin;
 use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget, GameCameraPlugin};
 use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
@@ -55,6 +56,7 @@ fn main() {
             TabNavigationPlugin
         ))
         // camera setup
+        .add_plugins(GameAssetsPlugin) // should load the necessary assets - currently only for the player ship
         .add_plugins(GameCameraPlugin)
 
         // config and settings plugins
@@ -67,17 +69,16 @@ fn main() {
 
         // -lib plugins
         .add_plugins(UiPlugin)
-        .add_plugins(GamePlugin)
 
         .add_plugins(UiSliderPlugin)
         .add_plugins(UiSettingsPlugin)
 
+        .add_plugins(PlayerPlugin)
         .add_plugins(MovementPlugin)
 
         .add_systems(Startup, setup_ui_theme)
         //.add_systems(Startup, setup)
         .add_systems(Startup, testsetup)
-        .add_systems(Update, assign_camera_target_system)
 
         .run();
 }
@@ -89,22 +90,15 @@ fn testsetup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // circular base
-    commands.spawn((
-        Mesh3d(meshes.add(Circle::new(4.0))),
-        MeshMaterial3d(materials.add(Color::WHITE)),
-        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
-    ));
-    // cube
-    let cube = 
+    // ship
+    // let cube = 
     commands.spawn((
         // Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         // MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
         SceneRoot(asset_server.load("ships/models/Spitfire.glb#Scene0")),
         Transform::from_xyz(0.0, 0.5, 0.0),
-        OrbitCameraTarget,
+        // OrbitCameraTarget,
     )).id();
-
 
     // light
     commands.spawn((
@@ -115,18 +109,3 @@ fn testsetup(
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 }
-
-fn assign_camera_target_system(
-    mut camera_query: Query<&mut OrbitCamera>,
-    target_query: Query<Entity, With<OrbitCameraTarget>>,
-) {
-    let Ok(target) = target_query.single() else { return; };
-
-    for mut orbit in &mut camera_query {
-        if orbit.get_target() == Entity::PLACEHOLDER {
-            orbit.set_target(target);
-            println!("Camera target assigned: {:?}", target);
-        }
-    }
-}
-

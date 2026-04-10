@@ -21,7 +21,6 @@ pub fn spawn_ui_camera(mut commands: Commands) {
             distance: 10.0,
             yaw: 0.0,
             pitch: 0.0,
-            sensitivity: 0.001,
         },
     ));
 
@@ -36,13 +35,15 @@ pub fn spawn_ui_camera(mut commands: Commands) {
 #[derive(Component)]
 pub struct OrbitCameraTarget;
 
+/// contains the information about the 3d camera focal point
+/// for 3rd person view
+/// TODO: research if the target is really needed, should be possible to work with Entity query to get the target
 #[derive(Component)]
 pub struct OrbitCamera {
     target: Entity,       // the target we orbit around
     distance: f32,        // distance from target
     yaw: f32,             // horizontal angle
     pitch: f32,           // vertical angle
-    sensitivity: f32,     // mouse sensitivity
 }
 
 impl OrbitCamera {
@@ -135,13 +136,31 @@ pub fn orbit_camera_transform_system(
             continue;
         };
 
-        let x = orbit.distance * orbit.pitch.cos() * orbit.yaw.sin();
-        let y = orbit.distance * orbit.pitch.sin();
-        let z = orbit.distance * orbit.pitch.cos() * orbit.yaw.cos();
-
         let target = target_transform.translation;
-        transform.translation = target + Vec3::new(x, y, z);
+
+        let rotation =
+            Quat::from_axis_angle(Vec3::Y, orbit.yaw) *
+            Quat::from_axis_angle(Vec3::X, orbit.pitch);
+
+        transform.translation =
+            target + rotation * Vec3::new(0.0, 0.0, orbit.distance);
+
         transform.look_at(target, Vec3::Y);
+    }
+}
+
+/// set up the orbit camera 
+fn assign_camera_target_system(
+    mut camera_query: Query<&mut OrbitCamera>,
+    target_query: Query<Entity, With<OrbitCameraTarget>>,
+) {
+    let Ok(target) = target_query.single() else { return; };
+
+    for mut orbit in &mut camera_query {
+        if orbit.get_target() == Entity::PLACEHOLDER {
+            orbit.set_target(target);
+            println!("Camera target assigned: {:?}", target);
+        }
     }
 }
 
@@ -151,12 +170,11 @@ impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Update, (
+                assign_camera_target_system,
                 orbit_camera_input_system,
                 orbit_camera_zoom_system,
                 orbit_camera_transform_system
-                    .after(orbit_camera_input_system)
-                    .after(orbit_camera_zoom_system),
-                //orbit_camera_transform_system,
-            ));
+                ).chain()
+            );
     }
 }

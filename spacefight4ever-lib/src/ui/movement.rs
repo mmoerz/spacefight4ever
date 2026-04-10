@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
+use crate::ui::camera::OrbitCameraTarget;
+
 fn draw_cursor(
-    camera_query: Single<(&Camera, &GlobalTransform)>,
+    camera_query: Single<(&Camera, &GlobalTransform), With<OrbitCameraTarget>>,
     ground: Single<&GlobalTransform, With<GroundPlane>>,
     window: Single<&Window>,
     mut gizmos: Gizmos,

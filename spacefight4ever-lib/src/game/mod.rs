@@ -21,6 +21,7 @@ pub mod ship {
 pub mod player {
     pub mod player;
     pub mod ship;
+    pub mod gameassets;
 }
 
 pub mod physics {
