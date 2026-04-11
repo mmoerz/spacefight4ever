@@ -55,12 +55,12 @@ fn main() {
             InputDispatchPlugin,
             TabNavigationPlugin
         ))
-        // camera setup
-        .add_plugins(GameAssetsPlugin) // should load the necessary assets - currently only for the player ship
-        .add_plugins(GameCameraPlugin)
-
         // config and settings plugins
         .add_plugins(ConfigPlugin)
+        .add_plugins(GameAssetsPlugin) // should load the necessary assets - currently only for the player ship
+
+        // camera setup
+        .add_plugins(GameCameraPlugin)
 
         // -ui crate plugins
         .add_plugins(UiAssetsPlugin)

@@ -1,15 +1,21 @@
 
 use bevy::{
-    anti_alias::fxaa::Sensitivity, input::{
+    anti_alias::fxaa::Sensitivity, 
+    input::{
         gestures::*,
         mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-    }, prelude::*
+    }, 
+    prelude::*,
+    camera::Projection,
 };
 
 use crate::config::environment::AppConfig;
 
 /// spawn the cameras
-pub fn spawn_ui_camera(mut commands: Commands) {
+pub fn spawn_ui_camera(
+    mut commands: Commands,
+    config: Res<AppConfig>,
+) {
     commands.spawn((
         Name::new("Camera3d"),
         Camera3d::default(),
@@ -18,7 +24,7 @@ pub fn spawn_ui_camera(mut commands: Commands) {
         GlobalTransform::default(),
         OrbitCamera {
             target: Entity::PLACEHOLDER,
-            distance: 10.0,
+            distance: config.camera.distance_default,
             yaw: 0.0,
             pitch: 0.0,
         },
@@ -120,7 +126,7 @@ pub fn orbit_camera_zoom_system(
         orbit.distance *= zoom_factor;
 
         // clamp zoom range
-        orbit.distance = orbit.distance.clamp(2.0, 100.0);
+        orbit.distance = orbit.distance.clamp(2.0, 150.0);
     }
 }
 

@@ -35,7 +35,7 @@ impl Default for Sf4eConfigMouse {
     }
 }
 
-// the application configuration / settings that can be stored and loaded
+/// the application configuration / settings that can be stored and loaded
 #[derive(Resource, Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub asset_path: String,
