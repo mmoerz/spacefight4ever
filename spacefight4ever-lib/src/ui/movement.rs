@@ -1,3 +1,4 @@
+use avian3d::parry::query::point;
 use bevy::{
     input::{
         gestures::*,
@@ -121,29 +122,41 @@ fn ensure_preview_spawned(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     if state.active && !state.spawned {
-        commands.spawn((
-            MovementTargetPreviewLine,
-            Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))), // length adjusted later
-            MeshMaterial3d(materials.add(Color::WHITE)),
-            Transform::default(),
-        ));
-        
+        let line_material = materials.add(StandardMaterial{
+            base_color: Color::srgb(0.8, 0.8, 0.8),
+            unlit: true,
+            ..default()
+        });
+        let point_material = materials.add(StandardMaterial{
+            base_color: Color::srgb(0.8, 0.2, 0.2),
+            unlit: true,
+            ..default()
+        });
+
         commands.spawn((
             MovementTargetPreviewBase,
-            Mesh3d(meshes.add(Plane3d::default().mesh().size(0.2, 0.2))),
-            MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.3))),
+            //Mesh3d(meshes.add(Plane3d::default().mesh().size(0.2, 0.2))),
+            Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
+            MeshMaterial3d(point_material.clone()),
         ));
 
         commands.spawn((
             MovementTargetPreview,
             Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
-            MeshMaterial3d(materials.add(Color::srgb(0.8, 0.2, 0.2))),
+            MeshMaterial3d(point_material.clone()),
+        ));
+
+        commands.spawn((
+            MovementTargetPreviewLine,
+            Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))), // length adjusted later
+            MeshMaterial3d(line_material.clone()),
+            Transform::default(),
         ));
 
         commands.spawn((
             MovementTargetPreviewPath,
             Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
-            MeshMaterial3d(materials.add(Color::srgb(0.2, 0.8, 1.0))), // cyan path
+            MeshMaterial3d(line_material.clone()), // cyan path
             Transform::default(),
         ));
 
