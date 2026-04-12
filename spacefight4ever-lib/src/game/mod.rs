@@ -20,8 +20,9 @@ pub mod ship {
 
 pub mod player {
     pub mod player;
-    pub mod ship;
+    pub mod playership;
     pub mod gameassets;
+    pub mod ship;
 }
 
 pub mod physics {

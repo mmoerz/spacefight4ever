@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::combat::health::*;
 use crate::game::combat::health_basetypes::HealthLayerType;
-use crate::game::player::ship::*;
+use crate::game::player::playership::*;
 
 #[derive(Component)]
 pub struct HealthBar;

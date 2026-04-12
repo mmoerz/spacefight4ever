@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
 use crate::game::ship::weapon::{Weapon, Ammunition};
-use crate::game::player::{ship::*, gameassets::GameAssets};
+use crate::game::player::{playership::*, gameassets::GameAssets};
 use crate::game::ship::module::{ModuleSize, HardPointType};
 
 pub fn spawn_player(

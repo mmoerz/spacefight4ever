@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 #spacefight4ever_ui = { path = "../crates/spacefight4ever_ui", features = ["dynamic_linking", "debug"] }
 
-avian3d = { version = "0.6.0", features = [ "simd" ] }
 bevy = { workspace = true }
 bevy_prototype_lyon = { workspace = true, features = []}
 bevy_ui = { workspace = true }
@@ -15,6 +14,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 directories = { workspace = true }
 ron = { workspace = true }
+avian3d = { workspace = true, features = [ "simd" ]  }
 
 spacefight4ever_ui = { workspace = true }
 

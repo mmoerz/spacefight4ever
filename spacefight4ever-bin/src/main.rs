@@ -34,7 +34,7 @@ use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget, GameCamera
 use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
 use spacefight4ever_lib::ui::overlay::settings::UiSettingsPlugin;
-use spacefight4ever_lib::ui::movement::MovementPlugin;
+use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
 
 
 // to consider:
