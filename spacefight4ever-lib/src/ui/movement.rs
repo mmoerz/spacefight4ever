@@ -132,36 +132,6 @@ fn preview_scale(cam_pos: Vec3, point: Vec3) -> f32 {
     (dist * 0.05).clamp(0.05, 2.0)
 }
 
-fn spawn_movement_visuals(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    // target cube
-    commands.spawn((
-        MovementTargetMarker,
-        Mesh3d(meshes.add(Cuboid::new(0.25, 0.25, 0.25))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgb(1.0, 0.2, 0.2),
-            unlit: true,
-            ..default()
-        })),
-        Visibility::Visible,
-    ));
-
-    // path line
-    commands.spawn((
-        MovementTargetPathLine,
-        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgb(0.2, 0.8, 1.0),
-            unlit: true,
-            ..default()
-        })),
-        Visibility::Visible,
-    ));
-}
-
 fn sync_movement_visuals(
     movement: Res<MovementCommand>,
     cam: Single<&GlobalTransform, With<OrbitCamera>>,
