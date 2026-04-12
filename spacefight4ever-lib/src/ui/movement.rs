@@ -35,6 +35,20 @@ pub enum MovementPlacementState {
     AdjustingHeight {height : f32},
 }
 
+/// 3d point in space to move to
+#[derive(Component)]
+pub struct MovementTargetMarker;
+
+/// line from (ship) orbitcameratarget to movement target
+#[derive(Component)]
+pub struct MovementTargetPathLine;
+
+/// target to move to
+#[derive(Resource, Default)]
+pub struct MovementCommand {
+    pub target: Option<Vec3>,
+}
+
 /// point on ground plane
 #[derive(Component)]
 pub struct MovementTargetPreviewBase;
@@ -57,6 +71,7 @@ fn movement_height_input_system(
     window: Single<&Window>,
     camera_query: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
     ground: Single<&GlobalTransform, With<GroundPlane>>,
+    mut movement_command: ResMut<MovementCommand>,
 ) {
     let (camera, camera_transform) = *camera_query;
 
@@ -102,6 +117,8 @@ fn movement_height_input_system(
             let final_pos = Vec3::new(base.x, state.height, base.z);
             println!("Final 3D position: {:?}", final_pos);
 
+            movement_command.target = Some(final_pos);
+
             state.base = None;
         }
     }
@@ -115,84 +132,64 @@ fn preview_scale(cam_pos: Vec3, point: Vec3) -> f32 {
     (dist * 0.05).clamp(0.05, 2.0)
 }
 
-fn ensure_preview_spawned(
+fn spawn_movement_visuals(
     mut commands: Commands,
-    mut state: ResMut<MovementTarget>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    if state.active && !state.spawned {
-        let line_material = materials.add(StandardMaterial{
-            base_color: Color::srgb(0.8, 0.8, 0.8),
+    // target cube
+    commands.spawn((
+        MovementTargetMarker,
+        Mesh3d(meshes.add(Cuboid::new(0.25, 0.25, 0.25))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(1.0, 0.2, 0.2),
             unlit: true,
             ..default()
-        });
-        let point_material = materials.add(StandardMaterial{
-            base_color: Color::srgb(0.8, 0.2, 0.2),
+        })),
+        Visibility::Visible,
+    ));
+
+    // path line
+    commands.spawn((
+        MovementTargetPathLine,
+        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(0.2, 0.8, 1.0),
             unlit: true,
             ..default()
-        });
-
-        commands.spawn((
-            MovementTargetPreviewBase,
-            //Mesh3d(meshes.add(Plane3d::default().mesh().size(0.2, 0.2))),
-            Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
-            MeshMaterial3d(point_material.clone()),
-        ));
-
-        commands.spawn((
-            MovementTargetPreview,
-            Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
-            MeshMaterial3d(point_material.clone()),
-        ));
-
-        commands.spawn((
-            MovementTargetPreviewLine,
-            Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))), // length adjusted later
-            MeshMaterial3d(line_material.clone()),
-            Transform::default(),
-        ));
-
-        commands.spawn((
-            MovementTargetPreviewPath,
-            Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
-            MeshMaterial3d(line_material.clone()), // cyan path
-            Transform::default(),
-        ));
-
-        state.spawned = true;
-    }
+        })),
+        Visibility::Visible,
+    ));
 }
 
-fn cleanup_preview(
-    mut commands: Commands,
-    mut state: ResMut<MovementTarget>,
-    q_base: Query<Entity, With<MovementTargetPreviewBase>>,
-    q_top: Query<Entity, With<MovementTargetPreview>>,
-    q_line: Query<Entity, With<MovementTargetPreviewLine>>,
-    q_path: Query<Entity, With<MovementTargetPreviewPath>>,
+fn sync_movement_visuals(
+    movement: Res<MovementCommand>,
+    camera_target: Query<&GlobalTransform, With<OrbitCameraTarget>>,
+    mut marker_q: Query<&mut Transform, (With<MovementTargetMarker>, Without<MovementTargetPathLine>)>,
+    mut line_q: Query<&mut Transform, (With<MovementTargetPathLine>, Without<MovementTargetMarker>)>,
 ) {
-    if state.active {
-        return;
-    }
+    let Some(target) = movement.target else { return; };
 
-    for e in &q_base {
-        commands.entity(e).despawn();
-    }
+    let Ok(cam_target) = camera_target.single() else { return; };
 
-    for e in &q_top {
-        commands.entity(e).despawn();
-    }
+    let Ok(mut marker) = marker_q.single_mut() else { return; };
+    let Ok(mut line) = line_q.single_mut() else { return; };
 
-    for e in &q_line {
-        commands.entity(e).despawn();
-    }
+    let start = cam_target.translation();
+    let dir = target - start;
+    let length = dir.length();
 
-    for e in &q_path {
-        commands.entity(e).despawn();
-    }
+    // --- marker ---
+    marker.translation = target;
 
-    state.spawned = false;
+    // --- line ---
+    if length > 0.001 {
+        let mid = start + dir * 0.5;
+
+        line.translation = mid;
+        line.rotation = Quat::from_rotation_arc(Vec3::X, dir.normalize());
+        line.scale = Vec3::new(length, 1.0, 1.0);
+    }
 }
 
 fn sync_preview_base(
@@ -241,7 +238,7 @@ fn sync_preview_line(
     let Ok(mut t) = q.single_mut() else { return; };
 
     let cam_pos = cam.translation();
-    let thickness = preview_scale(cam_pos, base);
+    let thickness: f32 = preview_scale(cam_pos, base);
 
     let dir = top - base;
     let length = dir.length();
@@ -257,6 +254,7 @@ fn sync_preview_line(
 
 fn sync_preview_path(
     state: Res<MovementTarget>,
+    cam: Single<&GlobalTransform, With<OrbitCamera>>,
     camera_target: Query<&GlobalTransform, With<OrbitCameraTarget>>,
     mut q: Query<&mut Transform, With<MovementTargetPreviewPath>>,
 ) {
@@ -264,6 +262,9 @@ fn sync_preview_path(
 
     let Ok(cam_target) = camera_target.single() else { return; };
     let Ok(mut t) = q.single_mut() else { return; };
+
+    let cam_pos = cam.translation();
+    let thickness: f32 = preview_scale(cam_pos, base);    
 
     let top = Vec3::new(base.x, state.height, base.z);
     let start = cam_target.translation();
@@ -276,7 +277,114 @@ fn sync_preview_path(
 
         t.translation = mid + Vec3::Y * 0.01;
         t.rotation = Quat::from_rotation_arc(Vec3::X, dir.normalize());
-        t.scale = Vec3::new(length, 1.0, 1.0);
+        t.scale = Vec3::new(length, thickness, thickness);
+    }
+}
+
+/// spawn the visuals once and hide/show them when needed
+fn spawn_all_visuals(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let line_mat = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.8, 0.8, 0.8),
+        unlit: true,
+        ..default()
+    });
+
+    let point_mat = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.8, 0.2, 0.2),
+        unlit: true,
+        ..default()
+    });
+
+    // --- preview base point in ground plane ---
+    commands.spawn((
+        MovementTargetPreviewBase,
+        Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
+        MeshMaterial3d(point_mat.clone()),
+        Visibility::Hidden,
+    ));
+
+    // --- preview top which is the target point ---
+    commands.spawn((
+        MovementTargetPreview,
+        Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
+        MeshMaterial3d(point_mat.clone()),
+        Visibility::Hidden,
+    ));
+
+    // --- preview vertical line from base to target point ---
+    commands.spawn((
+        MovementTargetPreviewLine,
+        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        MeshMaterial3d(line_mat.clone()),
+        Visibility::Hidden,
+    ));
+
+    // --- preview path ---
+    commands.spawn((
+        MovementTargetPreviewPath,
+        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        MeshMaterial3d(line_mat.clone()),
+        Visibility::Hidden,
+    ));
+
+    // --- final marker ---
+    commands.spawn((
+        MovementTargetMarker,
+        Mesh3d(meshes.add(Cuboid::new(0.25, 0.25, 0.25))),
+        MeshMaterial3d(point_mat.clone()),
+        Visibility::Hidden,
+    ));
+
+    // --- final path ---
+    commands.spawn((
+        MovementTargetPathLine,
+        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        MeshMaterial3d(line_mat),
+        Visibility::Hidden,
+    ));
+}
+
+/// system to update the preview visibility based on the state of the preview
+fn update_preview_visibility(
+    state: Res<MovementTarget>,
+    mut q: Query<&mut Visibility, Or<(
+        With<MovementTargetPreviewBase>,
+        With<MovementTargetPreview>,
+        With<MovementTargetPreviewLine>,
+        With<MovementTargetPreviewPath>,
+    )>>,
+) {
+    let visible = state.active;
+
+    for mut vis in &mut q {
+        *vis = if visible {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
+    }
+}
+
+/// system to update the movement visibility
+fn update_movement_visibility(
+    movement: Res<MovementCommand>,
+    mut q: Query<&mut Visibility, Or<(
+        With<MovementTargetMarker>,
+        With<MovementTargetPathLine>,
+    )>>,
+) {
+    let visible = movement.target.is_some();
+
+    for mut vis in &mut q {
+        *vis = if visible {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
     }
 }
 
@@ -302,17 +410,22 @@ impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<MovementTarget>()
-            .add_systems(Startup, setup)
+            .init_resource::<MovementCommand>()
+            .add_systems(Startup, (
+                setup,
+                spawn_all_visuals,
+            ))
             .add_systems(Update, (
                 movement_height_input_system,
-                ensure_preview_spawned,
-                cleanup_preview,
+                update_preview_visibility,
+                update_movement_visibility,
                 (
                     sync_preview_base,
                     sync_preview_line,
                     sync_preview_top,
                     sync_preview_path,
                 ).chain(),
+                sync_movement_visuals,
                 ))
             ;
     }
