@@ -164,6 +164,7 @@ fn spawn_movement_visuals(
 
 fn sync_movement_visuals(
     movement: Res<MovementCommand>,
+    cam: Single<&GlobalTransform, With<OrbitCamera>>,
     camera_target: Query<&GlobalTransform, With<OrbitCameraTarget>>,
     mut marker_q: Query<&mut Transform, (With<MovementTargetMarker>, Without<MovementTargetPathLine>)>,
     mut line_q: Query<&mut Transform, (With<MovementTargetPathLine>, Without<MovementTargetMarker>)>,
@@ -182,13 +183,16 @@ fn sync_movement_visuals(
     // --- marker ---
     marker.translation = target;
 
+    let cam_pos = cam.translation();
+    let thickness: f32 = preview_scale(cam_pos, target);
+
     // --- line ---
     if length > 0.001 {
         let mid = start + dir * 0.5;
 
         line.translation = mid;
-        line.rotation = Quat::from_rotation_arc(Vec3::X, dir.normalize());
-        line.scale = Vec3::new(length, 1.0, 1.0);
+        line.rotation = Quat::from_rotation_arc(Vec3::Z, dir.normalize());
+        line.scale = Vec3::new(thickness, thickness, length);
     }
 }
 
@@ -202,10 +206,10 @@ fn sync_preview_base(
     let Ok(mut t) = q.single_mut() else { return; };
 
     let cam_pos = cam.translation();
-    let scale = preview_scale(cam_pos, base);
+    let thickness = preview_scale(cam_pos, base) * 0.2;
 
     t.translation = base + Vec3::Y * 0.01;
-    t.scale = Vec3::splat(scale);
+    t.scale = Vec3::splat(thickness);
 }
 
 fn sync_preview_top(
@@ -238,7 +242,7 @@ fn sync_preview_line(
     let Ok(mut t) = q.single_mut() else { return; };
 
     let cam_pos = cam.translation();
-    let thickness: f32 = preview_scale(cam_pos, base);
+    let thickness: f32 = preview_scale(cam_pos, base) * 0.2;
 
     let dir = top - base;
     let length = dir.length();
@@ -247,8 +251,8 @@ fn sync_preview_line(
         let mid = base + dir * 0.5;
 
         t.translation = mid + Vec3::Y * 0.01;
-        t.rotation = Quat::from_rotation_arc(Vec3::X, dir.normalize());
-        t.scale = Vec3::new(length, thickness, thickness);
+        t.rotation = Quat::from_rotation_arc(Vec3::Z, dir.normalize());
+        t.scale = Vec3::new( thickness, thickness, length);
     }
 }
 
@@ -264,7 +268,7 @@ fn sync_preview_path(
     let Ok(mut t) = q.single_mut() else { return; };
 
     let cam_pos = cam.translation();
-    let thickness: f32 = preview_scale(cam_pos, base);    
+    let thickness: f32 = preview_scale(cam_pos, base) * 0.2;    
 
     let top = Vec3::new(base.x, state.height, base.z);
     let start = cam_target.translation();
@@ -276,8 +280,8 @@ fn sync_preview_path(
         let mid = start + dir * 0.5;
 
         t.translation = mid + Vec3::Y * 0.01;
-        t.rotation = Quat::from_rotation_arc(Vec3::X, dir.normalize());
-        t.scale = Vec3::new(length, thickness, thickness);
+        t.rotation = Quat::from_rotation_arc(Vec3::Z, dir.normalize());
+        t.scale = Vec3::new( thickness, thickness, length);
     }
 }
 
@@ -318,7 +322,7 @@ fn spawn_all_visuals(
     // --- preview vertical line from base to target point ---
     commands.spawn((
         MovementTargetPreviewLine,
-        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        Mesh3d(meshes.add(Cuboid::new(0.05, 0.05, 1.0))),
         MeshMaterial3d(line_mat.clone()),
         Visibility::Hidden,
     ));
@@ -326,7 +330,7 @@ fn spawn_all_visuals(
     // --- preview path ---
     commands.spawn((
         MovementTargetPreviewPath,
-        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        Mesh3d(meshes.add(Cuboid::new(0.05, 0.05, 1.0))),
         MeshMaterial3d(line_mat.clone()),
         Visibility::Hidden,
     ));
@@ -334,7 +338,7 @@ fn spawn_all_visuals(
     // --- final marker ---
     commands.spawn((
         MovementTargetMarker,
-        Mesh3d(meshes.add(Cuboid::new(0.25, 0.25, 0.25))),
+        Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
         MeshMaterial3d(point_mat.clone()),
         Visibility::Hidden,
     ));
@@ -342,7 +346,7 @@ fn spawn_all_visuals(
     // --- final path ---
     commands.spawn((
         MovementTargetPathLine,
-        Mesh3d(meshes.add(Cuboid::new(1.0, 0.01, 0.05))),
+        Mesh3d(meshes.add(Cuboid::new(0.05, 0.05, 1.00))),
         MeshMaterial3d(line_mat),
         Visibility::Hidden,
     ));
