@@ -8,8 +8,10 @@ edition = "2024"
 
 bevy = { workspace = true }
 bevy_prototype_lyon = { workspace = true, features = []}
+
 bevy_ui = { workspace = true }
 bevy_ui_widgets = { workspace = true }
+
 serde = { workspace = true }
 serde_json = { workspace = true }
 directories = { workspace = true }

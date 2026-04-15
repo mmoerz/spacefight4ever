@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 #[derive(Resource, Default)]
 pub struct GameAssets {
-    pub player_ship: Handle<Scene>,
+    pub player_ship: Handle<DynamicScene>,
 }
 
 fn load_assets(
