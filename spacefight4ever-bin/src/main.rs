@@ -20,13 +20,15 @@ use bevy::{
 use avian3d::prelude::*;
 use bevy_ui_widgets::UiWidgetsPlugins;
 
+use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
+
 
 use spacefight4ever_ui::{
     ui::assets::assets::setup_ui_theme,
     plugins::{UiAssetsPlugin, UiAtlasButtonPlugin, UiAtlasWindowPlugin}
 };
 
-use spacefight4ever_lib::prelude::*;
+use spacefight4ever_lib::{game::player::gltf_playership::GltfPlayerShipPlugin, prelude::*};
 use spacefight4ever_lib::config::environment::*;
 use spacefight4ever_lib::game::player::gameassets::GameAssetsPlugin;
 use spacefight4ever_lib::game::player::player::PlayerPlugin;
@@ -35,7 +37,6 @@ use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
 use spacefight4ever_lib::ui::overlay::settings::UiSettingsPlugin;
 use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
-
 
 // to consider:
 /// TODO: get viewport to world coordinates for travelling - example: 3d_viewport_to_world
@@ -55,6 +56,10 @@ fn main() {
             InputDispatchPlugin,
             TabNavigationPlugin
         ))
+        // Debug
+        .add_plugins(EguiPlugin::default())
+        .add_plugins(WorldInspectorPlugin::new())
+
         // config and settings plugins
         .add_plugins(ConfigPlugin)
         .add_plugins(GameAssetsPlugin) // should load the necessary assets - currently only for the player ship
@@ -73,8 +78,9 @@ fn main() {
         .add_plugins(UiSliderPlugin)
         .add_plugins(UiSettingsPlugin)
 
-        .add_plugins(PlayerPlugin)
+        //.add_plugins(PlayerPlugin)
         .add_plugins(MovementPlugin)
+        .add_plugins(GltfPlayerShipPlugin)
 
         .add_systems(Startup, setup_ui_theme)
         //.add_systems(Startup, setup)

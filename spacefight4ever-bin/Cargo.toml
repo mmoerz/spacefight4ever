@@ -11,6 +11,8 @@ bevy = { workspace = true, features = [ "dynamic_linking", "debug" ] }
 bevy_ui_widgets = { workspace = true }
 avian3d = { version = "0.6.0", features = ["simd"] }
 
+bevy-inspector-egui = { version ="0.36" }
+
 spacefight4ever_ui = { workspace = true, features = [ "dynamic_linking", "debug" ] }
 
 [features]
