@@ -3,8 +3,7 @@ use bevy::{
     input::{
         gestures::*,
         mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-    },
-    prelude::*,
+    }, math::VectorSpace, prelude::*
 };
 
 use crate::game::player::playership::*;
@@ -25,20 +24,19 @@ use crate::ui::camera::{OrbitCamera, OrbitCameraTarget};
 // multiple waypoints
 
 #[derive(Resource, Default)]
-pub struct MovementTarget {
-    pub base: Option<Vec3>,
-    pub height: f32,
-    pub active: bool,
-    pub spawned: bool,
-    
-    pub drag_start_mouse_y: f32,  // NEW
-    pub drag_start_height: f32,   // NEW
+pub struct MovementPlacementData {
+    pub base : Vec3,
+    pub height : f32,
+   
+    pub drag_start_mouse_y: f32,  // for storing the initial y value
+    pub drag_start_height: f32,   // for storing the resulting height
 }
 
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum MovementPlacementState {
+    #[default]
     Idle,
-    PickingBase {base : Vec3},
-    AdjustingHeight {height : f32},
+    PlacingHeight,
 }
 
 /// 3d point in space to move to
@@ -52,7 +50,14 @@ pub struct MovementTargetPathLine;
 /// target to move to
 #[derive(Resource, Default)]
 pub struct MovementCommand {
-    pub target: Option<Vec3>,
+    pub target: Vec3,
+}
+
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum MovementCommandState {
+    #[default]
+    Idle,
+    Moving,
 }
 
 /// point on ground plane
@@ -71,62 +76,76 @@ pub struct MovementTargetPreviewLine;
 #[derive(Component)]
 pub struct MovementTargetPreviewPath;
 
-fn movement_height_input_system(
-    mut state: ResMut<MovementTarget>,
+fn movement_base_input_system(
+    mut next_state: ResMut<NextState<MovementPlacementState>>,
+    mut data: ResMut<MovementPlacementData>,
     mouse: Res<ButtonInput<MouseButton>>,
     window: Single<&Window>,
     camera_query: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
     ground: Single<&GlobalTransform, With<GroundPlane>>,
-    mut movement_command: ResMut<MovementCommand>,
 ) {
     let (camera, camera_transform) = *camera_query;
-
     let Some(cursor) = window.cursor_position() else { return; };
+
     let Ok(ray) = camera.viewport_to_world(camera_transform, cursor) else { return; };
 
     // --- click base ---
-    if mouse.just_pressed(MouseButton::Left) && state.base.is_none() {
+    if mouse.just_pressed(MouseButton::Left) {
         if let Some(point) = ray.plane_intersection_point(
             ground.translation(),
             InfinitePlane3d::new(ground.up()),
         ) {
-            state.base = Some(point);
-            state.height = point.y;
-            state.active = true;
+            data.base = point;
+            data.height = point.y;
 
             // start drag reference
-            state.drag_start_mouse_y = cursor.y;
-            state.drag_start_height = state.height;
+            data.drag_start_mouse_y = cursor.y;
+            data.drag_start_height = data.height;
+
+            next_state.set(MovementPlacementState::PlacingHeight);
         }
-        return;
     }
+}
+
+fn movement_height_input_system(
+    mut next_state: ResMut<NextState<MovementPlacementState>>,
+    mut move_state: ResMut<NextState<MovementCommandState>>,
+    mut data: ResMut<MovementPlacementData>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    window: Single<&Window>,
+    camera_query: Single<(&GlobalTransform), With<Camera3d>>,
+    mut movement_command: ResMut<MovementCommand>,
+) {
+    let camera_transform = *camera_query;
+
+    let Some(cursor) = window.cursor_position() else { return; };
 
     // --- drag height (STABLE) ---
-    if let Some(base) = state.base {
-        //if mouse.pressed(MouseButton::Left) {
-            let cam_pos = camera_transform.translation();
-            let distance = cam_pos.distance(base);
+    //if mouse.pressed(MouseButton::Left) {
+    let cam_pos = camera_transform.translation();
+    let distance = cam_pos.distance(data.base);
 
-            // tune these
-            let base_sensitivity = 0.002;
-            let sensitivity = base_sensitivity * distance;
+    // tune these
+    let base_sensitivity = 0.002;
+    let sensitivity = base_sensitivity * distance;
 
-            let delta_y = cursor.y - state.drag_start_mouse_y;
+    let delta_y = cursor.y - data.drag_start_mouse_y;
 
-            state.height = state.drag_start_height - delta_y * sensitivity;
-        //}
+    data.height = data.drag_start_height - delta_y * sensitivity;
+    //}
 
-        // confirm
-        if mouse.just_pressed(MouseButton::Left) {
-            state.active = false;
+    // confirm
+    if mouse.just_pressed(MouseButton::Left) {
+        let final_pos = Vec3::new(data.base.x, data.height, data.base.z);
+        println!("Final 3D position: {:?}", final_pos);
 
-            let final_pos = Vec3::new(base.x, state.height, base.z);
-            println!("Final 3D position: {:?}", final_pos);
+        movement_command.target = final_pos;
+        move_state.set(MovementCommandState::Moving);
 
-            movement_command.target = Some(final_pos);
+        data.base = Vec3::ZERO;
+        data.height = 0.0;
 
-            state.base = None;
-        }
+        next_state.set(MovementPlacementState::Idle);
     }
 }
 
@@ -145,7 +164,7 @@ fn sync_movement_visuals(
     mut marker_q: Query<&mut Transform, (With<MovementTargetMarker>, Without<MovementTargetPathLine>)>,
     mut line_q: Query<&mut Transform, (With<MovementTargetPathLine>, Without<MovementTargetMarker>)>,
 ) {
-    let Some(target) = movement.target else { return; };
+    let target= movement.target;
 
     let Ok(cam_target) = camera_target.single() else { return; };
 
@@ -173,11 +192,11 @@ fn sync_movement_visuals(
 }
 
 fn sync_preview_base(
-    state: Res<MovementTarget>,
+    state: Res<MovementPlacementData>,
     cam: Single<&GlobalTransform, With<OrbitCamera>>,
     mut q: Query<&mut Transform, With<MovementTargetPreviewBase>>,
 ) {
-    let Some(base) = state.base else { return; };
+    let base = state.base;
 
     let Ok(mut t) = q.single_mut() else { return; };
 
@@ -189,11 +208,11 @@ fn sync_preview_base(
 }
 
 fn sync_preview_top(
-    state: Res<MovementTarget>,
+    state: Res<MovementPlacementData>,
     cam: Single<&GlobalTransform, With<OrbitCamera>>,
     mut q: Query<&mut Transform, With<MovementTargetPreview>>,
 ) {
-    let Some(base) = state.base else { return; };
+    let base = state.base;
 
     let top = Vec3::new(base.x, state.height, base.z);
 
@@ -207,11 +226,11 @@ fn sync_preview_top(
 }
 
 fn sync_preview_line(
-    state: Res<MovementTarget>,
+    state: Res<MovementPlacementData>,
     cam: Single<&GlobalTransform, With<OrbitCamera>>,
     mut q: Query<&mut Transform, With<MovementTargetPreviewLine>>,
 ) {
-    let Some(base) = state.base else { return; };
+    let base = state.base;
 
     let top = Vec3::new(base.x, state.height, base.z);
 
@@ -233,12 +252,12 @@ fn sync_preview_line(
 }
 
 fn sync_preview_path(
-    state: Res<MovementTarget>,
+    state: Res<MovementPlacementData>,
     cam: Single<&GlobalTransform, With<OrbitCamera>>,
     camera_target: Query<&GlobalTransform, With<OrbitCameraTarget>>,
     mut q: Query<&mut Transform, With<MovementTargetPreviewPath>>,
 ) {
-    let Some(base) = state.base else { return; };
+    let base = state.base;
 
     let Ok(cam_target) = camera_target.single() else { return; };
     let Ok(mut t) = q.single_mut() else { return; };
@@ -330,7 +349,7 @@ fn spawn_all_visuals(
 
 /// system to update the preview visibility based on the state of the preview
 fn update_preview_visibility(
-    state: Res<MovementTarget>,
+    state: Res<State<MovementPlacementState>>,
     mut q: Query<&mut Visibility, Or<(
         With<MovementTargetPreviewBase>,
         With<MovementTargetPreview>,
@@ -338,7 +357,7 @@ fn update_preview_visibility(
         With<MovementTargetPreviewPath>,
     )>>,
 ) {
-    let visible = state.active;
+    let visible = *state.get() == MovementPlacementState::PlacingHeight;
 
     for mut vis in &mut q {
         *vis = if visible {
@@ -351,16 +370,14 @@ fn update_preview_visibility(
 
 /// system to update the movement visibility
 fn update_movement_visibility(
-    movement: Res<MovementCommand>,
+    state: Res<State<MovementCommandState>>,
     mut q: Query<&mut Visibility, Or<(
         With<MovementTargetMarker>,
         With<MovementTargetPathLine>,
     )>>,
 ) {
-    let visible = movement.target.is_some();
-
     for mut vis in &mut q {
-        *vis = if visible {
+        *vis = if *state.get() == MovementCommandState::Moving {
             Visibility::Visible
         } else {
             Visibility::Hidden
@@ -376,9 +393,6 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // remove gravity - we are in space
-    GravityScale(0.0);
-
     // plane
     commands.spawn((
         Mesh3d(meshes.add(Plane3d::default().mesh().size(20., 20.))),
@@ -393,19 +407,22 @@ fn ship_force_steering_system(
     mut query: Query<(Entity, Forces), With<PlayerShip>>, // forces is not a component only a query_data
     transforms: Query<&GlobalTransform, With<PlayerShip>>,
 ) {
-    let Some(target) = movement.target else { return; };
+    let target = movement.target;
 
     for (entity, mut force) in &mut query {
-        let Ok(transform) = transforms.get(entity) else { return; };
+        let Ok(transform) = transforms.get(entity) else { continue; };
+        let angular = force.angular_velocity();
+        let linear = force.linear_velocity();
 
         let position = transform.translation();
-        let forward = transform.forward();
+        let forward = -transform.right();
 
         let to_target = target - position;
         let distance = to_target.length();
 
-        if distance < 0.2 {
-            return;
+        if distance < 0.5 {
+            //force.apply_force(-linear * 10.0);
+            continue;
         }
 
         let desired_dir = to_target.normalize();
@@ -416,13 +433,15 @@ fn ship_force_steering_system(
         let rotation_axis = forward.cross(desired_dir);
 
         // turn ship toward target
-        force.apply_torque(rotation_axis * 5.0);
+        force.apply_torque(rotation_axis.normalize_or_zero() * 5.0 - angular.abs() * 3.0);
 
         // --- THRUST ---
         let thrust_power = 40.0;
-        let thrust_factor = alignment.clamp(0.0, 1.0);
+        //let thrust_factor = alignment.clamp(0.0, 1.0);
+        let desired_velocity = desired_dir * thrust_power;
+        let steering = desired_velocity - linear.abs();
 
-        force.apply_force(forward * thrust_power * thrust_factor);
+        force.apply_force(steering);
     }
 }
 
@@ -433,10 +452,13 @@ fn debug_velocity(query: Query<&LinearVelocity, With<PlayerShip>>) {
 }
 
 fn debug_ship_transform(
-    q: Query<&GlobalTransform, With<PlayerShip>>,
+    ship: Single<&GlobalTransform, With<PlayerShip>>,
+    marker: Query<&GlobalTransform, With<MovementTargetMarker>>,
 ) {
-    for t in &q {
-        println!("ship world pos: {:?}", t.translation());
+    if let Ok(target) = marker.single() {
+        println!("ship world pos: {:?}, target: {:?}", ship.translation(), target.translation());
+    } else {
+        println!("ship world pos: {:?}", ship.translation());
     }
 }
 
@@ -445,16 +467,22 @@ pub struct MovementPlugin;
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app
-            .init_resource::<MovementTarget>()
+            .init_state::<MovementPlacementState>()
+            .init_state::<MovementCommandState>()
+            .init_resource::<MovementPlacementData>()
             .init_resource::<MovementCommand>()
             .add_systems(Startup, (
                 setup,
                 spawn_all_visuals,
             ))
             .add_systems(Update, (
-                movement_height_input_system,
+                movement_base_input_system.run_if(in_state(MovementPlacementState::Idle)),
+                movement_height_input_system.run_if(in_state(MovementPlacementState::PlacingHeight))
+            ))
+            .add_systems(OnEnter(MovementCommandState::Moving), update_movement_visibility)
+            .add_systems(OnEnter(MovementCommandState::Idle), update_movement_visibility)
+            .add_systems(Update, (
                 update_preview_visibility,
-                update_movement_visibility,
                 (
                     sync_preview_base,
                     sync_preview_line,

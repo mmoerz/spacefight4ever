@@ -9,6 +9,7 @@ members = [
 
 [workspace.dependencies]
 bevy = "0.18.0"
+bevy_skein = "0.5.0"
 bevy_prototype_lyon = "0.16.0"
 bevy_ui = "0.18.1"
 bevy_ui_widgets = "0.18.1"

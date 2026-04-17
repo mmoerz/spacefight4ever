@@ -1,23 +1,10 @@
-
-
-// #[cfg(target_os = "linux")]
-// unsafe fn configure_linker() {
-//     std::env::set_var("RUSTFLAGS", "-C link-arg=-fuse-ld=lld -C target-cpu=native");
-//     std::env::set_var("CC", "clang");
-// }
-
-
-// #[cfg(not(target_os = "linux"))]
-// fn configure_linker() {
-//     // No-op for non-Linux targets
-// }
-
-
 use bevy::{
     prelude::*,
     input_focus::{tab_navigation::TabNavigationPlugin, InputDispatchPlugin}
 };
+use bevy_skein::SkeinPlugin;
 use avian3d::prelude::*;
+use avian3d::collision::collider::ColliderConstructor;
 use bevy_ui_widgets::UiWidgetsPlugins;
 
 use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
@@ -28,10 +15,16 @@ use spacefight4ever_ui::{
     plugins::{UiAssetsPlugin, UiAtlasButtonPlugin, UiAtlasWindowPlugin}
 };
 
-use spacefight4ever_lib::{game::player::gltf_playership::GltfPlayerShipPlugin, prelude::*};
-use spacefight4ever_lib::config::environment::*;
-use spacefight4ever_lib::game::player::gameassets::GameAssetsPlugin;
-use spacefight4ever_lib::game::player::player::PlayerPlugin;
+use spacefight4ever_lib::{
+    config::environment::*,
+    //game::player::gltf_playership::GltfPlayerShipPlugin,
+    game::player::{
+        gameassets::GameAssetsPlugin,
+        player::PlayerPlugin,
+        playership::PlayerShip,
+    },
+    prelude::*
+};
 use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget, GameCameraPlugin};
 use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
@@ -44,7 +37,7 @@ use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
 
 fn main() {
     App::new()
-
+        
         .add_plugins((
             DefaultPlugins.set(
             bevy::asset::AssetPlugin {
@@ -52,10 +45,18 @@ fn main() {
             ..default()
             }),
             PhysicsPlugins::default(),
+            SkeinPlugin::default(),
             UiWidgetsPlugins,
             InputDispatchPlugin,
             TabNavigationPlugin
         ))
+        // physics specific registration
+        .register_type::<ColliderConstructor>()
+        .register_type::<RigidBody>()
+        .register_type::<Friction>()
+        .register_type::<Restitution>()
+        .register_type::<LinearVelocity>()
+        .register_type::<AngularVelocity>()
         // Debug
         .add_plugins(EguiPlugin::default())
         .add_plugins(WorldInspectorPlugin::new())
@@ -78,13 +79,13 @@ fn main() {
         .add_plugins(UiSliderPlugin)
         .add_plugins(UiSettingsPlugin)
 
-        //.add_plugins(PlayerPlugin)
+        .add_plugins(PlayerPlugin)
         .add_plugins(MovementPlugin)
-        .add_plugins(GltfPlayerShipPlugin)
+        //.add_plugins(GltfPlayerShipPlugin)
 
         .add_systems(Startup, setup_ui_theme)
         //.add_systems(Startup, setup)
-        .add_systems(Startup, testsetup)
+        //.add_systems(Startup, testsetup)
 
         .run();
 }

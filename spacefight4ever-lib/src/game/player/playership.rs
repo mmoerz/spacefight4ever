@@ -93,9 +93,9 @@ pub fn spawn_player_ship(
     commands: &mut Commands,
     assets: &GameAssets,
 ) -> Entity {
-    //PlayerShipBuilder::new(assets.player_ship.clone())
-    //    .build(commands)
-    Entity::PLACEHOLDER
+    PlayerShipBuilder::new(assets.player_ship.clone())
+        .build(commands)
+    //Entity::PLACEHOLDER
 }
 
 // ============================================================================

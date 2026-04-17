@@ -7,6 +7,7 @@ edition = "2024"
 #spacefight4ever_ui = { path = "../crates/spacefight4ever_ui", features = ["dynamic_linking", "debug"] }
 
 bevy = { workspace = true }
+bevy_skein = { workspace = true }
 bevy_prototype_lyon = { workspace = true, features = []}
 
 bevy_ui = { workspace = true }

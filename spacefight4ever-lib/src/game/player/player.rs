@@ -1,3 +1,5 @@
+use std::sync::OnceState;
+
 use bevy::prelude::*;
 
 use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
@@ -5,8 +7,7 @@ use crate::game::ship::weapon::{Weapon, Ammunition};
 use crate::game::player::{playership::*, gameassets::GameAssets};
 use crate::game::ship::module::{ModuleSize, HardPointType};
 use crate::game::player::playership::sync_visual_to_physics;
-
-
+use crate::game::player::gameassets::GameState;
 
 pub fn spawn_player(
     mut commands: Commands,
@@ -54,7 +55,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, spawn_player)
+            .add_systems(OnEnter(GameState::InGame), spawn_player)
             .add_systems(Update,  sync_visual_to_physics);
     }
 }
