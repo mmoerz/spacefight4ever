@@ -411,35 +411,56 @@ fn ship_force_steering_system(
 
     for (entity, mut force) in &mut query {
         let Ok(transform) = transforms.get(entity) else { continue; };
+
         let angular = force.angular_velocity();
         let linear = force.linear_velocity();
 
         let position = transform.translation();
         let forward = transform.forward();
 
-        let to_target = target - position;
-        let distance = to_target.length();
+        let to_target_vec = target - position;
 
+        let distance = to_target_vec.length();
         if distance < 0.5 {
-            //force.apply_force(-linear * 10.0);
+            force.apply_force(-linear * 2.0);
             continue;
         }
 
-        let desired_dir = to_target.normalize();
+        let Some(desired_dir) = to_target_vec.try_normalize() else {
+            continue;
+        };
 
-        // --- ALIGNMENT ---
-        let alignment = forward.dot(desired_dir);
+        let desired_facing = if linear.length() > 1.0 {
+            linear.normalize()
+        } else {
+            desired_dir
+        };
 
-        let rotation_axis = forward.cross(desired_dir);
+        // --- rotation target based on velocity (IMPORTANT FIX) ---
+        let rotation_axis = forward.cross(desired_facing);
 
-        // turn ship toward target
-        //force.apply_torque(rotation_axis.normalize_or_zero() * 5.0 - angular.abs() * 3.0);
+        let axis_len = rotation_axis.length();
+
+        if axis_len > 0.0001 {
+            let torque_strength = 10.0;
+
+            let alignment = forward.dot(desired_dir).clamp(-1.0, 1.0);
+
+            let torque =
+                rotation_axis.normalize_or_zero() * torque_strength
+                - angular * 4.0;
+
+            force.apply_torque(torque);
+        }
 
         // --- THRUST ---
+        let alignment = forward.dot(desired_dir).clamp(0.0, 1.0);
+
         let thrust_power = 40.0;
-        //let thrust_factor = alignment.clamp(0.0, 1.0);
+        let thrust = forward * thrust_power * alignment;
+
         let desired_velocity = desired_dir * thrust_power;
-        let steering: Vec3 = desired_velocity - linear;
+        let steering = desired_velocity - linear;
 
         force.apply_force(steering.clamp_length_max(thrust_power));
     }
@@ -452,13 +473,58 @@ fn debug_velocity(query: Query<&LinearVelocity, With<PlayerShip>>) {
 }
 
 fn debug_ship_transform(
+    movement: Res<MovementCommand>,
+
     ship: Single<&GlobalTransform, With<PlayerShip>>,
     marker: Query<&GlobalTransform, With<MovementTargetMarker>>,
 ) {
-    if let Ok(target) = marker.single() {
-        println!("ship world pos: {:?}, target: {:?}", ship.translation(), target.translation());
+    let target = movement.target;
+
+    let ship_pos = ship.translation();
+
+    let to_target_vec = target - ship_pos;
+
+    let Some(desired_dir) = to_target_vec.try_normalize() else {
+        return;
+    };
+
+    if let Ok(marker_tf) = marker.single() {
+        println!(
+            "ship={:?}, marker={:?}, dir={:?}",
+            ship_pos,
+            marker_tf.translation(),
+            desired_dir
+        );
     } else {
-        println!("ship world pos: {:?}", ship.translation());
+        println!(
+            "ship={:?}, dir={:?}",
+            ship_pos,
+            desired_dir
+        );
+    }
+}
+
+fn move_spaceship(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut LinearVelocity, &mut AngularVelocity, &Transform)>,
+    time: Res<Time>,
+) {
+    for (mut lin_vel, mut ang_vel, transform) in &mut query {
+        let forward = transform.forward(); // Local forward vector
+        
+        // Thrust (W key)
+        if keyboard.pressed(KeyCode::KeyW) {
+            lin_vel.0 += forward * 50.0 * time.elapsed_secs();
+        }
+        
+        // Rotation (A/D for Yaw)
+        if keyboard.pressed(KeyCode::KeyA) {
+            ang_vel.0.y = 2.0;
+        } else if keyboard.pressed(KeyCode::KeyD) {
+            ang_vel.0.y = -2.0;
+        } else {
+            ang_vel.0.y = 0.0;
+        }
     }
 }
 
@@ -492,6 +558,8 @@ impl Plugin for MovementPlugin {
                 sync_movement_visuals,
                 ship_force_steering_system,
                 //debug_velocity,
+                move_spaceship,
+
                 debug_ship_transform,
                 ))
             ;

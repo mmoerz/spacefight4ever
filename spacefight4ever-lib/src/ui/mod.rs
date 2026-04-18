@@ -21,6 +21,7 @@ pub mod hud {
     pub mod hud_root;
     pub mod health_display;
     pub mod ship_modul_bar;
+    pub mod movement_display;
 }
 
 pub mod dialogs {
