@@ -415,7 +415,7 @@ fn ship_force_steering_system(
         let linear = force.linear_velocity();
 
         let position = transform.translation();
-        let forward = -transform.right();
+        let forward = transform.forward();
 
         let to_target = target - position;
         let distance = to_target.length();
@@ -433,15 +433,15 @@ fn ship_force_steering_system(
         let rotation_axis = forward.cross(desired_dir);
 
         // turn ship toward target
-        force.apply_torque(rotation_axis.normalize_or_zero() * 5.0 - angular.abs() * 3.0);
+        //force.apply_torque(rotation_axis.normalize_or_zero() * 5.0 - angular.abs() * 3.0);
 
         // --- THRUST ---
         let thrust_power = 40.0;
         //let thrust_factor = alignment.clamp(0.0, 1.0);
         let desired_velocity = desired_dir * thrust_power;
-        let steering = desired_velocity - linear.abs();
+        let steering: Vec3 = desired_velocity - linear;
 
-        force.apply_force(steering);
+        force.apply_force(steering.clamp_length_max(thrust_power));
     }
 }
 

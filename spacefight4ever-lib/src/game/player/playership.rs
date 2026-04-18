@@ -41,7 +41,8 @@ impl PlayerShipBuilder {
             
             // avian3d
             RigidBody::Dynamic,
-            Collider::capsule(1.0, 2.5),
+            //Collider::capsule(1.0, 2.5),
+            Collider::sphere(1.5),
             //ConstantForce::new(0., 0., 0.),
             GravityScale(0.0),
 
@@ -78,7 +79,10 @@ impl PlayerShipBuilder {
 
         let model_id = commands.spawn((
             SceneRoot(self.model.clone()),
-            Transform::from_xyz(0.0, 0.0, 0.0),
+            //Transform::from_xyz(0.0, 0.0, 0.0),
+            Transform::from_rotation(
+                Quat::from_rotation_y(std::f32::consts::FRAC_2_PI) // 90° Y rotation
+            ),
             Visibility::Visible,
             Name::new("SceneRoot"),
         )).id();
@@ -124,10 +128,10 @@ pub fn spawn_player_ship(
 // physics injector
 // =======
 
-/// yeah, this is fucking great, scene is some sort of magic node that behaves
-/// outside of expectations, creates it's own static unmutable little universe
-/// so from the outside there  is no way to influence the mesh, we need to 
-/// crawl inside the gltf model and stick tack physics onto the meshes
+// yeah, this is fucking great, scene is some sort of magic node that behaves
+// outside of expectations, creates it's own static unmutable little universe
+// so from the outside there  is no way to influence the mesh, we need to 
+// crawl inside the gltf model and stick tack physics onto the meshes
 // fn inject_fucking_physics(
 //     mut commands: Commands,
 //     // We need to wait for the scene to load, so we use added query
@@ -146,16 +150,16 @@ pub fn spawn_player_ship(
 //     }
 // }
 
-/// sync the model to the physics
-pub fn sync_visual_to_physics(
-    q: Query<(&GlobalTransform, &Children), With<PlayerShip>>,
-    mut transforms: Query<&mut Transform>,
-) {
-    for (gt, children) in &q {
-        for &child in children {
-            if let Ok(mut t) = transforms.get_mut(child) {
-                t.translation = gt.translation();
-            }
-        }
-    }
-}
+// sync the model to the physics
+// pub fn sync_visual_to_physics(
+//     q: Query<(&GlobalTransform, &Children), With<PlayerShip>>,
+//     mut transforms: Query<&mut Transform>,
+// ) {
+//     for (gt, children) in &q {
+//         for &child in children {
+//             if let Ok(mut t) = transforms.get_mut(child) {
+//                 t.translation = gt.translation();
+//             }
+//         }
+//     }
+// }
