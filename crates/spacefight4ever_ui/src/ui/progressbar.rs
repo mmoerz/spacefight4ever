@@ -31,12 +31,14 @@ pub struct UiProgressBarUniform {
     pub progress: f32,
     pub uv_offset: Vec2,
     pub uv_scale: Vec2,
+    pub direction: u32,
 }
 
 /// actual shader that will render the progress
 impl UiMaterial for UiProgressBarMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/progress_bar_uv.wgsl".into()
+        //"shaders/progress_bar_uv.wgsl".into()
+        "shaders/progress_bar_universal.wgsl".into()
     }
 }
 
@@ -47,6 +49,7 @@ impl UiProgressBarMaterial {
                 progress,
                 uv_offset: Vec2::ZERO,
                 uv_scale: Vec2::ONE,
+                direction: 0,
             },
             texture,
         }
@@ -63,16 +66,41 @@ impl UiProgressBarMaterial {
     pub fn set_scale(&mut self, scale: Vec2) {
         self.data.uv_scale = scale;
     }
+    pub fn set_direction(&mut self, dir: UiProgressBarDirection) {
+        self.data.direction = dir.as_u32();
+    }
+    pub fn direction(&self) -> UiProgressBarDirection {
+        match self.data.direction {
+            1 => UiProgressBarDirection::RightToLeft,
+            2 => UiProgressBarDirection::BottomToTop,
+            3 => UiProgressBarDirection::TopToBottom,
+            _ => UiProgressBarDirection::LeftToRight,
+        }
+    }
 }
 
 /// handle for easier access to the progress (and material)
 #[derive(Component, Debug)]
 pub struct UiProgressBarHandle(pub Handle<UiProgressBarMaterial>);
 
-#[derive(Clone, Copy)]
-pub enum UiProgressBarOrientation {
-    Horizontal,
-    Vertical,
+/// orientation of a progressbar
+#[derive(Clone, Copy, Debug)]
+pub enum UiProgressBarDirection {
+    LeftToRight,
+    RightToLeft,
+    BottomToTop,
+    TopToBottom,
+}
+
+impl UiProgressBarDirection {
+    pub fn as_u32(self) -> u32 {
+        match self {
+            UiProgressBarDirection::LeftToRight => 0,
+            UiProgressBarDirection::RightToLeft => 1,
+            UiProgressBarDirection::BottomToTop => 2,
+            UiProgressBarDirection::TopToBottom => 3,
+        }
+    }
 }
 
 /// a builder for progressbars
@@ -82,7 +110,7 @@ pub struct UiProgressBarBuilder {
     pub height: f32,
     pub offset: Vec2,
     pub scale: Vec2,
-    //orientation: UiProgressBarOrientation,
+    pub direction: UiProgressBarDirection,
     background_texture: Handle<Image>,
     bar_texture: Handle<Image>,
     //material: Handle<UiProgressBarMaterial>,
@@ -102,7 +130,7 @@ impl UiProgressBarBuilder {
             height,
             offset: Vec2::ZERO,
             scale: Vec2::ONE,
-            //orientation: UiProgressBarOrientation::Horizontal, // default to horizontal
+            direction: UiProgressBarDirection::LeftToRight, // default to horizontal
             background_texture,
             bar_texture,
         }
@@ -118,10 +146,10 @@ impl UiProgressBarBuilder {
         self
     }
 
-    // pub fn with_orientation(mut self, orientation: UiProgressBarOrientation) -> Self {
-    //     self.orientation = orientation;
-    //     self
-    // }
+    pub fn with_direction(mut self, direction: UiProgressBarDirection) -> Self {
+        self.direction = direction;
+        self
+    }
 
     /// builds a progressbar with a horizontal layout
     pub fn build(
@@ -130,14 +158,12 @@ impl UiProgressBarBuilder {
     ) -> impl Bundle {
         // in build for easier testing ?
         // must be unique for each progress bar
-        let handle = materials.add(UiProgressBarMaterial {
-            data: UiProgressBarUniform {
-                progress: self.progress,
-                uv_offset: self.offset,
-                uv_scale: self.scale,
-            },
-            texture: self.bar_texture,
-        });
+        let mut mat = UiProgressBarMaterial::new(self.progress, self.bar_texture);
+        mat.set_offset(self.offset);
+        mat.set_scale(self.scale);
+        mat.set_direction(self.direction);
+
+        let handle = materials.add(mat);
 
         (
             Name::new("UiProgressBar"),
@@ -172,6 +198,7 @@ impl UiProgressBarBuilder {
 
 pub fn spawn_progress_bar(
     progress: f32,
+    direction: UiProgressBarDirection,
     width: f32,
     height: f32,
     offset: Vec2,
@@ -186,12 +213,14 @@ pub fn spawn_progress_bar(
             progress, width, height, background_texture, bar_texture)
             .with_offset(offset)
             .with_scale(scale)
+            .with_direction(direction)
         .build(&mut materials)
     ).id()
 }
 
 pub fn progress_bar_bundle(
     progress: f32,
+    direction: UiProgressBarDirection,
     width: f32,
     height: f32,
     offset: Vec2,
@@ -204,6 +233,7 @@ pub fn progress_bar_bundle(
         progress, width, height, background_texture, bar_texture)
         .with_offset(offset)
         .with_scale(scale)
+        .with_direction(direction)
         .build(materials)
 }
 

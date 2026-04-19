@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use spacefight4ever_ui::ui::progressbar::{UiProgressBar, UiProgressBarHandle, UiProgressBarMaterial, progress_bar_bundle};
+use spacefight4ever_ui::ui::progressbar::{UiProgressBar, UiProgressBarDirection, UiProgressBarMaterial, progress_bar_bundle};
 
 pub struct HudMovementBuilder {
     pub width: f32,
@@ -29,7 +29,8 @@ impl HudMovementBuilder {
         self,
         materials: &mut Assets<UiProgressBarMaterial>,
     ) -> impl Bundle {
-        progress_bar_bundle(0.7, 120., 16.,
+        progress_bar_bundle(0.7, UiProgressBarDirection::LeftToRight,
+            120., 16.,
             Vec2 { x: 0.185, y: 0.15 }, Vec2 { x: 1.275, y: 2.1 },
             self.image, self.image_bar, materials)
     }
