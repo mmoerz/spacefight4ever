@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use spacefight4ever_ui::ui::progressbar::UiProgressBarMaterial;
+use spacefight4ever_ui::ui::progressbar_material::UiProgressBarMaterial;
 
 use crate::ui::{hud::ship_modul_bar::setup_hex_grid, layers::*};
 use super::health_display::*;

@@ -1,5 +1,8 @@
 use bevy::prelude::*;
-use spacefight4ever_ui::ui::progressbar::{UiProgressBar, UiProgressBarDirection, UiProgressBarMaterial, progress_bar_bundle};
+use spacefight4ever_ui::ui::{
+    progressbar::{UiProgressBar, UiProgressBarDirection, progress_bar_bundle},
+    progressbar_material::UiProgressBarMaterial,
+};
 
 pub struct HudMovementBuilder {
     pub width: f32,
@@ -45,26 +48,6 @@ pub fn spawn_movement_bar(
         HudMovementBuilder::new(120.0, 16.0, asset_server)
         .build(&mut materials)
     ).id()
-}
-
-// pub fn movement_bar_bundle(
-//     asset_server: &Res<AssetServer>,
-//     mut materials: ResMut<Assets<UiProgressBarMaterial>>,
-// ) -> impl Bundle {
-//     HudMovementBuilder::new(120.0, 16.0, asset_server)
-//         .build(&mut *materials)
-// }
-
-pub fn ui_movement_bar_system(
-    mut commands: Commands,
-    progressbar_query: Query<Entity, With<UiProgressBar>>,
-    mut image_query: Query<&mut ImageNode, With<UiProgressBar>>,
-) {
-    for progessbar in progressbar_query.iter() {
-        if let Ok(mut image_node) = image_query.get_mut(progessbar) {
-
-        }
-    }    
 }
 
 pub struct MovementDisplayPlugin;

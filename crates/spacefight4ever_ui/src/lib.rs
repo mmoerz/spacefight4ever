@@ -18,6 +18,7 @@ pub mod ui {
     pub mod atlasbutton;
     pub mod titlebar;
     pub mod window;
+    pub mod progressbar_material;
     pub mod progressbar;
 }
 
@@ -46,6 +47,6 @@ pub mod plugins {
         atlasbutton::UiAtlasButtonPlugin,
         titlebar::UiTitleBarPlugin,
         window::UiAtlasWindowPlugin,
-        progressbar::UiProgressBarPlugin,
+        progressbar_material::UiProgressBarPlugin,
     };
 }
