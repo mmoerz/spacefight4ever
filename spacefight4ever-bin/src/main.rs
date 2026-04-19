@@ -30,6 +30,7 @@ use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
 use spacefight4ever_lib::ui::overlay::settings::UiSettingsPlugin;
 use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
+use spacefight4ever_lib::ui::hud::movement_display::MovementDisplayPlugin;
 
 // to consider:
 /// TODO: get viewport to world coordinates for travelling - example: 3d_viewport_to_world
@@ -67,6 +68,7 @@ fn main() {
 
         // camera setup
         .add_plugins(GameCameraPlugin)
+        .add_plugins(MovementDisplayPlugin)
 
         // -ui crate plugins
         .add_plugins(UiAssetsPlugin)

@@ -3,10 +3,13 @@ use crate::ui::{hud::ship_modul_bar::setup_hex_grid, layers::*};
 
 use super::health_display::*;
 
+use super::movement_display::*;
+
 pub fn spawn_hud(
     mut commands: Commands,
     ui_layers: Res<UiLayers>,
     asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<ProgressBarMaterial>>,
 ) {
     let hex_height = 40.0_f32;
 
@@ -57,7 +60,7 @@ pub fn spawn_hud(
                 },
                 //BackgroundColor(Color::WHITE),
             ));
-            
+            bottom.spawn(movement_bar_bundle(&asset_server, materials));
         });
     
     health_display(bottom_hud, &mut commands, &asset_server);

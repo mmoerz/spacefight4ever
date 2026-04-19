@@ -18,6 +18,7 @@ pub mod ui {
     pub mod atlasbutton;
     pub mod titlebar;
     pub mod window;
+    pub mod progressbar;
 }
 
 pub mod prelude {

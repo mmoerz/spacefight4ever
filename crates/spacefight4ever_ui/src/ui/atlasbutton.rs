@@ -191,8 +191,8 @@ impl UiAtlasButtonBuilder {
             Button,
             self.button_type,
             Node {
-                width: Val::Px(self.width),
-                height: Val::Px(self.height),
+                width: px(self.width),
+                height: px(self.height),
                 margin: self.margin,
                 ..default()
             },
