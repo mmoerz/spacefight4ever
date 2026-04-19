@@ -1,14 +1,10 @@
 use bevy::prelude::*;
-
-
-// #[derive(Component)]
-// pub struct UiProgressBarValue(pub f32);
+use spacefight4ever_ui::ui::progressbar::{UiProgressBar, UiProgressBarHandle, UiProgressBarMaterial, progress_bar_bundle};
 
 pub struct HudMovementBuilder {
     pub width: f32,
     pub height: f32,
     image: Handle<Image>,
-    material: Handle<ProgressBarMaterial>,
     image_bar: Handle<Image>,
 }
 
@@ -17,55 +13,50 @@ impl HudMovementBuilder {
         width: f32,
         height: f32,
         asset_server: &Res<AssetServer>,
-        mut materials: ResMut<Assets<ProgressBarMaterial>>,
     ) -> Self {
-            let image = asset_server.load("textures/speedbar.png");
-            let image_bar = asset_server.load("textures/speedbar_triangles.png");
+        let image = asset_server.load("textures/speedbar.png");
+        let image_bar = asset_server.load("textures/speedbar_triangles.png");
 
-
-        // must be unique for each progress bar
-        let material = materials.add(ProgressBarMaterial {
-            progress: 0.5,
-            texture: asset_server.load("textures/speedbar_triangles.png"),
-        });
         Self {
             width,
             height,
-            material,
+            image,
+            image_bar
         }
     }
 
     pub fn build(
         self,
+        materials: &mut Assets<UiProgressBarMaterial>,
     ) -> impl Bundle {
-        (
-            
-        )       
+        progress_bar_bundle(0.7, 120., 16.,
+            Vec2 { x: 0.185, y: 0.15 }, Vec2 { x: 1.275, y: 2.1 },
+            self.image, self.image_bar, materials)
     }
 }
 
 pub fn spawn_movement_bar(
-    mut commands: Commands,
+    commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    mut materials: ResMut<Assets<ProgressBarMaterial>>,
+    mut materials: ResMut<Assets<UiProgressBarMaterial>>,
 ) -> Entity {
     commands.spawn(
-        HudMovementBuilder::new(120.0, 16.0, asset_server, materials)
-        .build()
+        HudMovementBuilder::new(120.0, 16.0, asset_server)
+        .build(&mut materials)
     ).id()
 }
 
-pub fn movement_bar_bundle(
-    asset_server: &Res<AssetServer>,
-    mut materials: ResMut<Assets<ProgressBarMaterial>>,
-) -> impl Bundle {
-    HudMovementBuilder::new(120.0, 16.0, asset_server, materials)
-        .build()
-}
+// pub fn movement_bar_bundle(
+//     asset_server: &Res<AssetServer>,
+//     mut materials: ResMut<Assets<UiProgressBarMaterial>>,
+// ) -> impl Bundle {
+//     HudMovementBuilder::new(120.0, 16.0, asset_server)
+//         .build(&mut *materials)
+// }
 
 pub fn ui_movement_bar_system(
     mut commands: Commands,
-    progressbar_query: Query<Entity, With<UiProgressBarValue>>,
+    progressbar_query: Query<Entity, With<UiProgressBar>>,
     mut image_query: Query<&mut ImageNode, With<UiProgressBar>>,
 ) {
     for progessbar in progressbar_query.iter() {
@@ -80,7 +71,7 @@ pub struct MovementDisplayPlugin;
 impl Plugin for MovementDisplayPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins(UiMaterialPlugin::<ProgressBarMaterial>::default())
+            //.add_plugins(UiMaterialPlugin::<UiProgressBarMaterial>::default())
             //.add_systems(Update, ui_movement_bar_system)
             ;
     }

@@ -1,15 +1,16 @@
 use bevy::prelude::*;
+
+use spacefight4ever_ui::ui::progressbar::UiProgressBarMaterial;
+
 use crate::ui::{hud::ship_modul_bar::setup_hex_grid, layers::*};
-
 use super::health_display::*;
-
 use super::movement_display::*;
 
 pub fn spawn_hud(
     mut commands: Commands,
     ui_layers: Res<UiLayers>,
     asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ProgressBarMaterial>>,
+    materials: ResMut<Assets<UiProgressBarMaterial>>,
 ) {
     let hex_height = 40.0_f32;
 
@@ -60,9 +61,13 @@ pub fn spawn_hud(
                 },
                 //BackgroundColor(Color::WHITE),
             ));
-            bottom.spawn(movement_bar_bundle(&asset_server, materials));
         });
     
+    let movement_bar = spawn_movement_bar(&mut commands, &asset_server, materials);
+    commands
+        .entity(bottom_hud)
+        .add_child(movement_bar);
+
     health_display(bottom_hud, &mut commands, &asset_server);
     setup_hex_grid(bottom_hud, &mut commands, &asset_server);
 }
