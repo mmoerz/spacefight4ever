@@ -18,6 +18,8 @@ pub struct UiLinearProgressBarMaterial {
 }
 
 /// uniform parameter for the shader
+/// TODO: convert 2 uv vec2 to vec4 and adapt shader
+/// would lead to better performance and caching (16bit align)
 #[derive(ShaderType, Clone, Debug)]
 pub struct UiProgressBarUniform {
     pub progress: f32,
