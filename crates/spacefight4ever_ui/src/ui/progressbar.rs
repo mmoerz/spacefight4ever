@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 
-use super::progressbar_material::UiProgressBarMaterial;
+use super::progressbar_material::UiLinearProgressBarMaterial;
 
 /// marker for a progressbar
-#[derive(Component, Default, Clone, Copy)]
-pub struct UiProgressBar;
+//#[derive(Component, Default, Clone, Copy)]
+// pub trait UiProgressBar : Component {
+//     fn progress(&self) -> f32;
+//     fn set_progress(&mut self, progress: f32);
+// }
 
 /// handle for easier access to the progress (and material)
 #[derive(Component, Debug)]
-pub struct UiProgressBarHandle(pub Handle<UiProgressBarMaterial>);
+pub struct UiLinearProgressBar(pub Handle<UiLinearProgressBarMaterial>);
 
 /// orientation of a progressbar which defines the fill direction
 #[derive(Clone, Copy, Debug)]
@@ -84,11 +87,11 @@ impl UiProgressBarBuilder {
     /// builds a progressbar with a horizontal layout
     pub fn build(
         self,
-        materials: &mut Assets<UiProgressBarMaterial>,
+        materials: &mut Assets<UiLinearProgressBarMaterial>,
     ) -> impl Bundle {
         // in build for easier testing ?
         // must be unique for each progress bar
-        let mut mat = UiProgressBarMaterial::new(self.progress, self.bar_texture);
+        let mut mat = UiLinearProgressBarMaterial::new(self.progress, self.bar_texture);
         mat.set_offset(self.offset);
         mat.set_scale(self.scale);
         mat.set_direction(self.direction);
@@ -97,8 +100,7 @@ impl UiProgressBarBuilder {
 
         (
             Name::new("UiProgressBar"),
-            UiProgressBar,
-            UiProgressBarHandle(handle.clone()),
+            UiLinearProgressBar(handle.clone()),
             Node {
                 width: px(self.width),
                 height: px(self.height),
@@ -136,7 +138,7 @@ pub fn spawn_progress_bar(
     background_texture: Handle<Image>,
     bar_texture: Handle<Image>,
     mut commands: Commands,
-    mut materials: ResMut<Assets<UiProgressBarMaterial>>,
+    mut materials: ResMut<Assets<UiLinearProgressBarMaterial>>,
 ) -> Entity {
     commands.spawn(
         UiProgressBarBuilder::new(
@@ -157,7 +159,7 @@ pub fn progress_bar_bundle(
     scale: Vec2,
     background_texture: Handle<Image>,
     bar_texture: Handle<Image>,
-    materials: &mut Assets<UiProgressBarMaterial>,
+    materials: &mut Assets<UiLinearProgressBarMaterial>,
 ) -> impl Bundle {
     UiProgressBarBuilder::new(
         progress, width, height, background_texture, bar_texture)

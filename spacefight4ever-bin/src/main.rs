@@ -12,7 +12,7 @@ use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
 
 use spacefight4ever_ui::{
     plugins::{UiAssetsPlugin, UiAtlasButtonPlugin, UiAtlasWindowPlugin, UiProgressBarPlugin},
-    ui::{assets::assets::setup_ui_theme, progressbar::UiProgressBar}
+    ui::{assets::assets::setup_ui_theme}
 };
 
 use spacefight4ever_lib::{

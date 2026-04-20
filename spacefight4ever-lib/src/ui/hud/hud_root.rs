@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use spacefight4ever_ui::ui::progressbar_material::UiProgressBarMaterial;
+use spacefight4ever_ui::ui::progressbar_material::UiLinearProgressBarMaterial;
 
 use crate::ui::{hud::ship_modul_bar::setup_hex_grid, layers::*};
 use super::health_display::*;
@@ -10,7 +10,7 @@ pub fn spawn_hud(
     mut commands: Commands,
     ui_layers: Res<UiLayers>,
     asset_server: Res<AssetServer>,
-    materials: ResMut<Assets<UiProgressBarMaterial>>,
+    materials: ResMut<Assets<UiLinearProgressBarMaterial>>,
 ) {
     let hex_height = 40.0_f32;
 

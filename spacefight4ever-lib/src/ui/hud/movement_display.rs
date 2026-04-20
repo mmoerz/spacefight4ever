@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use spacefight4ever_ui::ui::{
-    progressbar::{UiProgressBar, UiProgressBarDirection, progress_bar_bundle},
-    progressbar_material::UiProgressBarMaterial,
+    progressbar::{UiLinearProgressBar, UiProgressBarDirection, progress_bar_bundle},
+    progressbar_material::UiLinearProgressBarMaterial,
 };
 
 pub struct HudMovementBuilder {
@@ -30,7 +30,7 @@ impl HudMovementBuilder {
 
     pub fn build(
         self,
-        materials: &mut Assets<UiProgressBarMaterial>,
+        materials: &mut Assets<UiLinearProgressBarMaterial>,
     ) -> impl Bundle {
         progress_bar_bundle(0.7, UiProgressBarDirection::LeftToRight,
             120., 16.,
@@ -42,7 +42,7 @@ impl HudMovementBuilder {
 pub fn spawn_movement_bar(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    mut materials: ResMut<Assets<UiProgressBarMaterial>>,
+    mut materials: ResMut<Assets<UiLinearProgressBarMaterial>>,
 ) -> Entity {
     commands.spawn(
         HudMovementBuilder::new(120.0, 16.0, asset_server)

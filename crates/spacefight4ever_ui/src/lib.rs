@@ -20,6 +20,7 @@ pub mod ui {
     pub mod window;
     pub mod progressbar_material;
     pub mod progressbar;
+    pub mod progressbar_commands;
 }
 
 pub mod prelude {

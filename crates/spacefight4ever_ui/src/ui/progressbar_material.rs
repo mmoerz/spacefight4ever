@@ -8,7 +8,7 @@ use crate::ui::progressbar::UiProgressBarDirection;
 
 /// material for a progressbar for the shader
 #[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
-pub struct UiProgressBarMaterial {
+pub struct UiLinearProgressBarMaterial {
     #[uniform(0)]
     pub data: UiProgressBarUniform,
 
@@ -27,14 +27,14 @@ pub struct UiProgressBarUniform {
 }
 
 /// actual shader that will render the progress
-impl UiMaterial for UiProgressBarMaterial {
+impl UiMaterial for UiLinearProgressBarMaterial {
     fn fragment_shader() -> ShaderRef {
         //"shaders/progress_bar_uv.wgsl".into()
         "shaders/progress_bar_universal.wgsl".into()
     }
 }
 
-impl UiProgressBarMaterial {
+impl UiLinearProgressBarMaterial {
     /// create a new progressbarmaterial
     /// each progressbar needs its own material because it
     /// contains the progressbar status (progress)
@@ -81,7 +81,7 @@ pub struct UiProgressBarPlugin;
 impl Plugin for UiProgressBarPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins(UiMaterialPlugin::<UiProgressBarMaterial>::default())
+            .add_plugins(UiMaterialPlugin::<UiLinearProgressBarMaterial>::default())
             ;
     }
 }
