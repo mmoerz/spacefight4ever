@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
+use crate::game::player::ship::SpaceshipController;
 use crate::game::ship::weapon::{Weapon, Ammunition};
 use crate::game::player::{gameassets::GameAssets};
 use crate::game::ship::module::{ModuleSize, HardPointType};
@@ -33,6 +34,7 @@ impl PlayerShipBuilder {
         let ship_id = commands.spawn((
             Name::new("PlayerShip"),
             PlayerShip,
+            SpaceshipController::default(),
 
             ShipHealth {
                 values: LayeredHealth { values: [3, 10, 20 ] },
@@ -43,6 +45,8 @@ impl PlayerShipBuilder {
             RigidBody::Dynamic,
             //Collider::capsule(1.0, 2.5),
             Collider::sphere(1.5),
+            LinearDamping(0.5), 
+            AngularDamping(1.0), 
             //ConstantForce::new(0., 0., 0.),
             GravityScale(0.0),
 
@@ -80,9 +84,9 @@ impl PlayerShipBuilder {
         let model_id = commands.spawn((
             SceneRoot(self.model.clone()),
             //Transform::from_xyz(0.0, 0.0, 0.0),
-            Transform::from_rotation(
-                Quat::from_rotation_y(std::f32::consts::FRAC_2_PI) // 90° Y rotation
-            ),
+            // Transform::from_rotation(
+            //     Quat::from_rotation_y(std::f32::consts::FRAC_2_PI) // 90° Y rotation
+            // ),
             Visibility::Visible,
             Name::new("SceneRoot"),
         )).id();

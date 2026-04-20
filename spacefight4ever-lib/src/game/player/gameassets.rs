@@ -57,7 +57,7 @@ impl Plugin for GameAssetsPlugin {
             .init_resource::<GameAssets>()
             .add_systems(OnEnter(GameState::Loading), load_assets)
             .add_systems(Update, check_assets_ready.run_if(in_state(GameState::Loading)))
-            .add_systems(Update, debug_loading.run_if(in_state(GameState::Loading)));
+            .add_systems(Update, debug_loading.run_if(in_state(GameState::Loading)))
             ;
     }
 }

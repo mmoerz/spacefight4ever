@@ -6,7 +6,7 @@ use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{b
 use crate::game::ship::weapon::{Weapon, Ammunition};
 use crate::game::player::{playership::*, gameassets::GameAssets};
 use crate::game::ship::module::{ModuleSize, HardPointType};
-//use crate::game::player::playership::sync_visual_to_physics;
+use crate::game::player::ship::spaceship_movement_system;
 use crate::game::player::gameassets::GameState;
 
 pub fn spawn_player(
@@ -56,6 +56,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnEnter(GameState::InGame), spawn_player)
+            .add_systems(Update, spaceship_movement_system)
             //.add_systems(Update,  sync_visual_to_physics)
             ;
     }

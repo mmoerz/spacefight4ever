@@ -83,12 +83,12 @@ fn main() {
         .add_plugins(UiSettingsPlugin)
 
         .add_plugins(PlayerPlugin)
-        .add_plugins(MovementPlugin)
+        //.add_plugins(MovementPlugin)
         //.add_plugins(GltfPlayerShipPlugin)
 
         .add_systems(Startup, setup_ui_theme)
         //.add_systems(Startup, setup)
-        //.add_systems(Startup, testsetup)
+        .add_systems(Startup, testsetup)
 
         .run();
 }
@@ -102,13 +102,29 @@ fn testsetup(
 ) {
     // ship
     // let cube = 
+    // commands.spawn((
+    //     Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+    //     MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
+    //     //SceneRoot(asset_server.load("ships/models/Spitfire.glb#Scene0")),
+    //     Transform::from_xyz(0.0, 0.0, 0.0),
+    //     // OrbitCameraTarget,
+    // )).id();
+
     commands.spawn((
-        // Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-        // MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
-        SceneRoot(asset_server.load("ships/models/Spitfire.glb#Scene0")),
-        Transform::from_xyz(0.0, 0.5, 0.0),
+        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
+        //SceneRoot(asset_server.load("ships/models/Spitfire.glb#Scene0")),
+        Transform::from_xyz(8.0, 0.0, 0.0),
         // OrbitCameraTarget,
-    )).id();
+    ));
+
+    commands.spawn((
+        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
+        //SceneRoot(asset_server.load("ships/models/Spitfire.glb#Scene0")),
+        Transform::from_xyz(-8.0, 0.0, 0.0),
+        // OrbitCameraTarget,
+    ));
 
     // light
     commands.spawn((
