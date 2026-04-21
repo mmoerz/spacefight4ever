@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::game::ship::weapon_definition::*;
-use crate::game::ship::ammunition_definitions::*;
+use crate::game::ship::definitions::weapon_definition::*;
+use crate::game::ship::definitions::ammunition_definition::*;
 
 #[derive(Component, Clone, Copy)]
 pub struct Weapon {

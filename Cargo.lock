@@ -5591,6 +5591,7 @@ dependencies = [
  "serde",
  "serde_json",
  "spacefight4ever_ui",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

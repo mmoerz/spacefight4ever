@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::game::{combat::health_basetypes::{DamageEfficiency, HealthPercents}};
-use crate::game::ship::definition_repository::{NamedDefinition, DefinitionRepository};
+use super::definition_repository::{NamedDefinition, DefinitionRepository};
 
 pub const PATH_AMMUNITION_DEFINITION: &str = "assets/data/ammunitions.json";
 

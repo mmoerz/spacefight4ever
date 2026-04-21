@@ -23,11 +23,11 @@ pub fn calculate_attack(
 
 }
 
-pub fn attack_system(
-    mut events: MessageReader<Attack>,
-    mut query: Query<(&mut Ship, &ShipModel, &ShipResistances)>,
-) {
-    for ev in events.read() {
+// pub fn attack_system(
+//     mut events: MessageReader<Attack>,
+//     mut query: Query<(&mut Ship, &ShipModel, &ShipResistances)>,
+// ) {
+//     for ev in events.read() {
         
-    }
-}
+//     }
+// }

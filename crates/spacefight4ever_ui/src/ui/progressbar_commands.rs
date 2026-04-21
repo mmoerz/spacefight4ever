@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::ecs::system::SystemParam;
 
 use super::progressbar_material::UiLinearProgressBarMaterial;
 use super::progressbar::*;
@@ -12,7 +13,7 @@ pub enum UiProgressBarCommand {
     },
 }
 
-pub fn ui_bar_executor_system(
+pub fn ui_progress_bar_executor_system(
     mut events: MessageReader<UiProgressBarCommand>,
     bars: Query<&UiLinearProgressBar>,
     mut materials: ResMut<Assets<UiLinearProgressBarMaterial>>,
@@ -40,6 +41,7 @@ pub fn ui_bar_executor_system(
     }
 }
 
+#[derive(SystemParam)]
 pub struct UiProgressBarApi<'w> {
     pub writer: MessageWriter<'w, UiProgressBarCommand>,
 }

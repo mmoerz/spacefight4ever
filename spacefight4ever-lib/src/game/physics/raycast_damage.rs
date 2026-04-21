@@ -4,9 +4,9 @@ use avian3d::prelude::*;
 use crate::game::combat::basetypes::*;
 use crate::game::combat::health::*;
 use crate::game::combat::health_basetypes::HealthPercents;
-use crate::game::ship::ammunition_definitions::{AmmunitionDefinitionRepository, AmmunitionDefinition};
+use crate::game::ship::definitions::ammunition_definition::{AmmunitionDefinitionRepository, AmmunitionDefinition};
 use crate::game::ship::weapon::*;
-use crate::game::ship::weapon_definition::*;
+use crate::game::ship::definitions::weapon_definition::*;
 
 
 

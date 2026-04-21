@@ -2,7 +2,8 @@ use std::ops::{Index, IndexMut};
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::game::ship::{definition_repository::{DefinitionRepository, NamedDefinition}, module::ModuleSize};
+use crate::game::ship::module::ModuleSize;
+use super::{definition_repository::{DefinitionRepository, NamedDefinition}};
 
 const PATH_WEAPON_DEFINITION: &str = "assets/data/weapons.json";
 

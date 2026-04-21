@@ -1,7 +1,16 @@
 use bevy::prelude::*;
+use avian3d::prelude::*;
+
+use crate::game::player::playership::PlayerShip;
+use crate::game::player::ship::SpaceshipController;
+
+#[derive(Component)]
+pub struct HudMovementBar;
+
 use spacefight4ever_ui::ui::{
     progressbar::{UiLinearProgressBar, UiProgressBarDirection, progress_bar_bundle},
     progressbar_material::UiLinearProgressBarMaterial,
+    progressbar_commands::UiProgressBarApi,
 };
 
 pub struct HudMovementBuilder {
@@ -31,11 +40,13 @@ impl HudMovementBuilder {
     pub fn build(
         self,
         materials: &mut Assets<UiLinearProgressBarMaterial>,
-    ) -> impl Bundle {
-        progress_bar_bundle(0.7, UiProgressBarDirection::LeftToRight,
-            120., 16.,
-            Vec2 { x: 0.185, y: 0.15 }, Vec2 { x: 1.275, y: 2.1 },
-            self.image, self.image_bar, materials)
+    ) -> impl Bundle {(
+            HudMovementBar,
+            progress_bar_bundle(0.7, UiProgressBarDirection::LeftToRight,
+                120., 16.,
+                Vec2 { x: 0.185, y: 0.15 }, Vec2 { x: 1.275, y: 2.1 },
+                self.image, self.image_bar, materials)
+        )
     }
 }
 
@@ -50,11 +61,26 @@ pub fn spawn_movement_bar(
     ).id()
 }
 
+pub fn ui_movement_bar_system(
+    mut barapi: UiProgressBarApi,
+    mut query: Query<Forces, (With<SpaceshipController>, With<PlayerShip>)>,
+    ship: Single<&SpaceshipController, (With<SpaceshipController>, With<PlayerShip>)>,
+    entity: Single<Entity, With<HudMovementBar>>,
+) {
+    for force in &mut query {
+        let controller =  &ship;
+        let value = force.linear_velocity().length() / controller.move_speed;
+        barapi.set_progress(entity.entity(), value); // display speed in %
+    }
+}
+
+
 pub struct MovementDisplayPlugin;
 
 impl Plugin for MovementDisplayPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_systems(Update, ui_movement_bar_system)
             //.add_plugins(UiMaterialPlugin::<UiProgressBarMaterial>::default())
             //.add_systems(Update, ui_movement_bar_system)
             ;

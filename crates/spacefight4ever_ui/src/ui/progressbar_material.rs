@@ -3,6 +3,10 @@ use bevy::render::render_resource::*;
 use bevy::shader::ShaderRef;
 
 use crate::ui::progressbar::UiProgressBarDirection;
+use crate::ui::progressbar_commands::{
+    UiProgressBarCommand,
+    ui_progress_bar_executor_system
+};
 
 /// shader stuff for the progressbar
 
@@ -83,7 +87,9 @@ pub struct UiProgressBarPlugin;
 impl Plugin for UiProgressBarPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_message::<UiProgressBarCommand>()
             .add_plugins(UiMaterialPlugin::<UiLinearProgressBarMaterial>::default())
+            .add_systems(Update, ui_progress_bar_executor_system)
             ;
     }
 }

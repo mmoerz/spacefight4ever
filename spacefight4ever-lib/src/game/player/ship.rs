@@ -50,6 +50,11 @@ pub fn spaceship_movement_system (
     }
 }
 
+// //
+// let speed = force.linear_velocity().length();
+// let x = speed / profile.cruise_speed;
+// let value = (x / (1.0 + x)).clamp(0.0, 1.0);
+
 // essential setup
 // commands.spawn((
 //     SceneRoot(asset_server.load("ships/models/Spitfire.glb#Scene0")),
