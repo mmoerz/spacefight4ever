@@ -6,6 +6,27 @@ use crate::game::ship::definitions::ship_definition::{
     build_index_once_system
 };
 
+// Asset handles (Bevy)
+//  - textures
+//  - models
+//  - materials
+// Game database (your system)
+//  - ship definitions
+//  - weapon stats
+//  -factions
+// Registry layer
+//  - maps IDs → handles
+//  - built once after loading
+//
+// ShipDefinition (game truth)
+//     ↓
+// ShipIndex (lookup layer)
+//     ↓
+// Handle<ShipDefinition> (asset reference)
+//     ↓
+// GPU / scene / material
+
+
 /// in order to properly load all resources before using the resource handles
 /// a loading state prevents the game from running
 #[derive(Default, States, Debug, Clone, Eq, PartialEq, Hash)]
