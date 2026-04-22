@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use avian3d::prelude::*;
 
 use crate::game::player::playership::PlayerShip;
-use crate::game::player::ship::SpaceshipController;
+//use crate::game::player::ship::SpaceshipController;
+use crate::ui::input::ship::SpaceshipController;
 
 #[derive(Component)]
 pub struct HudMovementBar;

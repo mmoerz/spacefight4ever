@@ -7,7 +7,7 @@ use spacefight4ever_ui::{
 pub fn spawn_ship_equipment_dialog(
     commands: &mut Commands,
     parent: Entity,
-    asset_server: &Res<AssetServer>,
+    //asset_server: &Res<AssetServer>,
     z_index: ResMut<UiWindowZCounter>,
     ui_resources: &Res<UiResources>,
     themes: &Assets<UiTheme>,

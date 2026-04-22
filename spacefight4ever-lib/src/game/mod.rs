@@ -30,11 +30,11 @@ pub mod ship {
 pub mod player {
     pub mod player;
     pub mod playership;
-    pub mod gameassets;
-    pub mod ship;
     //pub mod gltf_playership;
 }
 
 pub mod physics {
     pub mod raycast_damage;
 }
+
+pub mod assets;

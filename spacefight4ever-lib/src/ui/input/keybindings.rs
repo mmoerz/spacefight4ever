@@ -1,6 +1,4 @@
-use avian3d::parry::either::Either::Right;
-use bevy::{prelude::*, state::commands};
-use crate::ui::camera::OrbitCameraTarget;
+use bevy::{prelude::*};
 use crate::ui::{self, overlay::settings::UiSettingsOpened};
 use crate::ui::layers::UiLayers;
 use spacefight4ever_ui::{
@@ -26,7 +24,7 @@ pub fn trigger_ship_equipment_dialog(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
     ui_layers: Res<UiLayers>,
-    asset_server: Res<AssetServer>,
+    //asset_server: Res<AssetServer>,
     z_index: ResMut<UiWindowZCounter>,
     //mut events: MessageWriter<UiWindowsSwitchAtlasRequest>,
     if_theme: If<Res<UiResources>>,
@@ -40,7 +38,7 @@ pub fn trigger_ship_equipment_dialog(
         ui::dialogs::ship_equipment::spawn_ship_equipment_dialog(
             &mut commands,
             ui_layers.window_root,
-            &asset_server,
+            //&asset_server,
             z_index,
             theme,
             &themes,

@@ -1,0 +1,6 @@
+(
+    model: Spitfire,
+    size: Micro,
+    mass: 2000.0,
+    max_cruise_speed: 
+)

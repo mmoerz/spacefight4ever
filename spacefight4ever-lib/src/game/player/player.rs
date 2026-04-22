@@ -1,53 +1,21 @@
-use std::sync::OnceState;
-
 use bevy::prelude::*;
 
-use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
-use crate::game::ship::weapon::{Weapon, Ammunition};
-use crate::game::player::{playership::*, gameassets::GameAssets};
-use crate::game::ship::module::{ModuleSize, HardPointType};
-use crate::game::player::ship::spaceship_movement_system;
-use crate::game::player::gameassets::GameState;
+use crate::game::{combat::{health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
+//use crate::game::ship::weapon::{Weapon, Ammunition};
+use crate::game::player::playership::*;
+//use crate::game::ship::module::{ModuleSize, HardPointType};
+use crate::ui::input::ship::spaceship_movement_system;
+use crate::game::assets::{GameState, GameAssets};
 
 pub fn spawn_player(
     mut commands: Commands,
-    assets: Res<GameAssets>,
+    assets: Res<Assets<Gltf>>,
+    assets_collection: Res<GameAssets>,
 ) {
-    // commands.spawn((
-    //     Name::new("PlayerShip"),
-    //     player_ship_bundle(&assets),
-    //     // Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-    //     // MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
-    //     ShipHealth {
-    //         values: LayeredHealth { values: [3, 10, 20 ] },
-    //         values_max: LayeredHealth { values: [10, 10, 20] },
-    //     },
-    // )).with_children(|ship| {
-    //     ship.spawn((
-    //         MountPoint {
-    //             id: 0,
-    //             kind: MountType::Hardpoint(HardPointType::Weapon),
-    //             allowed_size: ModuleSize::Small,
-    //         },
-    //         WeaponModuleBundle::new(
-    //             Module {
-    //                 id: 0,
-    //                 name: "Foobar".into(),
-    //                 size: ModuleSize::Small,
-    //                 kind: MountType::Hardpoint(HardPointType::Weapon),
-    //             },
-    //             Weapon {
-    //                 weapon_id: 0,
-    //                 cooldown: 10.0,
-    //             },
-    //             Ammunition{
-    //                 ammo_id: 0,
-    //                 count: 10,
-    //             },
-    //         ),
-    //     ));
-    // });
-    spawn_player_ship(&mut commands, &assets);
+    let ship_model = assets.get(&assets_collection.player_ship).unwrap();
+    let scene  = ship_model.scenes[0].clone();
+
+    spawn_player_ship(&mut commands, scene);
 }
 
 pub struct PlayerPlugin;

@@ -10,6 +10,7 @@ bevy = { workspace = true }
 bevy_skein = { workspace = true }
 bevy_prototype_lyon = { workspace = true, features = []}
 
+bevy_asset_loader = { workspace = true }
 bevy_ui = { workspace = true }
 bevy_ui_widgets = { workspace = true }
 

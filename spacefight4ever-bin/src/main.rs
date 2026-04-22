@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     input_focus::{tab_navigation::TabNavigationPlugin, InputDispatchPlugin}
 };
+use bevy_asset_loader::prelude::*;
 use bevy_skein::SkeinPlugin;
 use avian3d::prelude::*;
 use avian3d::collision::collider::ColliderConstructor;
@@ -19,10 +20,10 @@ use spacefight4ever_lib::{
     config::environment::*,
     //game::player::gltf_playership::GltfPlayerShipPlugin,
     game::player::{
-        gameassets::GameAssetsPlugin,
         player::PlayerPlugin,
         playership::PlayerShip,
     },
+    game::assets::GameAssetsPlugin,
     prelude::*
 };
 use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget, GameCameraPlugin};
@@ -38,7 +39,6 @@ use spacefight4ever_lib::ui::hud::movement_display::MovementDisplayPlugin;
 
 fn main() {
     App::new()
-        
         .add_plugins((
             DefaultPlugins.set(
             bevy::asset::AssetPlugin {
@@ -51,6 +51,7 @@ fn main() {
             InputDispatchPlugin,
             TabNavigationPlugin
         ))
+        
         // physics specific registration
         .register_type::<ColliderConstructor>()
         .register_type::<RigidBody>()

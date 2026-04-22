@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
-use super::playership::PlayerShip;
+use crate::game::player::playership::PlayerShip;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]

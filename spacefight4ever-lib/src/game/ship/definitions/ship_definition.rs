@@ -1,3 +1,8 @@
+use std::{
+    str::FromStr,
+    collections::HashMap,
+};
+
 use bevy::{
     asset::{io::Reader, AssetLoader, LoadContext},
     prelude::*,
@@ -6,31 +11,41 @@ use bevy::{
 use serde::{Deserialize, Serialize};
 
 use crate::game::ship::module::ModuleSize;
-use super::{definition_repository::{DefinitionRepository, NamedDefinition}};
+//use super::{definition_repository::NamedDefinition};
 use super::load_error::AssetLoadError;
 
-pub const PATH_SHIP_DEFINITION: &str = "assets/data/ships.def.ron";
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Deserialize, Serialize)]
+pub enum ShipModel {
+    #[default]
+    Spitfire,
+}
+
+impl FromStr for ShipModel {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Spitfire" => Ok(ShipModel::Spitfire),
+            _ => Err(()),
+        }
+    }
+}
 
 /// describes the static data of a weapon
 #[derive(Asset, TypePath, Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct ShipDefinition {
-    pub name: String,
+    //pub name: String,
+    pub model: ShipModel,
     pub size: ModuleSize,
     pub mass: f32,
+    pub max_cruise_speed: f32,
 }
 
-impl Copy for ShipDefinition {
-    fn copy(&self) -> Self {
-        ShipDefinition { self.name, self.size, self.mass }
-    }
-}
-
-
-impl NamedDefinition for ShipDefinition {
-    fn name(&self) -> &str {
-        &self.name
-    }
-}
+// impl NamedDefinition for ShipDefinition {
+//     fn name(&self) -> &str {
+//         &self.name
+//     }
+// }
 
 #[derive(Default, TypePath)]
 pub struct ShipDefinitionLoader;
@@ -56,6 +71,67 @@ impl AssetLoader for ShipDefinitionLoader {
     fn extensions(&self) -> &[&str] {
         &["ship.def.ron"]
     }
+}
+
+#[derive(Resource, Default)]
+pub struct ShipDefinitionIndex {
+    pub index: HashMap<ShipModel, Handle<ShipDefinition>>,
+}
+
+pub fn build_index_once_system(
+    //mut commands: Commands,
+    defs: Res<Assets<ShipDefinition>>,
+    assets: Res<ShipAssets>,
+    mut index: ResMut<ShipDefinitionIndex>,
+) {
+    for handle in &assets.folder {
+        if let Some(def) = defs.get(handle) {
+            index.index.insert(def.model.clone(), handle.clone());
+        }
+    }
+}
+
+// fn update_index_on_change(
+//     mut events: EventReader<AssetEvent<ShipDefinition>>,
+//     defs: Res<Assets<ShipDefinition>>,
+//     mut index: ResMut<ShipIndex>,
+// ) {
+//     for event in events.read() {
+//         match event {
+//             AssetEvent::Added { id }
+//             | AssetEvent::Modified { id } => {
+//                 if let Some(def) = defs.get(*id) {
+//                     index.by_name.insert(def.name.clone(), Handle::weak(*id));
+//                 }
+//             }
+
+//             AssetEvent::Removed { id } => {
+//                 // remove stale entries
+//                 index.by_name.retain(|_, h| h.id() != *id);
+//             }
+//         }
+//     }
+// }
+
+pub struct ShipDefinitionPlugin;
+
+impl Plugin for ShipDefinitionPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .init_asset::<ShipDefinition>()
+            .init_asset_loader::<ShipDefinitionLoader>()
+            .init_resource::<ShipDefinitionIndex>()
+            .add_systems(Startup, build_index_once_system);
+    }
+}
+
+use bevy_asset_loader::asset_collection::AssetCollection;
+
+// TODO: this is bevy_asset_loader specific, keep here or move to assets.rs?
+#[derive(AssetCollection, Resource)]
+pub struct ShipAssets {
+    #[asset(path = "data/ships", collection(typed))]
+    folder: Vec<Handle<ShipDefinition>>,
 }
 
 // /// just an alias to usize for ship ids
@@ -97,46 +173,47 @@ impl AssetLoader for ShipDefinitionLoader {
 //     }
 // }
 
-// custom asset loader for ButtonSkin, 
-// which reads from a RON file and loads the associated texture
-#[derive(Default, TypePath)]
-pub struct ShipDefinitionsLoader;
+// // custom asset loader for ButtonSkin, 
+// // which reads from a RON file and loads the associated texture
+// #[derive(Default, TypePath)]
+// pub struct ShipDefinitionsLoader;
 
-// ship definition file structure
-#[derive(Asset, TypePath, Deserialize)]
-pub struct ShipDefinitionFile {
-    pub ships: Vec<ShipDefinition>,
-}
+// // ship definition file structure
+// #[derive(Asset, TypePath, Deserialize)]
+// pub struct ShipDefinitionFile {
+//     pub ships: Vec<ShipDefinition>,
+// }
 
-// /// Implementation of the custom asset loader for `ButtonSkin`
-// /// This loader reads a RON file that specifies the texture atlas and mapping for button states,
-// /// and then loads the associated texture as a Bevy asset.
-impl AssetLoader for ShipDefinitionsLoader {
-    type Asset = ShipDefinitionFile;
-    type Settings = ();
-    type Error = AssetLoadError;
-    async fn load(
-        &self,
-        reader: &mut dyn Reader,
-        _settings: &(),
-        load_context: &mut LoadContext<'_>,
-    ) -> Result<Self::Asset, Self::Error> {
-        let mut bytes = Vec::new();
-        reader.read_to_end(&mut bytes).await?;
+// // /// Implementation of the custom asset loader for `ButtonSkin`
+// // /// This loader reads a RON file that specifies the texture atlas and mapping for button states,
+// // /// and then loads the associated texture as a Bevy asset.
+// impl AssetLoader for ShipDefinitionsLoader {
+//     type Asset = ShipDefinitionFile;
+//     type Settings = ();
+//     type Error = AssetLoadError;
+//     async fn load(
+//         &self,
+//         reader: &mut dyn Reader,
+//         _settings: &(),
+//         load_context: &mut LoadContext<'_>,
+//     ) -> Result<Self::Asset, Self::Error> {
+//         let mut bytes = Vec::new();
+//         reader.read_to_end(&mut bytes).await?;
         
-        let file: ShipDefinitionFile = ron::de::from_bytes(&bytes)?;
+//         let file: ShipDefinitionFile = ron::de::from_bytes(&bytes)?;
 
-        for ship in file.ships {
-            load_context.add_labeled_asset(
-                ship.name.clone(),
-                ship,
-            );
-        }
+//         for ship in file.ships {
+//             load_context.add_labeled_asset(
+//                 ship.name.clone(),
+//                 ship,
+//             );
+//         }
 
-        Ok(file)
-    }
+//         Ok(file)
+//     }
 
-    fn extensions(&self) -> &[&str] {
-        &["ship.def.ron"]
-    }
-}
+//     fn extensions(&self) -> &[&str] {
+//         &["ship.def.ron"]
+//     }
+// }
+

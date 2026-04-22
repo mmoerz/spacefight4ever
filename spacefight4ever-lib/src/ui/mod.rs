@@ -15,6 +15,7 @@ pub mod movement;
 
 pub mod input {
     pub mod keybindings;
+    pub mod ship;
 }
 
 pub mod hud {

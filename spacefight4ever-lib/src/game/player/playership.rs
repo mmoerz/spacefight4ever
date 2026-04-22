@@ -1,13 +1,16 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
-use crate::game::player::ship::SpaceshipController;
+use crate::ui::input::ship::SpaceshipController;
 use crate::game::ship::weapon::{Weapon, Ammunition};
-use crate::game::player::{gameassets::GameAssets};
+use crate::game::assets::GameAssets;
 use crate::game::ship::module::{ModuleSize, HardPointType};
 use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
 
 use crate::ui::camera::{OrbitCameraTarget};
+
+use crate::game::ship::definitions::ship_definition::ShipDefinition;
+
 
 #[derive(Component)]
 pub struct PlayerShip;
@@ -99,11 +102,24 @@ impl PlayerShipBuilder {
 
 pub fn spawn_player_ship(
     commands: &mut Commands,
-    assets: &GameAssets,
+    scene: Handle<Scene>,
 ) -> Entity {
-    PlayerShipBuilder::new(assets.player_ship.clone())
+    PlayerShipBuilder::new(scene)
         .build(commands)
     //Entity::PLACEHOLDER
+}
+
+pub fn spawn_player_ship_gltf(
+    commands: &mut Commands,
+    assets: Res<Assets<Gltf>>,
+    assets_collection: Res<GameAssets>,
+    ship_defs: Res<Assets<ShipDefinition>>,
+) -> Entity {
+    let ship_model = assets.get(&assets_collection.player_ship).unwrap();
+    let scene  = ship_model.scenes[0].clone();
+    
+
+    spawn_player_ship(commands, scene)
 }
 
 // ============================================================================
