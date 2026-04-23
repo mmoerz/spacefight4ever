@@ -13,8 +13,9 @@ use serde::{Deserialize, Serialize};
 use crate::game::ship::module::ModuleSize;
 //use super::{definition_repository::NamedDefinition};
 use super::load_error::AssetLoadError;
+use super::ship_models::ShipModelIndex;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Deserialize, Serialize)]
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Deserialize, Serialize)]
 pub enum ShipModel {
     #[default]
     Spitfire,
@@ -27,6 +28,14 @@ impl FromStr for ShipModel {
         match s {
             "Spitfire" => Ok(ShipModel::Spitfire),
             _ => Err(()),
+        }
+    }
+}
+
+impl ToString for ShipModel {
+    fn to_string(&self) -> String {
+        match self {
+            ShipModel::Spitfire => "Spitfire".to_string(),
         }
     }
 }
@@ -79,14 +88,19 @@ pub struct ShipDefinitionIndex {
 }
 
 pub fn build_index_once_system(
-    //mut commands: Commands,
     defs: Res<Assets<ShipDefinition>>,
-    assets: Res<ShipAssets>,
+    assets: Res<ShipDefinitions>,
     mut index: ResMut<ShipDefinitionIndex>,
+    mut model_index: ResMut<ShipModelIndex>,
+    asset_server: Res<AssetServer>,
 ) {
     for handle in &assets.folder {
         if let Some(def) = defs.get(handle) {
+            println!("Indexing ship definition: {}", def.model.to_string());
             index.index.insert(def.model.clone(), handle.clone());
+            let model_handle = asset_server.load(format!("ships/models/{}.glb", 
+                    def.model.to_string()));
+            model_index.index.insert(def.model.clone(), model_handle);
         }
     }
 }
@@ -129,7 +143,7 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 
 // TODO: this is bevy_asset_loader specific, keep here or move to assets.rs?
 #[derive(AssetCollection, Resource)]
-pub struct ShipAssets {
+pub struct ShipDefinitions {
     #[asset(path = "data/ships", collection(typed))]
     folder: Vec<Handle<ShipDefinition>>,
 }

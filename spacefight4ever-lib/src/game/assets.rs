@@ -1,9 +1,13 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use crate::game::ship::definitions::ship_definition::{
-    ShipAssets, ShipDefinition, ShipDefinitionLoader, ShipDefinitionIndex,
-    build_index_once_system
+use crate::game::ship::definitions::{
+    ship_definition::{
+        ShipDefinition, ShipDefinitionIndex, 
+        ShipDefinitionLoader, ShipDefinitions, 
+        build_index_once_system
+    },
+    ship_models::{ ShipModels, ShipModelIndex },
 };
 
 // Asset handles (Bevy)
@@ -38,11 +42,7 @@ pub enum GameState {
     InGame,
 }
 
-#[derive(AssetCollection, Resource)]
-pub struct GameAssets {
-    #[asset(path = "ships/models/Spitfire.glb")]
-    pub player_ship: Handle<Gltf>,
-}
+
 
 ///
 pub struct GameAssetsPlugin;
@@ -54,11 +54,13 @@ impl Plugin for GameAssetsPlugin {
             .init_asset::<ShipDefinition>()
             .init_asset_loader::<ShipDefinitionLoader>()
             .init_resource::<ShipDefinitionIndex>()
+            .init_resource::<ShipModelIndex>()
+
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
-                    .continue_to_state(GameState::InGame)
-                    .load_collection::<ShipAssets>()
-                    .load_collection::<GameAssets>(),
+                    .continue_to_state(GameState::Indexing)
+                    .load_collection::<ShipDefinitions>()
+                    .load_collection::<ShipModels>(),
             )
             .add_systems(OnEnter(GameState::Indexing), (
                 build_index_once_system,

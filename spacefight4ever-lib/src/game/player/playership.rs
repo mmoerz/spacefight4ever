@@ -1,29 +1,33 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
+use spacefight4ever_ui::ui::assets;
 
 use crate::ui::input::ship::SpaceshipController;
 use crate::game::ship::weapon::{Weapon, Ammunition};
-use crate::game::assets::GameAssets;
+use crate::game::ship::definitions::{
+    ship_definition::{ShipModel, ShipDefinition, },
+    ship_models::{ShipModelIndex, ShipModels},
+};
 use crate::game::ship::module::{ModuleSize, HardPointType};
 use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
 
 use crate::ui::camera::{OrbitCameraTarget};
 
-use crate::game::ship::definitions::ship_definition::ShipDefinition;
-
-
 #[derive(Component)]
 pub struct PlayerShip;
 
 pub struct PlayerShipBuilder {
+    ship_model: ShipModel,
     model: Handle<Scene>,
 }
 
 impl PlayerShipBuilder {
     pub fn new(
+        ship_model: ShipModel,
         model: Handle<Scene>,
     ) -> Self {
         Self {
+            ship_model,
             model,
         }
     }
@@ -38,6 +42,7 @@ impl PlayerShipBuilder {
             Name::new("PlayerShip"),
             PlayerShip,
             SpaceshipController::default(),
+            self.ship_model,
 
             ShipHealth {
                 values: LayeredHealth { values: [3, 10, 20 ] },
@@ -102,24 +107,25 @@ impl PlayerShipBuilder {
 
 pub fn spawn_player_ship(
     commands: &mut Commands,
+    model: ShipModel,
     scene: Handle<Scene>,
 ) -> Entity {
-    PlayerShipBuilder::new(scene)
+    PlayerShipBuilder::new(model, scene)
         .build(commands)
     //Entity::PLACEHOLDER
 }
 
 pub fn spawn_player_ship_gltf(
     commands: &mut Commands,
+    model: ShipModel,
     assets: Res<Assets<Gltf>>,
-    assets_collection: Res<GameAssets>,
-    ship_defs: Res<Assets<ShipDefinition>>,
+    model_assets: Res<ShipModelIndex>,
 ) -> Entity {
-    let ship_model = assets.get(&assets_collection.player_ship).unwrap();
+    let handle = model_assets.index.get(&model).unwrap();
+    let ship_model = assets.get(handle).unwrap();
     let scene  = ship_model.scenes[0].clone();
-    
 
-    spawn_player_ship(commands, scene)
+    spawn_player_ship(commands, model, scene)
 }
 
 // ============================================================================

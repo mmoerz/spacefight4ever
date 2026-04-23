@@ -15,6 +15,7 @@ pub mod ship {
         pub mod weapon_definition; // for storing weapon definitions that are reused between identical weapons
         pub mod ammunition_definition; // for storing ammunition definitions that are reused between identical ammunition
         pub mod ship_definition;
+        pub mod ship_models; // for storing the asset handles of ship models
     }
     pub mod modules {
         pub mod stats;
