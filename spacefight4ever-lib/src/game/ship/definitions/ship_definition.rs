@@ -40,11 +40,22 @@ impl ToString for ShipModel {
     }
 }
 
+// #[derive(Component, Debug, Clone, PartialEq, Eq)]
+// pub struct ShipModel {
+//     pub name: String,
+//     pub kind: ShipType,
+//     pub manufacturer: String,
+//     pub mount_points: Vec<MountPoint> // default (empty mountpoints)
+//     // put a reference or identifier for the graphics part here?
+// }
+
+
 /// describes the static data of a weapon
 #[derive(Asset, TypePath, Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct ShipDefinition {
     //pub name: String,
     pub model: ShipModel,
+    pub manufacturer: String,
     pub size: ModuleSize,
     pub mass: f32,
     pub max_cruise_speed: f32,

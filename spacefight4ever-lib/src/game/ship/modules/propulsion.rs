@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 
+use crate::game::ship::definitions::ship_definition::{
+    ShipModel, ShipDefinition, ShipDefinitionIndex,
+};
 use super::stats::Stat;
 
 #[derive(Component, Clone)]
@@ -44,22 +47,27 @@ impl Stat for PropulsionStat {
 }
 
 pub fn compute_ship_capability(
-    mut ships: Query<(&Children, &mut PropulsionStat,)>,
+    mut ships: Query<(&ShipModel, &Children, &mut PropulsionStat,)>,
     modules: Query<&PropulsionModule>,
+    index: Res<ShipDefinitionIndex>,
+    defs: Res<Assets<ShipDefinition>>, 
 ) {
-    for (children, mut cap) in &mut ships {
-        let mut max = 0.0;
-        let mut cruise = 0.0;
+    for (model, children, mut cap) in &mut ships {
+        let mut thrust_max = 0.0;
+        let mut cruise_max = 0.0;
+        let Some(handle) = index.index.get(model) else { continue; };
+        let Some(def) = defs.get(handle) else { continue; };
+        let mass = def.mass;
 
         for child in children {
             if let Ok(m) = modules.get(*child) {
-                max += m.max_thrust * m.efficiency;
-                cruise += m.max_thrust * 0.6 * m.efficiency;
+                thrust_max += m.max_thrust * m.efficiency;
+                cruise_max += m.max_thrust * m.efficiency / mass;
             }
         }
 
-        cap.max = max;
-        cap.set(cruise);
+        cap.max = thrust_max;
+        cap.set(cruise_max);
     }
 }
 

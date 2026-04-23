@@ -108,14 +108,7 @@ pub enum ShipType {
 }
 
 
-#[derive(Component, Debug, Clone, PartialEq, Eq)]
-pub struct ShipModel {
-    pub name: String,
-    pub kind: ShipType,
-    pub manufacturer: String,
-    pub mount_points: Vec<MountPoint> // default (empty mountpoints)
-    // put a reference or identifier for the graphics part here?
-}
+
 
 // // each ship has a list of mountpoints that adhere
 // // to the 'default' mountpoints defined in ShipModel

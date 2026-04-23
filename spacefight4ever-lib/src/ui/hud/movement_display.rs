@@ -4,6 +4,7 @@ use avian3d::prelude::*;
 use crate::game::player::playership::PlayerShip;
 //use crate::game::player::ship::SpaceshipController;
 use crate::ui::input::ship::SpaceshipController;
+use crate::game::ship::definitions::ship_definition::{ShipDefinition, ShipDefinitionIndex, ShipModel};
 
 #[derive(Component)]
 pub struct HudMovementBar;
@@ -66,11 +67,20 @@ pub fn ui_movement_bar_system(
     mut barapi: UiProgressBarApi,
     mut query: Query<Forces, (With<SpaceshipController>, With<PlayerShip>)>,
     ship: Single<&SpaceshipController, (With<SpaceshipController>, With<PlayerShip>)>,
+    ship_model: Single<&ShipModel, (With<SpaceshipController>, With<PlayerShip>)>,
     entity: Single<Entity, With<HudMovementBar>>,
+    index: Res<ShipDefinitionIndex>,
+    defs: Res<Assets<ShipDefinition>>,
 ) {
+    let Some(handle) = index.index.get(*ship_model) else { return; };
+    let Some(def) = defs.get(handle) else { return; };
+
     for force in &mut query {
         let controller =  &ship;
-        let value = force.linear_velocity().length() / controller.move_speed;
+        let value = force.linear_velocity().length() * controller.thrust_multiplier / def.max_cruise_speed;
+        if value > 0.1 {
+            println!("{:?}", value);
+        }
         barapi.set_progress(entity.entity(), value); // display speed in %
     }
 }

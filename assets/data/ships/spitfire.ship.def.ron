@@ -1,6 +1,7 @@
 (
     model: Spitfire,
+    manufacturer: "Electro Dynamics",
     size: Micro,
     mass: 2000.0,
-    max_cruise_speed: 20.0
+    max_cruise_speed: 200.0
 )

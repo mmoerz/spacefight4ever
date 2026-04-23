@@ -1,20 +1,27 @@
+use std::f32::consts::E;
+
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
-use crate::game::player::playership::PlayerShip;
+use crate::game::{player::playership::PlayerShip};
+use crate::game::ship::definitions::{
+    ship_definition::{ShipDefinition, ShipDefinitionIndex, ShipModel},
+    ship_models::{ShipModelIndex},
+};
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct SpaceshipController {
-    pub move_speed: f32,
-    pub rotation_speed: f32,
+    pub thrust_multiplier: f32,
 }
 
 impl Default for SpaceshipController {
+    /// returns default for a SpaceshipController
+    /// move_speed 50, rotation_speed 2
+    /// 
     fn default() -> Self {
         Self {
-            move_speed: 50.0,
-            rotation_speed: 2.0,
+            thrust_multiplier: 1.0,
         }
     }
 }
@@ -22,11 +29,17 @@ impl Default for SpaceshipController {
 pub fn spaceship_movement_system (
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<(Entity, Forces), (With<SpaceshipController>, With<PlayerShip>)>, // forces is not a component only a query_data
-    transform_query: Query<(&Transform, &SpaceshipController)>,
+    //index: Res<ShipModelIndex>,
+    defs: Res<Assets<ShipDefinition>>,
+    index: Res<ShipDefinitionIndex>,
+    transform_query: Query<(&Transform, &ShipModel, &SpaceshipController)>,
 ) {
     for (entity, mut force) in &mut query {
-        let Ok((transform, controller)) = 
+        let Ok((transform, ship_model, controller)) = 
             transform_query.get(entity) else { continue; };
+        //let Some(handle) = index.index.get(&ship_model) else { continue; };
+        let Some(handle) = index.index.get(ship_model) else { continue; };
+        let Some(def) = defs.get(handle) else { continue; };
 
     //for (mut force, mut torque, transform, controller) in query.iter_mut() {
         // --- Linear Movement (Thrust) ---
@@ -35,7 +48,9 @@ pub fn spaceship_movement_system (
         if keyboard.pressed(KeyCode::ArrowDown) { thrust += transform.forward().as_vec3(); }
         
         // Apply force (resetting each frame to prevent infinite acceleration)
-        force.apply_force(thrust * controller.move_speed);
+        // lol this can't be max cruise speed, because the force is normally measured in N
+        // since there is no mass here, this is just a half truth
+        force.apply_force(thrust * controller.thrust_multiplier * def.max_cruise_speed);
 
         // --- Angular Movement (Rotation/Pitch/Yaw) ---
         let mut rotation = Vec3::ZERO;
@@ -46,7 +61,7 @@ pub fn spaceship_movement_system (
         if keyboard.pressed(KeyCode::KeyQ) { rotation.z += 1.0; } // Roll
         if keyboard.pressed(KeyCode::KeyE) { rotation.z -= 1.0; }
 
-        force.apply_torque(transform.rotation * (rotation * controller.rotation_speed));
+        force.apply_torque(transform.rotation * (rotation * 1.0));
     }
 }
 

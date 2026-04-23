@@ -120,10 +120,12 @@ pub fn spawn_player_ship_gltf(
     model: ShipModel,
     assets: Res<Assets<Gltf>>,
     model_assets: Res<ShipModelIndex>,
+    //def_assets: Res<ShipDefinitionIndex>,
 ) -> Entity {
     let handle = model_assets.index.get(&model).unwrap();
     let ship_model = assets.get(handle).unwrap();
     let scene  = ship_model.scenes[0].clone();
+    //let def_handle = def_assets.index.get(&model).unwrap();
 
     spawn_player_ship(commands, model, scene)
 }
