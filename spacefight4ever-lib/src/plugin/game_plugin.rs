@@ -5,7 +5,6 @@ use bevy::prelude::*;
 use crate::game::combat::health::*;
 use crate::game::combat::health_basetypes::*;
 use crate::game::physics::raycast_damage::*;
-use crate::game::ship::definitions::weapon_definition::*;
 use crate::game::ship::definitions::ammunition_definition::*;
 
 pub struct CombatPlugin;

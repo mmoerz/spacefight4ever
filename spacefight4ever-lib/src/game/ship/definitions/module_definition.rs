@@ -1,16 +1,16 @@
 use std::{
-    str::FromStr,
     collections::HashMap,
 };
 
 use bevy::{
-    //asset::{io::Reader, AssetLoader, LoadContext},
+    asset::{io::Reader, AssetLoader, LoadContext},
     prelude::*,
     reflect::TypePath,
 };
 use serde::{Deserialize, Serialize};
 
 use super::{
+    load_error::AssetLoadError,
     weapon_definition::WeaponDefinition,
     shield_definition::ShieldDefinition,
     armor_definition::ArmorDefinition,
@@ -40,9 +40,7 @@ pub enum ModuleData {
 
 impl Default for ModuleData {
     fn default() -> Self {
-        ModuleData::Support {
-            0: SupportDefinition::Scan { strength: 0.0 }
-        }
+        ModuleData::Support(SupportDefinition::Scan { strength: 0.0 })
     }
 }
 
@@ -53,7 +51,31 @@ pub struct ModuleDefinition {
     pub size: ModuleSize,
 }
 
+#[derive(Default, TypePath)]
+pub struct ModuleDefinitionLoader;
 
+impl AssetLoader for ModuleDefinitionLoader {
+    type Asset = ModuleDefinition;
+    type Settings = ();
+    type Error = AssetLoadError;
+
+    async fn load(
+        &self,
+        reader: &mut dyn Reader,
+        _settings: &(),
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).await?;
+
+        let file: ModuleDefinition = ron::de::from_bytes(&bytes)?;
+        Ok(file)
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["ship.def.ron"]
+    }
+}
 
 use bevy_asset_loader::asset_collection::AssetCollection;
 
@@ -64,9 +86,22 @@ pub struct ModuleDefinitions {
     folder: Vec<Handle<ModuleDefinition>>,
 }
 
+#[derive(Hash, Eq, PartialEq, Debug, Clone)]
+pub struct ModuleId(pub String);
+
 #[derive(Resource, Default)]
 pub struct ModuleDefinitionIndex {
-    pub index: HashMap<String, Handle<ModuleDefinition>>,
+    index: HashMap<ModuleId, Handle<ModuleDefinition>>,
+}
+
+impl ModuleDefinitionIndex {
+    pub fn get(&self, id: &ModuleId) -> Option<&Handle<ModuleDefinition>> {
+        self.index.get(id)
+    }
+
+    pub fn get_str(&self, name: &str) -> Option<&Handle<ModuleDefinition>> {
+        self.index.get(&ModuleId(name.to_string()))
+    }
 }
 
 pub fn build_index_once_system(
@@ -76,8 +111,11 @@ pub fn build_index_once_system(
 ) {
     for handle in &assets.folder {
         if let Some(def) = defs.get(handle) {
-            println!("Indexing module definition: {}", def.name);
-            index.index.insert(def.name.clone(), handle.clone());
+            debug!("Indexing module definition: {}", def.name);
+            let id = ModuleId(def.name.clone());
+            if index.index.insert(id, handle.clone()).is_some() {
+                warn!("Duplicate module definition name: {}", def.name);
+            } 
         }
     }
 }

@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use avian3d::prelude::*;
 
 use crate::ui::input::ship::SpaceshipController;
-use crate::game::ship::weapon::{Weapon, Ammunition};
 use crate::game::ship::definitions::{
     ship_definition::{ShipModel, ShipDefinition, ShipDefinitionIndex},
     ship_models::{ShipModelIndex},

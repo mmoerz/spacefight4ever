@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 pub mod consts;
 pub mod structs;
 pub mod bundle;

@@ -176,6 +176,7 @@ pub struct ShipDefinitions {
     folder: Vec<Handle<ShipDefinition>>,
 }
 
+
 // /// just an alias to usize for ship ids
 // ///
 // /// usize is safer (no overflow), but it uses up i64 on 64bit systems

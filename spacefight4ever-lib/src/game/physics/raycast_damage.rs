@@ -3,8 +3,11 @@ use avian3d::prelude::*;
 
 use crate::game::combat::basetypes::*;
 use crate::game::combat::health::*;
-use crate::game::ship::definitions::ammunition_definition::{AmmunitionDefinitionRepository, AmmunitionDefinition};
-use crate::game::ship::modules::module::Module;
+use crate::game::ship::definitions::{
+    ammunition_definition::{ AmmunitionDefinitionRepository, AmmunitionDefinition },
+    module_definition::{ModuleDefinition, ModuleData},
+    weapon_definition::WeaponDefinition,
+};
 use crate::game::ship::weapon::*;
 use crate::game::ship::definitions::weapon_definition::*;
 
@@ -65,15 +68,24 @@ pub fn weapon_fire_system(
     target_query: Query<(Entity, &Transform), With<Target>>,
     spatial_query: SpatialQuery,
     mut damage_writer: MessageWriter<HealthDamageReceived>,
-    weapon_repo: Res<Assets<ModuleDefinition>>,
+    modules: Res<Assets<ModuleDefinition>>,
     ammo_repo: Res<AmmunitionDefinitionRepository>,
     time: Res<Time>,
 ) {
     for event in fire_events.read() {
         let Ok((weapon_transform, mut weapon, mut ammunition)) = weapon_query.get_mut(event.weapon_entity) else { continue; };
         let Ok(behavior) = definition_query.get(event.weapon_entity) else { continue; };
-        let weapon_def = weapon_repo.get_by_id(weapon.weapon_id);
+        let module_def = modules.get(&weapon.handle).unwrap();
+        let module_data = &module_def.kind;
         let ammo_def = ammo_repo.get_by_id(ammunition.ammo_id);
+
+        let weapon_def = 
+        match &module_data {
+            ModuleData::Weapon(weapon_def) => { 
+                weapon_def
+            }
+            _ => continue
+        };
 
         if weapon.cooldown > 0.0 { continue; }
         if ammunition.count <= 0 { continue; }
@@ -249,7 +261,6 @@ fn has_line_of_sight(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::ship::definitions::module_definition::ModuleSize;
 
     fn base_weapon() -> WeaponDefinition {
         let mut range = WeaponRange::default();

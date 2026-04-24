@@ -4,7 +4,8 @@ use bevy_asset_loader::prelude::*;
 use crate::game::ship::definitions::{
     module_definition::{
         ModuleDefinition,
-        ModuleDefinitions,
+        ModuleDefinitionLoader,
+        ModuleDefinitionIndex,
     },
     ship_definition::{
         ShipDefinition, ShipDefinitionIndex, 
@@ -60,7 +61,8 @@ impl Plugin for GameAssetsPlugin {
             .init_resource::<ShipModelIndex>()
 
             .init_asset::<ModuleDefinition>()
-            .init_resource::<ModuleDefinitions>()
+            .init_asset_loader::<ModuleDefinitionLoader>()
+            .init_resource::<ModuleDefinitionIndex>()
 
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)
