@@ -3,7 +3,14 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 
-use crate::game::ship::definitions::module_definition::{Module, ModuleSize};
+use crate::game::ship::definitions::module_definition::{
+    ModuleDefinition,
+    ModuleSize,
+    ModuleData,
+};
+use crate::game::ship::modules::module::Module;
+
+///
 
 /// the 'hardpoint' type
 /// there are different types of slots where 
@@ -64,17 +71,27 @@ pub struct MountPoint {
     pub id: u32,
     pub kind: MountType,
     pub allowed_size: ModuleSize,
-    pub occupied: Option<Entity>,
 }
 
 impl MountPoint {
     /// check wether the mountpoint can equip the module or not
-    pub fn can_equip(&self, module: &Module) -> bool {
+    pub fn can_equip(&self, module: &Module, assets: &Assets<ModuleDefinition>) -> bool {
+        let module = assets.get(&module.handle).unwrap();
+
         // Check mount type compatibility
         let type_ok = match (&self.kind, &module.kind) {
             (MountType::Hardpoint(a), 
-             MountType::Hardpoint(b)) => a == b,
-            (MountType::Slot(a), MountType::Slot(b)) => a == b,
+             ModuleData::Weapon(_)) => *a == HardPointType::Weapon,
+            (MountType::Hardpoint(a), 
+             ModuleData::Shield(_)) => *a == HardPointType::Shield,
+            (MountType::Hardpoint(a), 
+             ModuleData::Armor(_)) => *a == HardPointType::Armor,
+            
+            (MountType::Slot(a), 
+            ModuleData::Propulsion(_)) => *a == SlotType::Propulsion,
+            (MountType::Slot(a), 
+            ModuleData::Support(_)) => *a == SlotType::Support,
+
             _ => false,
         };
 
@@ -86,7 +103,7 @@ pub struct MountPointBuilder {
     pub id: u32,
     pub kind: MountType,
     pub allowed_size: ModuleSize,
-    pub occupied: Option<Bundle>,
+    pub occupied: Option<Module>,
 }
 
 impl MountPointBuilder {
@@ -99,29 +116,35 @@ impl MountPointBuilder {
         }
     }
 
-    pub fn set_module(self, bundle: Bundle) -> Self {
+    pub fn set_module(self, bundle: Module) -> Self {
         Self {
             occupied: Some(bundle),
             ..self
         }
     }
 
-    fn build(
+    pub fn build(
         self,
-        mut commands: Commands,
+        commands: &mut Commands,
     ) -> Entity {
-        let mountpoint =  
-            commands.spawn(
+        let mountpoint: Entity =  if let Some(occupied) = self.occupied {
+            commands.spawn((
                 MountPoint {
                     id: self.id,
                     kind: self.kind,
                     allowed_size: self.allowed_size,
-                    occupied: self.occupied,
+                },
+                occupied,
+            )).id()
+        } else {
+             commands.spawn(
+                MountPoint {
+                    id: self.id,
+                    kind: self.kind,
+                    allowed_size: self.allowed_size,
                 }
-            ).id();
-        if let Some(occupied) = self.occupied {
-            commands.entity(mountpoint).add_child(occupied);
-        }
+            ).id()
+        };
         mountpoint
     }
 }

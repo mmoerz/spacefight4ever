@@ -8,6 +8,7 @@ use crate::game::ship::definitions::{
     ship_models::{ShipModelIndex},
 };
 use crate::game::ship::definitions::module_definition::ModuleSize;
+use crate::game::ship::modules::mountpoint::{MountType, SlotType, MountPointBuilder};
 use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}};
 
 use crate::ui::camera::{OrbitCameraTarget};
@@ -64,33 +65,39 @@ impl PlayerShipBuilder {
             Visibility::Visible,
 
             OrbitCameraTarget,
-        )).with_children(|ship| {
-            ship.spawn((
-                Name::new("Mountpoint"),
-                MountPoint {
-                    id: 0,
-                    kind: MountType::Hardpoint(HardPointType::Weapon),
-                    allowed_size: ModuleSize::Small,
-                },
-                WeaponModuleBundle::new(
-                    Module {
-                        id: 0,
-                        name: "Foobar".into(),
-                        size: ModuleSize::Small,
-                        kind: MountType::Hardpoint(HardPointType::Weapon),
-                    },
-                    Weapon {
-                        weapon_id: 0,
-                        cooldown: 10.0,
-                    },
-                    Ammunition{
-                        ammo_id: 0,
-                        count: 10,
-                    },
-                ),
-                ));
-            ship.spawn()
-        }).id();
+        // )).with_children(|ship| {
+        //     ship.spawn((
+        //         Name::new("Mountpoint"),
+                
+
+        //         MountPoint {
+        //             id: 0,
+        //             kind: MountType::Hardpoint(HardPointType::Weapon),
+        //             allowed_size: ModuleSize::Small,
+        //         },
+        //         WeaponModuleBundle::new(
+        //             Module {
+        //                 id: 0,
+        //                 name: "Foobar".into(),
+        //                 size: ModuleSize::Small,
+        //                 kind: MountType::Hardpoint(HardPointType::Weapon),
+        //             },
+        //             Weapon {
+        //                 weapon_id: 0,
+        //                 cooldown: 10.0,
+        //             },
+        //             Ammunition{
+        //                 ammo_id: 0,
+        //                 count: 10,
+        //             },
+        //         ),
+        //         ));
+        //     ship.spawn()
+        // })
+            )).id();
+
+        let mp0 = MountPointBuilder::new(0, MountType::Slot(SlotType::Propulsion), ModuleSize::Small)
+            .build(commands);
 
         let model_id = commands.spawn((
             SceneRoot(self.handle.clone()),
@@ -102,7 +109,7 @@ impl PlayerShipBuilder {
             Name::new("SceneRoot"),
         )).id();
 
-        commands.entity(ship_id).add_child(model_id);
+        commands.entity(ship_id).add_children(&[model_id, mp0]);
 
         ship_id
     }

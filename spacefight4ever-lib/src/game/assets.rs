@@ -2,12 +2,15 @@ use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
 use crate::game::ship::definitions::{
+    module_definition::{
+        ModuleDefinition,
+        ModuleDefinitions,
+    },
     ship_definition::{
         ShipDefinition, ShipDefinitionIndex, 
         ShipDefinitionLoader, ShipDefinitions, 
         build_index_once_system
-    },
-    ship_models::{ ShipModels, ShipModelIndex },
+    }, ship_models::{ ShipModelIndex, ShipModels }
 };
 
 // Asset handles (Bevy)
@@ -55,6 +58,9 @@ impl Plugin for GameAssetsPlugin {
             .init_asset_loader::<ShipDefinitionLoader>()
             .init_resource::<ShipDefinitionIndex>()
             .init_resource::<ShipModelIndex>()
+
+            .init_asset::<ModuleDefinition>()
+            .init_resource::<ModuleDefinitions>()
 
             .add_loading_state(
                 LoadingState::new(GameState::AssetLoading)

@@ -10,10 +10,13 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::game::ship::{
-    definitions::weapon_definition::WeaponDefinition
+use super::{
+    weapon_definition::WeaponDefinition,
+    shield_definition::ShieldDefinition,
+    armor_definition::ArmorDefinition,
+    support_definitions::SupportDefinition,
+    propulsion_definition::PropulsionDefinition,
 };
-
 
 #[derive(Default,Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum ModuleSize {
@@ -28,26 +31,17 @@ pub enum ModuleSize {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ModuleData {
-    Propulsion {
-        max_thrust: f32,
-        efficiency: f32,
-    },
+    Propulsion(PropulsionDefinition),
     Weapon(WeaponDefinition),
-    Shield {
-        capacity: f32,
-        recharge_rate: f32,
-    },
-    Armor {
-        hitpoints: f32,
-    },
-    Support {
-        // flexible / misc systems
-    },
+    Shield(ShieldDefinition),
+    Armor(ArmorDefinition),
+    Support(SupportDefinition)
 }
 
 impl Default for ModuleData {
     fn default() -> Self {
         ModuleData::Support {
+            0: SupportDefinition::Scan { strength: 0.0 }
         }
     }
 }
@@ -59,11 +53,7 @@ pub struct ModuleDefinition {
     pub size: ModuleSize,
 }
 
-#[derive(Asset, TypePath, Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
-pub struct PropulsionDefinition {
-    pub max_thrust: f32,
-    pub efficiency: f32,
-}
+
 
 use bevy_asset_loader::asset_collection::AssetCollection;
 
@@ -72,4 +62,22 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 pub struct ModuleDefinitions {
     #[asset(path = "data/modules", collection(typed))]
     folder: Vec<Handle<ModuleDefinition>>,
+}
+
+#[derive(Resource, Default)]
+pub struct ModuleDefinitionIndex {
+    pub index: HashMap<String, Handle<ModuleDefinition>>,
+}
+
+pub fn build_index_once_system(
+    defs: Res<Assets<ModuleDefinition>>,
+    assets: Res<ModuleDefinitions>,
+    mut index: ResMut<ModuleDefinitionIndex>,
+) {
+    for handle in &assets.folder {
+        if let Some(def) = defs.get(handle) {
+            println!("Indexing module definition: {}", def.name);
+            index.index.insert(def.name.clone(), handle.clone());
+        }
+    }
 }

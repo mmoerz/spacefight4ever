@@ -1,19 +1,18 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 
-use crate::game::ship::definitions::weapon_definition::*;
+use crate::game::ship::definitions::module_definition::ModuleDefinition;
 use crate::game::ship::definitions::ammunition_definition::*;
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone)]
 pub struct Weapon {
-    pub weapon_id: WeaponDefinitionId,
+    pub handle: Handle<ModuleDefinition>,
     pub cooldown: f32
 }
 
 impl Weapon {
-    pub fn new(weapon_id: WeaponDefinitionId) -> Self {
+    pub fn new(handle: Handle<ModuleDefinition>) -> Self {
         Self {
-            weapon_id,
+            handle,
             cooldown: 0.0,
         }
     }

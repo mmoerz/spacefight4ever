@@ -18,7 +18,7 @@ impl Plugin for CombatPlugin {
             //.add_message::<HealthHealRequest>()
             .add_message::<WeaponFireRequest>()
 
-            .add_systems(Startup, setup_weapon_repo)
+            //.add_systems(Startup, setup_weapon_repo)
             .add_systems(Startup, setup_ammunition_repo)
 
             .add_systems(

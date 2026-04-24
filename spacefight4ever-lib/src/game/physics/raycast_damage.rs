@@ -4,6 +4,7 @@ use avian3d::prelude::*;
 use crate::game::combat::basetypes::*;
 use crate::game::combat::health::*;
 use crate::game::ship::definitions::ammunition_definition::{AmmunitionDefinitionRepository, AmmunitionDefinition};
+use crate::game::ship::modules::module::Module;
 use crate::game::ship::weapon::*;
 use crate::game::ship::definitions::weapon_definition::*;
 
@@ -64,7 +65,7 @@ pub fn weapon_fire_system(
     target_query: Query<(Entity, &Transform), With<Target>>,
     spatial_query: SpatialQuery,
     mut damage_writer: MessageWriter<HealthDamageReceived>,
-    weapon_repo: Res<WeaponDefinitionRepository>,
+    weapon_repo: Res<Assets<ModuleDefinition>>,
     ammo_repo: Res<AmmunitionDefinitionRepository>,
     time: Res<Time>,
 ) {

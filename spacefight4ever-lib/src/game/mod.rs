@@ -13,8 +13,14 @@ pub mod ship {
         pub mod load_error;
         pub mod definition_repository;
         pub mod module_definition;
+
         pub mod weapon_definition; // for storing weapon definitions that are reused between identical weapons
         pub mod ammunition_definition; // for storing ammunition definitions that are reused between identical ammunition
+        pub mod shield_definition;
+        pub mod armor_definition;
+        pub mod support_definitions;
+        pub mod propulsion_definition;
+        
         pub mod ship_definition;
         pub mod ship_models; // for storing the asset handles of ship models
     }

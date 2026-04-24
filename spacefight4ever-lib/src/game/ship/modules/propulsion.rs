@@ -77,21 +77,21 @@ impl PropulsionStat {
 // module is changed (below)
 // if i compute it once, i need to store it somewhere
 
-pub fn compute_ship_capability(
-    mut ships: Query<(&ShipModel, &Children, &mut PropulsionStat,)>,
-    modules: Query<&PropulsionModule>,
-) {
-    for (_model, children, mut cap) in &mut ships {
-        let mut thrust_max = 0.0;
+// pub fn compute_ship_capability(
+//     mut ships: Query<(&ShipModel, &Children, &mut PropulsionStat,)>,
+//     modules: Query<&PropulsionModule>,
+// ) {
+//     for (_model, children, mut cap) in &mut ships {
+//         let mut thrust_max = 0.0;
         
-        for child in children {
-            if let Ok(m) = modules.get(*child) {
-                thrust_max += m.max_thrust * m.efficiency;
-                //speed_max += m.max_thrust * m.efficiency / mass;
-            }
-        }
+//         for child in children {
+//             if let Ok(m) = modules.get(*child) {
+//                 thrust_max += m.max_thrust * m.efficiency;
+//                 //speed_max += m.max_thrust * m.efficiency / mass;
+//             }
+//         }
 
-        cap.max = thrust_max;
-    }
-}
+//         cap.max = thrust_max;
+//     }
+// }
 
