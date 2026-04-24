@@ -82,6 +82,7 @@ impl PlayerShipBuilder {
             RigidBody::Dynamic,
             //Collider::capsule(1.0, 2.5),
             Collider::sphere(1.5),
+            Mass(self.definition.mass),
             LinearDamping(self.definition.linear_dampening), 
             AngularDamping(self.definition.angular_dampening), 
             //ConstantForce::new(0., 0., 0.),
