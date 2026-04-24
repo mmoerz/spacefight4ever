@@ -5,18 +5,7 @@ use crate::game::ship::definitions::ship_definition::{
 };
 use super::stats::Stat;
 
-#[derive(Component, Clone)]
-pub struct PropulsionModule {
-    pub max_thrust: f32,
-    pub efficiency: f32,
-}
-
-// #[derive(Component, Default)]
-// pub struct PropulsionCapability {
-//     pub max_speed_estimate: f32,
-//     pub cruise_speed_estimate: f32,
-// }
-
+/// propulsion is acutally thrust (N)
 #[derive(Component, Default)]
 pub struct PropulsionStat {
     current: f32,
@@ -41,33 +30,68 @@ impl Stat for PropulsionStat {
         self.min
     }
 
+    fn set_min(&mut self, value: f32) {
+        self.min = value;
+        self.current = self.current.clamp(self.min, self.max);
+    }
+
     fn max(&self) -> f32 {
         self.max
     }
+
+    fn set_max(&mut self, value: f32) {
+        self.max = value;
+        self.current = self.current.clamp(self.min, self.max);
+    }
+
 }
+
+impl PropulsionStat {
+    pub fn calculate_speed_max(
+        &self,
+        model: &ShipModel,
+        index: &Res<ShipDefinitionIndex>,
+        defs: &Res<Assets<ShipDefinition>>, 
+    ) -> f32 {
+        let Some(handle) = index.index.get(model) else { return 0.; };
+        let Some(def) = defs.get(handle) else { return 0.; };
+        return self.current / def.linear_dampening;
+    }
+
+    // TODO: this fails silently, make some noise ...
+    pub fn calculate_accelartion_max(
+        &self,
+        model: &ShipModel,
+        index: &Res<ShipDefinitionIndex>,
+        defs: &Res<Assets<ShipDefinition>>, 
+    ) -> f32 {
+        let Some(handle) = index.index.get(model) else { return 0.; };
+        let Some(def) = defs.get(handle) else { return 0.; };
+        return self.current / def.mass;
+    }
+}
+
+// speed is a 'virtual' stat that needs to be computed
+// speed (m/s) = thrust (N) / mass (kg)
+// i can either compute that whenever i need it, or i can compute it once when the propulsion
+// module is changed (below)
+// if i compute it once, i need to store it somewhere
 
 pub fn compute_ship_capability(
     mut ships: Query<(&ShipModel, &Children, &mut PropulsionStat,)>,
     modules: Query<&PropulsionModule>,
-    index: Res<ShipDefinitionIndex>,
-    defs: Res<Assets<ShipDefinition>>, 
 ) {
-    for (model, children, mut cap) in &mut ships {
+    for (_model, children, mut cap) in &mut ships {
         let mut thrust_max = 0.0;
-        let mut cruise_max = 0.0;
-        let Some(handle) = index.index.get(model) else { continue; };
-        let Some(def) = defs.get(handle) else { continue; };
-        let mass = def.mass;
-
+        
         for child in children {
             if let Ok(m) = modules.get(*child) {
                 thrust_max += m.max_thrust * m.efficiency;
-                cruise_max += m.max_thrust * m.efficiency / mass;
+                //speed_max += m.max_thrust * m.efficiency / mass;
             }
         }
 
         cap.max = thrust_max;
-        cap.set(cruise_max);
     }
 }
 

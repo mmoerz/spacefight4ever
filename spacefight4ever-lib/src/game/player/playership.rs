@@ -1,15 +1,14 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
-use spacefight4ever_ui::ui::assets;
 
 use crate::ui::input::ship::SpaceshipController;
 use crate::game::ship::weapon::{Weapon, Ammunition};
 use crate::game::ship::definitions::{
-    ship_definition::{ShipModel, ShipDefinition, },
-    ship_models::{ShipModelIndex, ShipModels},
+    ship_definition::{ShipModel, ShipDefinition, ShipDefinitionIndex},
+    ship_models::{ShipModelIndex},
 };
-use crate::game::ship::module::{ModuleSize, HardPointType};
-use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
+use crate::game::ship::definitions::module_definition::ModuleSize;
+use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}};
 
 use crate::ui::camera::{OrbitCameraTarget};
 
@@ -17,18 +16,21 @@ use crate::ui::camera::{OrbitCameraTarget};
 pub struct PlayerShip;
 
 pub struct PlayerShipBuilder {
-    ship_model: ShipModel,
-    model: Handle<Scene>,
+    model: ShipModel,
+    definition: ShipDefinition,
+    handle: Handle<Scene>,
 }
 
 impl PlayerShipBuilder {
     pub fn new(
         ship_model: ShipModel,
+        ship_definition: &ShipDefinition,
         model: Handle<Scene>,
     ) -> Self {
         Self {
-            ship_model,
-            model,
+            model: ship_model,
+            definition: ship_definition.clone(),
+            handle: model,
         }
     }
 
@@ -42,7 +44,7 @@ impl PlayerShipBuilder {
             Name::new("PlayerShip"),
             PlayerShip,
             SpaceshipController::default(),
-            self.ship_model,
+            self.model,
 
             ShipHealth {
                 values: LayeredHealth { values: [3, 10, 20 ] },
@@ -53,8 +55,8 @@ impl PlayerShipBuilder {
             RigidBody::Dynamic,
             //Collider::capsule(1.0, 2.5),
             Collider::sphere(1.5),
-            LinearDamping(0.5), 
-            AngularDamping(1.0), 
+            LinearDamping(self.definition.linear_dampening), 
+            AngularDamping(self.definition.angular_dampening), 
             //ConstantForce::new(0., 0., 0.),
             GravityScale(0.0),
 
@@ -86,11 +88,12 @@ impl PlayerShipBuilder {
                         count: 10,
                     },
                 ),
-            ));
+                ));
+            ship.spawn()
         }).id();
 
         let model_id = commands.spawn((
-            SceneRoot(self.model.clone()),
+            SceneRoot(self.handle.clone()),
             //Transform::from_xyz(0.0, 0.0, 0.0),
             // Transform::from_rotation(
             //     Quat::from_rotation_y(std::f32::consts::FRAC_2_PI) // 90° Y rotation
@@ -108,26 +111,28 @@ impl PlayerShipBuilder {
 pub fn spawn_player_ship(
     commands: &mut Commands,
     model: ShipModel,
+    ship_definition: &ShipDefinition,
     scene: Handle<Scene>,
 ) -> Entity {
-    PlayerShipBuilder::new(model, scene)
+    PlayerShipBuilder::new(model, ship_definition, scene)
         .build(commands)
-    //Entity::PLACEHOLDER
 }
 
 pub fn spawn_player_ship_gltf(
     commands: &mut Commands,
     model: ShipModel,
     assets: Res<Assets<Gltf>>,
-    model_assets: Res<ShipModelIndex>,
-    //def_assets: Res<ShipDefinitionIndex>,
+    def_assets: Res<Assets<ShipDefinition>>,
+    model_index: Res<ShipModelIndex>,
+    def_index: Res<ShipDefinitionIndex>,
 ) -> Entity {
-    let handle = model_assets.index.get(&model).unwrap();
+    let handle = model_index.index.get(&model).unwrap();
     let ship_model = assets.get(handle).unwrap();
     let scene  = ship_model.scenes[0].clone();
-    //let def_handle = def_assets.index.get(&model).unwrap();
+    let def_handle = def_index.index.get(&model).unwrap();
+    let def = def_assets.get(def_handle).unwrap();
 
-    spawn_player_ship(commands, model, scene)
+    spawn_player_ship(commands, model, def, scene)
 }
 
 // ============================================================================

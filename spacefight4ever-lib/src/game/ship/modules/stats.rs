@@ -6,6 +6,8 @@ pub trait Stat {
     fn normalize(&self) -> f32;
     fn min(&self) -> f32;
     fn max(&self) -> f32;
+    fn set_min(&mut self, value: f32);
+    fn set_max(&mut self, value: f32);
 }
 
 /// hmm this would probably defeat the ecs pattern

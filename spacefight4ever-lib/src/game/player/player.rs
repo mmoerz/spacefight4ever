@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::{combat::{health_basetypes::LayeredHealth}, ship::{bundle::WeaponModuleBundle, module::{Module, MountPoint, MountType}}};
-//use crate::game::ship::weapon::{Weapon, Ammunition};
 use crate::game::player::playership::*;
 use crate::game::ship::definitions::{
-    ship_definition::{ShipModel, ShipDefinition, },
-    ship_models::{ShipModelIndex, ShipModels},
+    ship_definition::{ShipModel, ShipDefinition, ShipDefinitionIndex},
+    ship_models::{ShipModelIndex},
 };
 //use crate::game::ship::module::{ModuleSize, HardPointType};
 use crate::ui::input::ship::spaceship_movement_system;
@@ -14,9 +12,12 @@ use crate::game::assets::GameState;
 pub fn spawn_player(
     mut commands: Commands,
     assets: Res<Assets<Gltf>>,
-    model_assets: Res<ShipModelIndex>,
+    def_assets: Res<Assets<ShipDefinition>>,
+    model_index: Res<ShipModelIndex>,
+    def_index: Res<ShipDefinitionIndex>,
 ) {
-    spawn_player_ship_gltf(&mut commands, ShipModel::Spitfire, assets, model_assets);
+    spawn_player_ship_gltf(&mut commands, ShipModel::Spitfire, assets, def_assets, model_index, def_index);
+    //spawn_player_ship(&mut commands, Shipassets);
 }
 
 pub struct PlayerPlugin;

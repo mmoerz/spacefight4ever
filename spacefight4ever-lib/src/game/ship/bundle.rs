@@ -14,8 +14,8 @@ pub struct WeaponModuleBundle {
     pub transform: Transform,
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,
-    pub inherited_visibility: InheritedVisibility,
-    pub view_visibility: ViewVisibility,
+    // pub inherited_visibility: InheritedVisibility,
+    // pub view_visibility: ViewVisibility,
 }
 
 impl WeaponModuleBundle {
@@ -27,8 +27,8 @@ impl WeaponModuleBundle {
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),
             visibility: Visibility::default(),
-            inherited_visibility: InheritedVisibility::default(),
-            view_visibility: ViewVisibility::default(),
+            // inherited_visibility: InheritedVisibility::default(),
+            // view_visibility: ViewVisibility::default(),
         }
     }
 }

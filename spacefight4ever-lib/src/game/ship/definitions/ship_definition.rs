@@ -10,10 +10,24 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::game::ship::module::ModuleSize;
+use crate::game::ship::definitions::module_definition::ModuleSize;
 //use super::{definition_repository::NamedDefinition};
 use super::load_error::AssetLoadError;
 use super::ship_models::ShipModelIndex;
+
+/// the ship types is a taxonomy for size and capabilities
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShipType {
+    Fighter,
+    Bomber,
+    Corvette,
+    Frigate,
+    Destroyer,
+    Cruiser,
+    Battlecruiser,
+    Battleship,
+    Carrier
+}
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Deserialize, Serialize)]
 pub enum ShipModel {
@@ -40,6 +54,8 @@ impl ToString for ShipModel {
     }
 }
 
+
+
 // #[derive(Component, Debug, Clone, PartialEq, Eq)]
 // pub struct ShipModel {
 //     pub name: String,
@@ -58,7 +74,8 @@ pub struct ShipDefinition {
     pub manufacturer: String,
     pub size: ModuleSize,
     pub mass: f32,
-    pub max_cruise_speed: f32,
+    pub linear_dampening: f32,
+    pub angular_dampening: f32,
 }
 
 // impl NamedDefinition for ShipDefinition {

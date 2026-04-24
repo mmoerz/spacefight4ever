@@ -3,5 +3,6 @@
     manufacturer: "Electro Dynamics",
     size: Micro,
     mass: 2000.0,
-    max_cruise_speed: 200.0
+    linear_dampening: 0.5,
+    angular_dampening: 1.0
 )

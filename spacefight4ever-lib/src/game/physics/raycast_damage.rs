@@ -3,7 +3,6 @@ use avian3d::prelude::*;
 
 use crate::game::combat::basetypes::*;
 use crate::game::combat::health::*;
-use crate::game::combat::health_basetypes::HealthPercents;
 use crate::game::ship::definitions::ammunition_definition::{AmmunitionDefinitionRepository, AmmunitionDefinition};
 use crate::game::ship::weapon::*;
 use crate::game::ship::definitions::weapon_definition::*;
@@ -249,7 +248,7 @@ fn has_line_of_sight(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::ship::module::ModuleSize;
+    use crate::game::ship::definitions::module_definition::ModuleSize;
 
     fn base_weapon() -> WeaponDefinition {
         let mut range = WeaponRange::default();
@@ -258,8 +257,6 @@ mod tests {
         range[WeaponRangeType::Max] = 100.0;
 
         WeaponDefinition { 
-            name: "Thunder".into(),
-            size: ModuleSize::Small,
             behavior: WeaponBehavior::Beam, 
             range: range,
             max_angle: Some(360.0),

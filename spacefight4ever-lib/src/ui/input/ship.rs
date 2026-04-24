@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use avian3d::prelude::*;
 
 use crate::game::{player::playership::PlayerShip};
+use crate::game::ship::modules::propulsion::PropulsionStat;
 use crate::game::ship::definitions::{
     ship_definition::{ShipDefinition, ShipDefinitionIndex, ShipModel},
     ship_models::{ShipModelIndex},
@@ -30,16 +31,19 @@ pub fn spaceship_movement_system (
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<(Entity, Forces), (With<SpaceshipController>, With<PlayerShip>)>, // forces is not a component only a query_data
     //index: Res<ShipModelIndex>,
+    propulsion_query: Query<&PropulsionStat, (With<SpaceshipController>, With<PlayerShip>)>,
     defs: Res<Assets<ShipDefinition>>,
     index: Res<ShipDefinitionIndex>,
     transform_query: Query<(&Transform, &ShipModel, &SpaceshipController)>,
 ) {
     for (entity, mut force) in &mut query {
+        let Ok(propulsion) = propulsion_query.get(entity) else { continue; };
         let Ok((transform, ship_model, controller)) = 
             transform_query.get(entity) else { continue; };
         //let Some(handle) = index.index.get(&ship_model) else { continue; };
-        let Some(handle) = index.index.get(ship_model) else { continue; };
-        let Some(def) = defs.get(handle) else { continue; };
+        // let Some(handle) = index.index.get(ship_model) else { continue; };
+        // let Some(def) = defs.get(handle) else { continue; };
+        let max_accel = propulsion.calculate_accelartion_max(ship_model, &index, &defs);
 
     //for (mut force, mut torque, transform, controller) in query.iter_mut() {
         // --- Linear Movement (Thrust) ---
@@ -50,7 +54,7 @@ pub fn spaceship_movement_system (
         // Apply force (resetting each frame to prevent infinite acceleration)
         // lol this can't be max cruise speed, because the force is normally measured in N
         // since there is no mass here, this is just a half truth
-        force.apply_force(thrust * controller.thrust_multiplier * def.max_cruise_speed);
+        force.apply_force(thrust * controller.thrust_multiplier * max_accel);
 
         // --- Angular Movement (Rotation/Pitch/Yaw) ---
         let mut rotation = Vec3::ZERO;

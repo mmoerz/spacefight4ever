@@ -2,20 +2,12 @@ use std::ops::{Index, IndexMut};
 
 use bevy::prelude::*;
 
-use crate::game::combat::ships::*;
-use crate::game::ship::module::*;
-
-
-
-
 #[derive(Message)]
 pub struct Attack {
     pub attacker: Entity,
     pub target: Entity,
     pub weapon: String,
 }
-
-
 
 pub fn calculate_attack(
 
