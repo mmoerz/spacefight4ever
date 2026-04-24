@@ -57,7 +57,7 @@ impl PropulsionStat {
     ) -> f32 {
         let Some(handle) = index.index.get(model) else { return 0.; };
         let Some(def) = defs.get(handle) else { return 0.; };
-        return self.current / def.linear_dampening;
+        return self.max * def.linear_dampening;
     }
 
     // TODO: this fails silently, make some noise ...

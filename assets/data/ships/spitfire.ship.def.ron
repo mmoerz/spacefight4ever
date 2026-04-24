@@ -2,7 +2,7 @@
     model: Spitfire,
     manufacturer: "Electro Dynamics",
     size: Micro,
-    mass: 2000.0,
+    mass: 1000.0,
     linear_dampening: 0.5,
     angular_dampening: 1.0,
     mountpoints: [

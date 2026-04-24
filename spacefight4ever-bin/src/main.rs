@@ -2,7 +2,7 @@ use bevy::{
     prelude::*,
     input_focus::{tab_navigation::TabNavigationPlugin, InputDispatchPlugin}
 };
-use bevy_asset_loader::prelude::*;
+//use bevy_asset_loader::prelude::*;
 use bevy_skein::SkeinPlugin;
 use avian3d::prelude::*;
 use avian3d::collision::collider::ColliderConstructor;
@@ -21,14 +21,14 @@ use spacefight4ever_lib::{
     //game::player::gltf_playership::GltfPlayerShipPlugin,
     game::player::{
         player::PlayerPlugin,
-        playership::PlayerShip,
+        //playership::PlayerShip,
     },
     game::assets::GameAssetsPlugin,
     prelude::*
 };
-use spacefight4ever_lib::ui::camera::{OrbitCamera, OrbitCameraTarget, GameCameraPlugin};
+use spacefight4ever_lib::ui::camera::GameCameraPlugin;
 use spacefight4ever_lib::config::environment::ConfigPlugin;
-use spacefight4ever_lib::ui::overlay::slider::{UiSliderPlugin};
+use spacefight4ever_lib::ui::overlay::slider::UiSliderPlugin;
 use spacefight4ever_lib::ui::overlay::settings::UiSettingsPlugin;
 use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
 use spacefight4ever_lib::ui::hud::movement_display::MovementDisplayPlugin;

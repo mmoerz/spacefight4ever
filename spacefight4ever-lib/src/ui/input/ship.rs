@@ -1,5 +1,3 @@
-use std::f32::consts::E;
-
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
@@ -115,15 +113,15 @@ pub fn spaceship_movement_system (
 // If you want a strict maximum speed (e.g., "The ship cannot exceed 100 m/s"), you shouldn't rely on damping alone. You should add a system to clamp the LinearVelocity:
 // rust
 
-fn clamp_velocity(mut query: Query<&mut LinearVelocity>) {
-    let max_speed = 100.0;
-    for mut vel in query.iter_mut() {
-        let speed = vel.length();
-        if speed > max_speed {
-            vel.0 *= max_speed / speed;
-        }
-    }
-}
+// fn clamp_velocity(mut query: Query<&mut LinearVelocity>) {
+//     let max_speed = 100.0;
+//     for mut vel in query.iter_mut() {
+//         let speed = vel.length();
+//         if speed > max_speed {
+//             vel.0 *= max_speed / speed;
+//         }
+//     }
+// }
 
 // Use code with caution.
 // Summary of what limits what:

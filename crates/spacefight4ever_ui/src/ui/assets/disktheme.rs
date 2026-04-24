@@ -8,7 +8,7 @@ use bevy::{
 
 use crate::ui::{assets::atlasbuttonskin::UiButtonTypesAllHandles, button::{UiButtonType, UiWindowType}};
 use super::asseterror::UiAssetLoadError;
-use super::atlasbuttonskin::{ButtonSkin, DiskButtonSkin};
+use super::atlasbuttonskin::{DiskButtonSkin};
 use super::theme::*;
 use super::windowsskin::{WindowSkin, DiskWindowSkin};
 

@@ -33,12 +33,12 @@ pub mod prelude {
 pub use bundle::*;
 
 // for asset plugin
-use ui::assets::{
-    atlasbuttonskin::{ButtonSkinLoader, ButtonSkin},
-    windowsskin::{WindowSkinLoader, WindowSkin},
-    theme::UiTheme,
-    disktheme::UiThemeLoader
-};
+// use ui::assets::{
+//     //atlasbuttonskin::{ButtonSkinLoader, ButtonSkin},
+//     //windowsskin::{WindowSkinLoader, WindowSkin},
+//     //theme::UiTheme,
+//     //disktheme::UiThemeLoader
+// };
 
 pub mod plugins {
     pub use crate::ui::{

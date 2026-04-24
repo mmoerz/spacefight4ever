@@ -80,7 +80,8 @@ pub fn ui_movement_bar_system(
 
     for force in &mut query {
         let controller =  &ship;
-        let value = force.linear_velocity().length() * controller.thrust_multiplier / max_speed;
+        let force_len = force.linear_velocity().length();
+        let value = force_len * controller.thrust_multiplier / max_speed;
         if value > 0.1 {
             println!("{:?}", value);
         }
