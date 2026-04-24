@@ -4,5 +4,49 @@
     size: Micro,
     mass: 2000.0,
     linear_dampening: 0.5,
-    angular_dampening: 1.0
+    angular_dampening: 1.0,
+    mountpoints: [
+        MountPointDefinition(
+            id: 0,
+            kind: Hardpoint(
+                Weapon
+            ),
+            allowed_size: Micro
+        ),
+        MountPointDefinition(
+            id: 1,
+            kind: Hardpoint(
+                Weapon
+            ),
+            allowed_size: Micro
+        ),
+        MountPointDefinition(
+            id: 2,
+            kind: Hardpoint(
+                Weapon
+            ),
+            allowed_size: Micro
+        ),
+        MountPointDefinition(
+            id: 3,
+            kind: Hardpoint(
+                Shield
+            ),
+            allowed_size: Micro
+        ),
+        MountPointDefinition(
+            id: 4,
+            kind: Slot(
+                Propulsion
+            ),
+            allowed_size: Micro
+        ),
+        MountPointDefinition(
+            id: 5,
+            kind: Slot(
+                Propulsion
+            ),
+            allowed_size: Micro
+        ),
+    ]
 )

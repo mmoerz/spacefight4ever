@@ -1,18 +1,22 @@
-use bevy::prelude::*;
+use std::{
+    fmt::Debug,
 
-use crate::game::ship::definitions::module_definition::ModuleDefinition;
+};
 
-// impl Module {
-//     /// Helper to create a standard weapon module definition
-//     pub fn new_weapon(id: u32, name: impl Into<String>, size: ModuleSize) -> Self {
-//         Self {
-//             id,
-//             name: name.into(),
-//             kind: MountType::Hardpoint(HardPointType::Weapon),
-//             size,
-//         }
-//     }
-// }
+use bevy::{prelude::*, render::render_graph::SlotType};
+
+use crate::game::ship::{
+    definitions::module_definition::{
+        ModuleDefinition, ModuleData,
+    },
+    modules::propulsion::PropulsionModule,
+};
+
+#[derive(Debug)]
+pub enum ModuleSpawnError {
+    NotFound,
+    Unsupported,
+}
 
 // a simple ship modul that a ship can equip
 // the slot_type limits the modul to that type
@@ -29,7 +33,32 @@ pub struct Module {
 //     pub size: ModuleSize,
 }
 
+/// Helper to create a standard module component from
+/// a module definition
+/// there is always only one module per mountpoint
+pub fn spawn_module_to_component(
+    commands: &mut Commands,
+    mountpoint: Entity,
+    module: &Module,
+    module_assets: &Res<Assets<ModuleDefinition>>,
+) -> Result<Entity, ModuleSpawnError> {
+    let Some(module_def) = 
+        module_assets.get(&module.handle) else { 
+            return Err(ModuleSpawnError::NotFound); 
+        };
 
+    match &module_def.kind {
+        //MountType::Hardpoint(HardPointType::) => {
+        ModuleData::Propulsion(_) => {
+            Ok(
+                commands.entity(mountpoint).insert(PropulsionModule {
+                    handle: module.handle.clone(),
+                }).id()
+            )
+        }
+        _ => Err(ModuleSpawnError::Unsupported)
+    }
+}
 
 
 

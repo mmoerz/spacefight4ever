@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 
-use crate::game::ship::definitions::ship_definition::{
-    ShipModel, ShipDefinition, ShipDefinitionIndex,
+use crate::game::ship::definitions::{
+    ship_definition::{ShipModel, ShipDefinition, ShipDefinitionIndex},
+    module_definition::{ModuleDefinition,ModuleDefinitionIndex},
 };
 use super::stats::Stat;
+use super::module::Module;
 
 /// propulsion is acutally thrust (N)
 #[derive(Component, Default)]
@@ -72,26 +74,33 @@ impl PropulsionStat {
 }
 
 // speed is a 'virtual' stat that needs to be computed
-// speed (m/s) = thrust (N) / mass (kg)
+// acceleration (m/s^2) = thrust (N) / mass (kg)
 // i can either compute that whenever i need it, or i can compute it once when the propulsion
 // module is changed (below)
 // if i compute it once, i need to store it somewhere
 
-// pub fn compute_ship_capability(
-//     mut ships: Query<(&ShipModel, &Children, &mut PropulsionStat,)>,
-//     modules: Query<&PropulsionModule>,
-// ) {
-//     for (_model, children, mut cap) in &mut ships {
-//         let mut thrust_max = 0.0;
+pub fn compute_ship_capability(
+    mut ships: Query<(&ShipModel, &Children, &mut PropulsionStat,)>,
+    modules: Query<&PropulsionModule>,
+    module_defs: Res<Assets<ModuleDefinition>>,
+) {
+    for (_model, children, mut cap) in &mut ships {
+        let mut thrust_max = 0.0;
         
-//         for child in children {
-//             if let Ok(m) = modules.get(*child) {
-//                 thrust_max += m.max_thrust * m.efficiency;
-//                 //speed_max += m.max_thrust * m.efficiency / mass;
-//             }
-//         }
+        for child in children {
+            if let Ok(m) = modules.get(*child) {
+                let Some(def) = module_defs.get(&m.handle) else { continue; };
+                let Some(prop) = def.kind.as_propulsion() else { continue; };
 
-//         cap.max = thrust_max;
-//     }
-// }
+                thrust_max += prop.inner.max_thrust * prop.inner.efficiency;
+            }
+        }
 
+        cap.max = thrust_max;
+    }
+}
+
+#[derive(Component)]
+pub struct PropulsionModule {
+    pub handle: Handle<ModuleDefinition>,
+}

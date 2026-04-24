@@ -6,6 +6,8 @@ use crate::game::ship::definitions::{
         ModuleDefinition,
         ModuleDefinitionLoader,
         ModuleDefinitionIndex,
+        ModuleDefinitions,
+        build_module_definition_index_once_system
     },
     ship_definition::{
         ShipDefinition, ShipDefinitionIndex, 
@@ -68,10 +70,12 @@ impl Plugin for GameAssetsPlugin {
                 LoadingState::new(GameState::AssetLoading)
                     .continue_to_state(GameState::Indexing)
                     .load_collection::<ShipDefinitions>()
-                    .load_collection::<ShipModels>(),
+                    .load_collection::<ShipModels>()
+                    .load_collection::<ModuleDefinitions>(),
             )
             .add_systems(OnEnter(GameState::Indexing), (
                 build_index_once_system,
+                build_module_definition_index_once_system,
                 next_state,
             ))
             ;

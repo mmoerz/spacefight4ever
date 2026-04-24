@@ -14,6 +14,7 @@ use crate::game::ship::definitions::module_definition::ModuleSize;
 //use super::{definition_repository::NamedDefinition};
 use super::load_error::AssetLoadError;
 use super::ship_models::ShipModelIndex;
+use super::mountpoint::MountPointDefinition;
 
 /// the ship types is a taxonomy for size and capabilities
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -54,8 +55,6 @@ impl ToString for ShipModel {
     }
 }
 
-
-
 // #[derive(Component, Debug, Clone, PartialEq, Eq)]
 // pub struct ShipModel {
 //     pub name: String,
@@ -76,6 +75,7 @@ pub struct ShipDefinition {
     pub mass: f32,
     pub linear_dampening: f32,
     pub angular_dampening: f32,
+    pub mountpoints: Vec<MountPointDefinition>,
 }
 
 // impl NamedDefinition for ShipDefinition {

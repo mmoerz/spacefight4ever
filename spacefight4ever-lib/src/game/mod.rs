@@ -21,6 +21,7 @@ pub mod ship {
         pub mod support_definitions;
         pub mod propulsion_definition;
         
+        pub mod mountpoint;
         pub mod ship_definition;
         pub mod ship_models; // for storing the asset handles of ship models
     }

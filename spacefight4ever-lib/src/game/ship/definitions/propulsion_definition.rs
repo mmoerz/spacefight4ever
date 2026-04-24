@@ -6,3 +6,6 @@ pub struct PropulsionDefinition {
     pub efficiency: f32,
 }
 
+pub struct PropulsionView<'a> {
+    pub inner: &'a PropulsionDefinition,
+}

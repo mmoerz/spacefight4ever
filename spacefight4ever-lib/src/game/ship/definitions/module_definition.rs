@@ -15,7 +15,7 @@ use super::{
     shield_definition::ShieldDefinition,
     armor_definition::ArmorDefinition,
     support_definitions::SupportDefinition,
-    propulsion_definition::PropulsionDefinition,
+    propulsion_definition::{PropulsionDefinition,PropulsionView,},
 };
 
 #[derive(Default,Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -41,6 +41,15 @@ pub enum ModuleData {
 impl Default for ModuleData {
     fn default() -> Self {
         ModuleData::Support(SupportDefinition::Scan { strength: 0.0 })
+    }
+}
+
+impl ModuleData {
+    pub fn as_propulsion(&self) -> Option<PropulsionView<'_>> {
+        match self {
+            ModuleData::Propulsion(p) => Some(PropulsionView { inner: p }),
+            _ => None,
+        }
     }
 }
 
@@ -73,7 +82,7 @@ impl AssetLoader for ModuleDefinitionLoader {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["ship.def.ron"]
+        &["module.def.ron"]
     }
 }
 
@@ -104,7 +113,7 @@ impl ModuleDefinitionIndex {
     }
 }
 
-pub fn build_index_once_system(
+pub fn build_module_definition_index_once_system(
     defs: Res<Assets<ModuleDefinition>>,
     assets: Res<ModuleDefinitions>,
     mut index: ResMut<ModuleDefinitionIndex>,

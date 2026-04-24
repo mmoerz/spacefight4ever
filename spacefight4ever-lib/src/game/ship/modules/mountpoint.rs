@@ -76,8 +76,9 @@ pub struct MountPoint {
 impl MountPoint {
     /// check wether the mountpoint can equip the module or not
     pub fn can_equip(&self, module: &Module, assets: &Assets<ModuleDefinition>) -> bool {
-        let module = assets.get(&module.handle).unwrap();
-
+        let Some(module) = assets.get(&module.handle) else {
+            return false;
+        };
         // Check mount type compatibility
         let type_ok = match (&self.kind, &module.kind) {
             (MountType::Hardpoint(a), 
@@ -116,7 +117,23 @@ impl MountPointBuilder {
         }
     }
 
-    pub fn set_module(self, bundle: Module) -> Self {
+    fn can_equip(&self, module: &Module, modules: &Assets<ModuleDefinition>) -> bool {
+        let mountpoint = MountPoint {
+            id: self.id,
+            kind: self.kind,
+            allowed_size: self.allowed_size,
+        };
+        mountpoint.can_equip(module, modules)
+    }
+
+    pub fn set_module(self, bundle: Module, modules: &Assets<ModuleDefinition>) -> Self {
+        if &self.id != &bundle.id {
+            warn!("mountpoint id missmatch {:?} {:?}", &self.id, &bundle.id);
+        }
+        if !self.can_equip(&bundle, modules) {
+            warn!("mountpoint can't equip");
+            return self;
+        }
         Self {
             occupied: Some(bundle),
             ..self

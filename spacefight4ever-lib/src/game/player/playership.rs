@@ -1,13 +1,22 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
+use crate::game::ship::modules::module::spawn_module_to_component;
 use crate::ui::input::ship::SpaceshipController;
 use crate::game::ship::definitions::{
     ship_definition::{ShipModel, ShipDefinition, ShipDefinitionIndex},
     ship_models::{ShipModelIndex},
 };
-use crate::game::ship::definitions::module_definition::ModuleSize;
-use crate::game::ship::modules::mountpoint::{MountType, SlotType, MountPointBuilder};
+use crate::game::ship::definitions::module_definition::{
+    ModuleDefinition
+};
+use crate::game::ship::modules::{
+    mountpoint::{
+        MountPointBuilder
+    },
+    module::Module,
+    propulsion::PropulsionStat,
+};
 use crate::game::{combat::{health::*, health_basetypes::LayeredHealth}};
 
 use crate::ui::camera::{OrbitCameraTarget};
@@ -19,6 +28,7 @@ pub struct PlayerShipBuilder {
     model: ShipModel,
     definition: ShipDefinition,
     handle: Handle<Scene>,
+    modules: Vec<Module>,
 }
 
 impl PlayerShipBuilder {
@@ -31,7 +41,22 @@ impl PlayerShipBuilder {
             model: ship_model,
             definition: ship_definition.clone(),
             handle: model,
+            modules: Vec::new(),
         }
+    }
+
+    pub fn add_module(mut self, module: Module) -> Self {
+        self.modules.push(module);
+        self
+    }
+
+    pub fn add_modules(mut self, modules: Vec<Module>) -> Self {
+        self.modules.extend(modules);
+        self
+    }
+
+    fn get_module_by_id(&self, id: u32) -> Option<&Module> {
+        self.modules.iter().find(|m| m.id == id)
     }
 
     // TODO:avian3d collision box is missing here
@@ -39,6 +64,7 @@ impl PlayerShipBuilder {
     pub fn build(
         self,
         commands: &mut Commands,
+        module_assets: Res<Assets<ModuleDefinition>>,
 ) -> Entity {
         let ship_id = commands.spawn((
             Name::new("PlayerShip"),
@@ -46,6 +72,7 @@ impl PlayerShipBuilder {
             SpaceshipController::default(),
             self.model,
 
+            PropulsionStat::default(),
             ShipHealth {
                 values: LayeredHealth { values: [3, 10, 20 ] },
                 values_max: LayeredHealth { values: [10, 10, 20] },
@@ -95,9 +122,6 @@ impl PlayerShipBuilder {
         // })
             )).id();
 
-        let mp0 = MountPointBuilder::new(0, MountType::Slot(SlotType::Propulsion), ModuleSize::Small)
-            .build(commands);
-
         let model_id = commands.spawn((
             SceneRoot(self.handle.clone()),
             //Transform::from_xyz(0.0, 0.0, 0.0),
@@ -108,7 +132,26 @@ impl PlayerShipBuilder {
             Name::new("SceneRoot"),
         )).id();
 
-        commands.entity(ship_id).add_children(&[model_id, mp0]);
+        commands.entity(ship_id).add_child(model_id);
+
+        for mp in self.definition.mountpoints.iter() {
+            let mp_id = 
+                MountPointBuilder::new(mp.id, mp.kind, mp.allowed_size)
+                    .build(commands);
+            
+            commands.entity(ship_id).add_child(mp_id);
+
+            if let Some(module) = self.get_module_by_id(mp.id) {
+                let Ok(mod_id) = 
+                    spawn_module_to_component(commands, mp_id, module, &module_assets) else {
+                        warn!("module not found");
+                        continue;
+                    };
+                if mod_id != mp_id {
+                    warn!("module id to hardpoint id missmatch m:{:?} h:{:?}", mod_id, mp_id);
+                }
+            }
+        }
 
         ship_id
     }
@@ -119,9 +162,12 @@ pub fn spawn_player_ship(
     model: ShipModel,
     ship_definition: &ShipDefinition,
     scene: Handle<Scene>,
+    modules: Vec<Module>,
+    assets: Res<Assets<ModuleDefinition>>,
 ) -> Entity {
     PlayerShipBuilder::new(model, ship_definition, scene)
-        .build(commands)
+        .add_modules(modules)
+        .build(commands, assets)
 }
 
 pub fn spawn_player_ship_gltf(
@@ -131,6 +177,8 @@ pub fn spawn_player_ship_gltf(
     def_assets: Res<Assets<ShipDefinition>>,
     model_index: Res<ShipModelIndex>,
     def_index: Res<ShipDefinitionIndex>,
+    modules: Vec<Module>,
+    module_assets: Res<Assets<ModuleDefinition>>,
 ) -> Entity {
     let handle = model_index.index.get(&model).unwrap();
     let ship_model = assets.get(handle).unwrap();
@@ -138,7 +186,7 @@ pub fn spawn_player_ship_gltf(
     let def_handle = def_index.index.get(&model).unwrap();
     let def = def_assets.get(def_handle).unwrap();
 
-    spawn_player_ship(commands, model, def, scene)
+    spawn_player_ship(commands, model, def, scene, modules, module_assets)
 }
 
 // ============================================================================
