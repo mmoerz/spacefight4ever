@@ -1,7 +1,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::ship::modules::mountpoint::{MountPoint, MountType};
+use crate::game::ship::modules::mountpoint::{MountType};
 use crate::game::ship::definitions::module_definition::ModuleSize;
 
 /// a 'hardpoint' where modules can be equiped

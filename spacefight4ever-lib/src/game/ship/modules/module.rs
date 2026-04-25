@@ -3,7 +3,7 @@ use std::{
 
 };
 
-use bevy::{prelude::*, render::render_graph::SlotType};
+use bevy::prelude::*;
 
 use crate::game::ship::{
     definitions::module_definition::{

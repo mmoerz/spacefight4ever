@@ -1,12 +1,9 @@
 
 use bevy::{
-    anti_alias::fxaa::Sensitivity, 
     input::{
-        gestures::*,
-        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
+        mouse::{MouseMotion, MouseWheel},
     }, 
     prelude::*,
-    camera::Projection,
 };
 
 use crate::config::environment::AppConfig;

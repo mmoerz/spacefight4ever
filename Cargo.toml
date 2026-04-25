@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.dependencies]
-bevy = "0.18.0"
+bevy = { version ="0.18.1",  default-features = true }
 bevy_prototype_lyon = "0.16.0"
 
 serde = "1.0.228"

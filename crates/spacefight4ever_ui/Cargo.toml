@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.18.1" }
+bevy = { workspace = true}
 serde = { workspace = true}
 ron = { workspace = true }
 thiserror = "2.0.18"

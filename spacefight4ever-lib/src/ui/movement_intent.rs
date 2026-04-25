@@ -1,9 +1,6 @@
 use avian3d::prelude::*;
 use bevy::{
-    input::{
-        gestures::*,
-        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-    }, math::VectorSpace, prelude::*
+    prelude::*,
 };
 
 use crate::game::player::playership::*;

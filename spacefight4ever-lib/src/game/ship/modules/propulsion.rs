@@ -2,10 +2,9 @@ use bevy::prelude::*;
 
 use crate::game::ship::definitions::{
     ship_definition::{ShipModel, ShipDefinition, ShipDefinitionIndex},
-    module_definition::{ModuleDefinition,ModuleDefinitionIndex},
+    module_definition::{ModuleDefinition,},
 };
 use super::stats::Stat;
-use super::module::Module;
 
 /// propulsion is acutally thrust (N)
 #[derive(Component, Default)]

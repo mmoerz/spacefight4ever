@@ -31,15 +31,13 @@ pub fn spaceship_movement_system (
     mut query: Query<(Entity, Forces), (With<SpaceshipController>, With<PlayerShip>)>, // forces is not a component only a query_data
     //index: Res<ShipModelIndex>,
     mut propulsion_query: Query<&mut PropulsionStat, (With<SpaceshipController>, With<PlayerShip>)>,
-    defs: Res<Assets<ShipDefinition>>,
-    index: Res<ShipDefinitionIndex>,
     transform_query: Query<(&Transform, &ShipModel, &SpaceshipController)>,
 ) {
     for (entity, mut force) in &mut query {
         let Ok(mut propulsion) = propulsion_query.get_mut(entity) else {
                 continue; 
             };
-        let Ok((transform, ship_model, controller)) = 
+        let Ok((transform, _ship_model, controller)) = 
             transform_query.get(entity) else { continue; };
         
         // --- Linear Movement (Thrust) ---

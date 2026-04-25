@@ -30,7 +30,7 @@ use spacefight4ever_lib::ui::camera::GameCameraPlugin;
 use spacefight4ever_lib::config::environment::ConfigPlugin;
 use spacefight4ever_lib::ui::overlay::slider::UiSliderPlugin;
 use spacefight4ever_lib::ui::overlay::settings::UiSettingsPlugin;
-use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
+//use spacefight4ever_lib::ui::movement_intent::MovementPlugin;
 use spacefight4ever_lib::ui::hud::movement_display::MovementDisplayPlugin;
 
 // to consider:
@@ -97,7 +97,6 @@ fn main() {
 /// set up a simple 3D scene
 fn testsetup(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {

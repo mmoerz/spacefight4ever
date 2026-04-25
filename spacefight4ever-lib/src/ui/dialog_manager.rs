@@ -4,7 +4,6 @@ use super::layers::*;
 use super::dialog_stack::*;
 use super::dialogs::confirm_exit::*;
 use super::dialogs::message::*;
-use super::dialogs::ship_equipment::*;
 
 #[derive(Component)]
 pub struct DialogEntity;

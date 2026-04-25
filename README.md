@@ -112,6 +112,8 @@ assets/dialogs/
  ├─ confirm_exit_buttons.svg
  ├─ message_dialog.svg
 
+ # libraries
+ https://github.com/NiklasEi/bevy_asset_loader 
 
  # ui editors
 

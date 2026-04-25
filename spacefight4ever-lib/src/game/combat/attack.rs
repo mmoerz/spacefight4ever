@@ -1,5 +1,3 @@
-use std::ops::{Index, IndexMut};
-
 use bevy::prelude::*;
 
 #[derive(Message)]

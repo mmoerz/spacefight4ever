@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
 
-use crate::game::combat::basetypes::*;
 use crate::game::combat::health::*;
 use crate::game::ship::definitions::{
     ammunition_definition::{ AmmunitionDefinitionRepository, AmmunitionDefinition },
@@ -179,27 +178,27 @@ pub fn compose_raw_damage(
     damage as i32
 }
 
-fn print_hits(spatial_query: SpatialQuery, query: Query<&Invisible>) {
-    // Ray origin and direction
-    let origin = Vec3::ZERO;
-    let direction = Dir3::X;
+// fn print_hits(spatial_query: SpatialQuery, query: Query<&Invisible>) {
+//     // Ray origin and direction
+//     let origin = Vec3::ZERO;
+//     let direction = Dir3::X;
 
-    // Configuration for the ray cast
-    let max_distance = 100.0;
-    let solid = true;
-    let filter = SpatialQueryFilter::default();
+//     // Configuration for the ray cast
+//     let max_distance = 100.0;
+//     let solid = true;
+//     let filter = SpatialQueryFilter::default();
 
-    // Cast ray and get the first hit that matches the predicate
-    let hit = spatial_query.cast_ray_predicate(origin, direction, max_distance, solid, &filter, &|entity| {
-        // Skip entities with the `Invisible` component.
-        !query.contains(entity)
-    });
+//     // Cast ray and get the first hit that matches the predicate
+//     let hit = spatial_query.cast_ray_predicate(origin, direction, max_distance, solid, &filter, &|entity| {
+//         // Skip entities with the `Invisible` component.
+//         !query.contains(entity)
+//     });
 
-    // Print first hit
-    if let Some(first_hit) = hit {
-        println!("First hit: {:?}", first_hit);
-    }
-}
+//     // Print first hit
+//     if let Some(first_hit) = hit {
+//         println!("First hit: {:?}", first_hit);
+//     }
+// }
 
 /// Abstraction for raycasting to allow mocking in tests
 pub trait RayCaster {

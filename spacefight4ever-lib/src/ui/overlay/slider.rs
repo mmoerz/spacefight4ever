@@ -1,15 +1,14 @@
 use bevy::{
     input_focus::{
         tab_navigation::{TabGroup, TabIndex, TabNavigationPlugin},
-        InputDispatchPlugin,
     },
     picking::hover::Hovered,
     prelude::*,
 };
 use bevy_ui_widgets::{
-        observe, slider_self_update, CoreSliderDragState, Slider, SliderRange, SliderThumb,
-        SliderValue, TrackClick, UiWidgetsPlugins,
-    };
+        CoreSliderDragState, Slider, SliderRange, SliderThumb,
+        SliderValue, TrackClick, 
+};
 
 #[derive(Component)]
 pub struct ValueLabel(pub Entity);
