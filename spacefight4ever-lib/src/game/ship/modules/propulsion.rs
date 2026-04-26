@@ -61,9 +61,9 @@ impl PropulsionStat {
         let Some(handle) = index.index.get(model) else { return 0.; };
         let Some(def) = defs.get(handle) else { return 0.; };
         if def.linear_dampening == 0. {
-            self.max / def.mass
+            self.max / def.mass * 0.94 // correction factor
         } else {
-            self.max / (def.mass * def.linear_dampening)
+            self.max / (def.mass * def.linear_dampening) * 0.94
         }
     }
 
