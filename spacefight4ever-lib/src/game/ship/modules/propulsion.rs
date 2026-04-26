@@ -48,6 +48,10 @@ impl Stat for PropulsionStat {
 }
 
 impl PropulsionStat {
+    /// quite complicated
+    /// most likely semi-implicit Euler integration is used
+    /// acceleration (velocity increase) = thrust (N) / mass (kg) * dt(s)
+    /// decelaration from damping is approximated = (1 - Damping * dt(s))
     pub fn calculate_speed_max(
         &self,
         model: &ShipModel,
@@ -56,7 +60,11 @@ impl PropulsionStat {
     ) -> f32 {
         let Some(handle) = index.index.get(model) else { return 0.; };
         let Some(def) = defs.get(handle) else { return 0.; };
-        return self.max * def.linear_dampening;
+        if def.linear_dampening == 0. {
+            self.max / def.mass
+        } else {
+            self.max / (def.mass * def.linear_dampening)
+        }
     }
 
     // TODO: this fails silently, make some noise ...

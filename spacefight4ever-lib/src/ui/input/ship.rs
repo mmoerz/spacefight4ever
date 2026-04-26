@@ -4,8 +4,7 @@ use avian3d::prelude::*;
 use crate::game::{player::playership::PlayerShip};
 use crate::game::ship::modules::propulsion::PropulsionStat;
 use crate::game::ship::definitions::{
-    ship_definition::{ShipDefinition, ShipDefinitionIndex, ShipModel},
-    ship_models::{ShipModelIndex},
+    ship_definition::{ShipModel},
 };
 use crate::game::ship::modules::stats::Stat;
 

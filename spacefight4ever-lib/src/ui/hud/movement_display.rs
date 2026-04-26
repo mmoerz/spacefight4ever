@@ -11,7 +11,7 @@ use crate::game::ship::definitions::ship_definition::{ShipDefinition, ShipDefini
 pub struct HudMovementBar;
 
 use spacefight4ever_ui::ui::{
-    progressbar::{UiLinearProgressBar, UiProgressBarDirection, progress_bar_bundle},
+    progressbar::{UiProgressBarDirection, progress_bar_bundle},
     progressbar_material::UiLinearProgressBarMaterial,
     progressbar_commands::UiProgressBarApi,
 };
@@ -82,8 +82,8 @@ pub fn ui_movement_bar_system(
         let controller =  &ship;
         let force_len = force.linear_velocity().length();
         let value = force_len * controller.thrust_multiplier / max_speed;
-        if value > 0.1 {
-            println!("{:?}", value);
+        if force_len > 0.1 {
+            println!("{:?}, {:?}", force_len, max_speed);
         }
         barapi.set_progress(entity.entity(), value); // display speed in %
     }

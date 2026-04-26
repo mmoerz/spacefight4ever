@@ -37,7 +37,7 @@ impl Plugin for UiPlugin {
             .add_systems(Update,ui::input::keybindings::trigger_ship_equipment_dialog)
             .add_systems(Update,ui::input::keybindings::trigger_settings)
                     
-            .add_systems(Update, ui::debug::debug_print_ui_tree)
+            //.add_systems(Update, ui::debug::debug_print_ui_tree)
             ;
     }
 }
