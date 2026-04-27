@@ -89,7 +89,6 @@ pub fn ui_movement_bar_system(
     }
 }
 
-
 pub struct MovementDisplayPlugin;
 
 impl Plugin for MovementDisplayPlugin {
