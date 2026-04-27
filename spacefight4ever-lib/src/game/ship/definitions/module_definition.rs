@@ -95,9 +95,27 @@ pub struct ModuleDefinitions {
     folder: Vec<Handle<ModuleDefinition>>,
 }
 
+// TODO: convert to u32 for further speed
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct ModuleId(pub String);
 
+/// convert str into  ModuleId
+impl From<&str> for ModuleId {
+    fn from(value: &str) -> Self {
+        Self(value.to_string())
+    }
+}
+
+/// convert str into  ModuleId
+/// to avoid allocating
+impl std::borrow::Borrow<str> for ModuleId {
+    fn borrow(&self) -> &str {
+        &self.0
+    }
+}
+
+// TODO: convert to Vec<Handle<ModuleDefinition>> using predefined static ids
+// TODO: for network/save systems fixed id is necessary
 #[derive(Resource, Default)]
 pub struct ModuleDefinitionIndex {
     index: HashMap<ModuleId, Handle<ModuleDefinition>>,
@@ -109,7 +127,7 @@ impl ModuleDefinitionIndex {
     }
 
     pub fn get_str(&self, name: &str) -> Option<&Handle<ModuleDefinition>> {
-        self.index.get(&ModuleId(name.to_string()))
+        self.index.get(name)
     }
 }
 
@@ -126,5 +144,199 @@ pub fn build_module_definition_index_once_system(
                 warn!("Duplicate module definition name: {}", def.name);
             } 
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use bevy::prelude::*;
+    use super::*;
+    use bevy::ecs::system::RunSystemOnce;
+
+    #[test]
+    fn indexes_single_module() {
+        let mut world = World::new();
+
+        // Insert Assets resource
+        world.init_resource::<Assets<ModuleDefinition>>();
+
+        // Create a handle + insert asset
+        let handle = {
+            let mut assets = world.resource_mut::<Assets<ModuleDefinition>>();
+
+            let handle = assets.add(ModuleDefinition {
+                name: "laser".to_string(),
+                ..Default::default()
+            });
+
+            handle
+        };
+
+        // Insert ModuleDefinitions resource
+        world.insert_resource(ModuleDefinitions {
+            folder: vec![handle.clone()],
+        });
+
+        world.insert_resource(ModuleDefinitionIndex::default());
+
+        // Run system
+        world.run_system_once(build_module_definition_index_once_system);
+
+        // Check result
+        let index = world.resource::<ModuleDefinitionIndex>();
+        assert!(index.get_str("laser").is_some());
+    }
+
+    #[test]
+    fn lookup_returns_correct_handle() {
+        let mut world = World::new();
+
+        // Insert Assets resource
+        let mut index = ModuleDefinitionIndex::default();
+        world.init_resource::<Assets<ModuleDefinition>>();
+
+        let mut assets = world.resource_mut::<Assets<ModuleDefinition>>();
+
+        let handle = assets.add(ModuleDefinition {
+            name: "engine".to_string(),
+            ..Default::default()
+        });
+
+        index.index.insert(ModuleId("engine".to_string()), handle.clone());
+
+        let result = index.get_str("engine").unwrap();
+
+        assert_eq!(result, &handle);
+    }
+
+    #[test]
+    fn lookup_missing_returns_none() {
+        let index = ModuleDefinitionIndex::default();
+
+        assert!(index.get_str("does_not_exist").is_none());
+    }
+
+    #[test]
+    fn duplicate_names_overwrite() {
+        let mut world = World::new();
+
+        world.init_resource::<Assets<ModuleDefinition>>();
+
+        let (h1, h2) = {
+            let mut assets = world.resource_mut::<Assets<ModuleDefinition>>();
+
+            let h1 = assets.add(ModuleDefinition {
+                name: "dup".into(),
+                ..Default::default()
+            });
+
+            let h2 = assets.add(ModuleDefinition {
+                name: "dup".into(),
+                ..Default::default()
+            });
+
+            (h1, h2)
+        };
+
+        world.insert_resource(ModuleDefinitions {
+            folder: vec![h1.clone(), h2.clone()],
+        });
+
+        world.insert_resource(ModuleDefinitionIndex::default());
+
+        world.run_system_once(build_module_definition_index_once_system);
+
+        let index = world.resource::<ModuleDefinitionIndex>();
+        let result = index.get_str("dup").unwrap();
+
+        assert_eq!(result, &h2);
+    }
+
+    #[test]
+    fn skips_unloaded_assets() {
+        let mut world = World::new();
+
+        world.init_resource::<Assets<ModuleDefinition>>();
+
+        // Create a handle WITHOUT adding asset
+        let handle: Handle<ModuleDefinition> = Handle::default();
+
+        world.insert_resource(ModuleDefinitions {
+            folder: vec![handle],
+        });
+
+        world.insert_resource(ModuleDefinitionIndex::default());
+
+        world.run_system_once(build_module_definition_index_once_system);
+
+        let index = world.resource::<ModuleDefinitionIndex>();
+        assert!(index.index.is_empty());
+    }
+
+    #[test]
+    fn running_twice_does_not_duplicate_entries() {
+
+        let mut world = World::new();
+
+        world.init_resource::<Assets<ModuleDefinition>>();
+        world.insert_resource(ModuleDefinitionIndex::default());
+
+        let handle = {
+            let mut assets = world.resource_mut::<Assets<ModuleDefinition>>();
+
+            assets.add(ModuleDefinition {
+                name: "laser".to_string(),
+                ..Default::default()
+            })
+        };
+
+        world.insert_resource(ModuleDefinitions {
+            folder: vec![handle.clone()],
+        });
+
+        // register system once
+        let system = world.register_system(build_module_definition_index_once_system);
+
+        // run twice
+        world.run_system(system);
+        world.run_system(system);
+
+        let index = world.resource::<ModuleDefinitionIndex>();
+
+        assert_eq!(index.index.len(), 1);
+    }
+
+    #[test]
+    fn as_propulsion_returns_some_for_propulsion() {
+        let def = ModuleData::Propulsion(PropulsionDefinition::default());
+
+        assert!(def.as_propulsion().is_some());
+    }
+
+    #[test]
+    fn as_propulsion_returns_none_for_other_types() {
+        let def = ModuleData::Support(SupportDefinition::Scan { strength: 1.0 });
+
+        assert!(def.as_propulsion().is_none());
+    }
+
+    #[test]
+    fn ron_roundtrip() {
+        let original = ModuleDefinition {
+            name: "shield".into(),
+            size: ModuleSize::Medium,
+            kind: ModuleData::Support(SupportDefinition::Scan { strength: 2.5 }),
+        };
+
+        let ron = ron::ser::to_string(&original).unwrap();
+        let decoded: ModuleDefinition = ron::de::from_str(&ron).unwrap();
+
+        assert_eq!(original, decoded);
+    }
+
+    #[test]
+    fn module_size_ordering() {
+        assert!(ModuleSize::Small < ModuleSize::Large);
+        assert!(ModuleSize::Micro < ModuleSize::XLarge);
     }
 }
