@@ -23,13 +23,26 @@
             "name": "Debug 'SF4E' unittests",
             "type": "lldb",
             "request": "launch",
-            "preLaunchTask": "build SF4E unittests",
-            "program": "${workspaceFolder}/target/debug/deps/spacefight4ever_lib-2d80394f419e2354",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--package",
+                    "spacefight4ever-lib"
+                ],
+                "filter": {
+                    "kind": "lib"
+                }
+            },
             "args": ["--nocapture"],
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "LD_LIBRARY_PATH": "${workspaceFolder}/target/debug/deps"
-            }
+            "cwd": "${workspaceFolder}"
+            // "preLaunchTask": "build SF4E unittests",
+            // "program": "${workspaceFolder}/target/debug/deps/spacefight4ever_lib-666189ba99226032",
+            // "args": ["--nocapture"],
+            // "cwd": "${workspaceFolder}",
+            // "env": {
+            //     "LD_LIBRARY_PATH": "${workspaceFolder}/target/debug/deps:$(rustc --print sysroot)/lib"
+            // }
         },
         {
             "name": "Debug 'SF4E' integration tests",
