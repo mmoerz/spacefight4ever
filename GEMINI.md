@@ -7,7 +7,7 @@ This document outlines the core development principles and architectural mandate
   - **Game Logic Layer:** Independent of UI, communicates via events.
   - **UI State Layer:** Listens to game events and updates UI state.
   - **UI Rendering Layer:** Bevy UI components and systems.
-- **Modularity:** Maintain separation between `spacefight4ever-lib` (core logic), `spacefight4ever-bin` (entry point), and `spacefight4ever-test` (verification).
+- **Modularity:** Maintain separation between `spacefight4ever-lib` (core logic), `spacefight4ever_ui` (core ui functionality),`spacefight4ever-bin` (entry point), and `spacefight4ever-test` (verification).
 
 ## 2. Engineering Standards
 - **Bevy Idioms:** Use Bevy's ECS (Entities, Components, Systems) and Plugin architecture for all game features.
@@ -20,6 +20,6 @@ This document outlines the core development principles and architectural mandate
 - **Validation:** Always run tests using `cargo test` before considering a task complete.
 
 ## 4. UI Development
-- **Consistency:** Follow the existing patterns in `spacefight4ever-lib/src/ui/`.
-- **Widgets:** Reuse or extend widgets in `spacefight4ever-lib/src/ui/widgets/`.
+- **Consistency:** Follow the existing patterns in `spacefight4ever-lib/src/ui/` and `crates/spacefight4ever_ui/src/ui`.
+- **Widgets:** Reuse or extend widgets in `spacefight4ever-lib/src/ui/widgets/` and `crates/spacefigth4ever_ui/src/ui`.
 - **Events:** Use Bevy events for communication between the game world and the UI.
