@@ -1,0 +1,72 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "Zed Debug SF4E bin",
+    // this is a task from .vscode/tasks.json
+    "build": "cargo build SF4E debug",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/spacefight4ever-bin",
+    "args": [],
+    "sourceLanguages": ["rust"],
+    "envFile": "$ZED_WORKTREE_ROOT/.env.debug",
+    "cwd": "$ZED_WORKTREE_ROOT",
+  },
+  {
+    "label": "Zed: Debug unittests",
+    "build": {
+      "command": "cargo",
+      "args": [
+        "test",
+        "--package",
+        "spacefight4ever-lib",
+        "--lib",
+        "--no-run",
+        "--message-format=json",
+      ],
+    },
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/target/debug/spacefight4ever-lib-unittests",
+    "sourceLanguages": ["rust"],
+    "envFile": "$ZED_WORKTREE_ROOT/.env.debug",
+    "cwd": "$ZED_WORKTREE_ROOT",
+  },
+  {
+    "label": "Debug SF4E test crate",
+    "build": {
+      "command": "cargo",
+      "args": ["test", "--package", "spacefight4ever-test", "--no-run"],
+    },
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "${workspaceFolder}/target/debug/spacefight4ever_test",
+    "sourceLanguages": ["rust"],
+    "envFile": "${workspaceFolder}/.env.debug",
+    "cwd": "${workspaceFolder}",
+    "args": [],
+    "settings": {
+      "stopOnEntry": false,
+    },
+  },
+  {
+    "label": "Debug SF4E UI crate",
+    "build": {
+      "command": "cargo",
+      "args": ["test", "--package", "spacefight4ever_ui", "--lib", "--no-run"],
+    },
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "${workspaceFolder}/target/debug/spacefight4ever_ui-unittests",
+    "sourceLanguages": ["rust"],
+    "envFile": "${workspaceFolder}/.env.debug",
+    "cwd": "${workspaceFolder}",
+    "args": [],
+    "settings": {
+      "stopOnEntry": false,
+    },
+  },
+]
