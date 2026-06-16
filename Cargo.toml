@@ -39,7 +39,7 @@ opt-level = 3
 opt-level = 0
 debug = 2
 
-[profile.dev.package.spacefight4ever_lib]
+[profile.dev.package.spacefight4ever-lib]
 opt-level = 0
 debug = 2
 
@@ -62,7 +62,7 @@ codegen-units = 1
 lto = "fat"
 log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
 # opt-level = "s" ->  it allows slightly more inlining and also the vectorization of loops
-# compared to "z" 
+# compared to "z"
 opt-level = "s"
 
 # Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.

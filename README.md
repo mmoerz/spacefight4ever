@@ -14,6 +14,9 @@ You can select which of the lauch options to start with F5 by:
 
 launching tasks directly you can press ``Ctrl+Shift+B`` and input the cargo container name and debug or release build.
 
+Currently I'm trying to get along with Zed. It is an experience.
+First of all you need to setup the lldb debug environment in .env.debug (see below for necessary toolchain path). target paths should be fine as they are.
+
 # setting up your rust
 if cargo run fails complaining about a missing rust 1.89, check if there are not two toolchains in use:
 ```
@@ -40,6 +43,10 @@ apt-get install librust-wayland-client-dev libasound2-dev libudev-dev lld clang
 
 apt-get install sscache
 ```
+
+## Zed
+### setup you LLM provider
+### add 
 
 ## suggested extensions for vscode
 Even Better Toml
@@ -122,3 +129,10 @@ assets/dialogs/
 
  # testing 
  https://chadnauseam.com/coding/gamedev/automated-testing-in-bevy
+
+ ## here comes the zed bummer 
+ We have to configure debug by hand - YES!!
+ If project specific libaries are declared missing - esspecially bevy - check the specified environment. It might lack ./target/ directories.
+ If the debugging launch complains about a missing libstd>
+you need to set>
+~/.rustup/toolchains/<your-toolchain>/lib/rustlib/<your-target-triple>/lib/
