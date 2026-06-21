@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use bevy::prelude::*;
+use std::str::FromStr;
 
 /// part of what a button is, the other part is the button component
 #[repr(usize)]
@@ -40,8 +40,8 @@ impl UiWindowState {
     }
 }
 
-/// we need bitwise | or able values so that we can define
-/// a list of buttons in a variable
+/// This is an enum with bitwise | or able values so that we can define
+/// a list of buttons in a variable.
 #[repr(usize)]
 #[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum UiButtonType {
@@ -49,7 +49,15 @@ pub enum UiButtonType {
     Menu = 1,
     Minimize = 2,
     Maximize = 4,
-    Close = 8
+    Close = 8,
+    Ok = 1 << 7,
+    Cancel = 1 << 8,
+    Yes = 1 << 5,
+    No = 1 << 6,
+    Abort = 1 << 9,
+    Retry = 1 << 10,
+    Ignore = 1 << 11,
+    Custom = 1 << 12,
 }
 
 /// enable loading from string for the UiButtonType
@@ -77,7 +85,7 @@ impl UiButtonType {
 #[derive(Component, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum UiWindowType {
     Simple,
-    Standard
+    Standard,
 }
 
 /// enable loading from string for the UiWindowType

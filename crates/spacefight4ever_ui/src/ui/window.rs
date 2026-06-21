@@ -4,9 +4,9 @@ use bevy::prelude::*;
 use crate::ui::button::UiButtonType;
 use crate::ui::titlebar::ui_titlebar_bundle;
 
-use super::titlebar::UiTitleBar;
+use super::assets::{atlasbuttonskin::ButtonSkin, theme::UiTheme, windowsskin::WindowSkin};
 use super::button::{UiWindowState, UiWindowType};
-use super::assets::{windowsskin::WindowSkin, theme::UiTheme, atlasbuttonskin::ButtonSkin};
+use super::titlebar::UiTitleBar;
 
 // state components for last used window size-index
 //
@@ -90,7 +90,7 @@ pub struct UiAtlasWindow {
     pub skin: Handle<WindowSkin>,
     pub min_width: f32,
     pub min_height: f32,
-    pub content_main: Entity, // main content node
+    pub content_main: Entity,               // main content node
     pub content_status_bar: Option<Entity>, // optional status bar
 }
 
@@ -128,7 +128,8 @@ pub fn on_window_titlebar_drag_start(
     mut commands: Commands,
 ) {
     if let Ok(parent) = parents.get(on_drag_start.event_target()) {
-        commands.entity(on_drag_start.event_target())
+        commands
+            .entity(on_drag_start.event_target())
             .insert(UiWindowDragging(parent.get()));
     }
 }
@@ -142,13 +143,14 @@ pub fn on_window_titlebar_drag(
         //println!("name: {:?}", name);
         if let Ok(mut transform) = query.get_mut(drag.0) {
             // Extract the current values as f32
-            let Val::Px(x) = transform.translation.x else { return };
-            let Val::Px(y) = transform.translation.y else { return };
+            let Val::Px(x) = transform.translation.x else {
+                return;
+            };
+            let Val::Px(y) = transform.translation.y else {
+                return;
+            };
 
-            transform.translation = Val2::px(
-                x + on_drag.delta.x,
-                y + on_drag.delta.y
-            );
+            transform.translation = Val2::px(x + on_drag.delta.x, y + on_drag.delta.y);
         }
     }
 }
@@ -161,8 +163,12 @@ pub fn on_window_titlebar_drag_end(
 ) {
     if let Ok(drag) = dragging.get(on_drag_end.event_target()) {
         if let Ok((mut node, mut transform)) = query.get_mut(drag.0) {
-            let Val::Px(dx) = transform.translation.x else { return };
-            let Val::Px(dy) = transform.translation.y else { return };
+            let Val::Px(dx) = transform.translation.x else {
+                return;
+            };
+            let Val::Px(dy) = transform.translation.y else {
+                return;
+            };
 
             if let Val::Px(left) = node.left {
                 node.left = Val::Px(left + dx);
@@ -173,14 +179,19 @@ pub fn on_window_titlebar_drag_end(
             }
             transform.translation = Val2::ZERO;
         }
-        commands.entity(on_drag_end.event_target()).remove::<UiWindowDragging>();
+        commands
+            .entity(on_drag_end.event_target())
+            .remove::<UiWindowDragging>();
     }
 }
 
 /// TODO: implement hide as well?
 pub fn close_windows(
     mut commands: Commands,
-    interaction_query: Query<(Entity, &UiButtonType, &Interaction), (Changed<Interaction>, With<UiButtonType>)>,
+    interaction_query: Query<
+        (Entity, &UiButtonType, &Interaction),
+        (Changed<Interaction>, With<UiButtonType>),
+    >,
     parents: Query<&ChildOf>,
     windows: Query<Entity, With<UiAtlasWindow>>,
 ) {
@@ -202,7 +213,6 @@ pub struct UiWindowsStatusChangeRequest {
     status: UiWindowState,
 }
 
-
 // TODO: implement making the titlebar smaller and moving it to the bottom corner, but
 // this will need some sort of tracking what windows have already been minimized
 pub fn minimize_windows(
@@ -213,7 +223,9 @@ pub fn minimize_windows(
 ) {
     for (button_type, interaction, button_container) in q {
         if *interaction == Interaction::Pressed && *button_type == UiButtonType::Minimize {
-            if let Some(window_entity) = get_window_node(&windows, button_container.get(), &parent_query) {
+            if let Some(window_entity) =
+                get_window_node(&windows, button_container.get(), &parent_query)
+            {
                 change_message.write(UiWindowsStatusChangeRequest {
                     window: window_entity,
                     status: UiWindowState::Minimized,
@@ -238,7 +250,7 @@ pub fn apply_window_state_change(
                     node.height = Val::Px(skin.titlebar.height);
                     current.state = UiWindowState::Minimized;
                     current.focused = false;
-                },
+                }
                 (UiWindowState::Normal, UiWindowState::Maximized) => {
                     current.save_window_size(&node);
                     node.left = Val::Px(0.);
@@ -247,13 +259,13 @@ pub fn apply_window_state_change(
                     node.height = Val::Percent(100.);
                     current.state = UiWindowState::Maximized;
                     current.focused = true;
-                },
-                (UiWindowState::Minimized, UiWindowState::Normal) | 
-                (UiWindowState::Minimized, UiWindowState::Minimized)=> {
+                }
+                (UiWindowState::Minimized, UiWindowState::Normal)
+                | (UiWindowState::Minimized, UiWindowState::Minimized) => {
                     current.restore_window_size(&mut node);
                     current.state = UiWindowState::Normal;
                     current.focused = true;
-                },
+                }
                 (UiWindowState::Minimized, UiWindowState::Maximized) => {
                     node.left = Val::Px(0.);
                     node.top = Val::Px(0.);
@@ -262,12 +274,12 @@ pub fn apply_window_state_change(
                     current.state = UiWindowState::Maximized;
                     current.focused = true;
                 }
-                (UiWindowState::Maximized, UiWindowState::Normal) |
-                (UiWindowState::Maximized, UiWindowState::Maximized) => {
+                (UiWindowState::Maximized, UiWindowState::Normal)
+                | (UiWindowState::Maximized, UiWindowState::Maximized) => {
                     current.restore_window_size(&mut node);
                     current.state = UiWindowState::Normal;
                     current.focused = true;
-                },
+                }
                 (UiWindowState::Maximized, UiWindowState::Minimized) => {
                     let skin: &WindowSkin = skin_query.get(&window.skin).unwrap();
                     node.height = Val::Px(skin.titlebar.height);
@@ -281,14 +293,17 @@ pub fn apply_window_state_change(
 }
 
 pub fn maximize_windows(
-    mut q: Query<(&UiButtonType, &Interaction, &ChildOf), (Changed<Interaction>, With<UiButtonType>)>,
+    mut q: Query<
+        (&UiButtonType, &Interaction, &ChildOf),
+        (Changed<Interaction>, With<UiButtonType>),
+    >,
     parent_query: Query<&ChildOf>,
     mut windows: Query<Entity, With<UiAtlasWindow>>,
     mut change_message: MessageWriter<UiWindowsStatusChangeRequest>,
 ) {
     for (button_type, interaction, button_container) in &mut q {
         if *interaction == Interaction::Pressed && *button_type == UiButtonType::Maximize {
-             if let Ok(titlebar) = parent_query.get(button_container.get()) {
+            if let Ok(titlebar) = parent_query.get(button_container.get()) {
                 println!("parent_tbar: {:?}", titlebar);
                 if let Ok(parent_window) = parent_query.get(titlebar.get()) {
                     if let Ok(window) = windows.get_mut(parent_window.get()) {
@@ -318,7 +333,7 @@ pub fn maximize_windows(
 //                 Interaction::None => button_index.0,
 //             };
 //         }
-//     }    
+//     }
 // }
 
 /// enum for expressing the side of the window that gets resized
@@ -357,19 +372,31 @@ pub fn window_resize_system(
                 if let Ok(window) = atlas_windows.get(window_entity) {
                     match handle.side {
                         ResizeSide::BottomRight => {
-                            let w = match node.width { Val::Px(v) => v, _ => window.min_width };
-                            let h = match node.height { Val::Px(v) => v, _ => window.min_height };
+                            let w = match node.width {
+                                Val::Px(v) => v,
+                                _ => window.min_width,
+                            };
+                            let h = match node.height {
+                                Val::Px(v) => v,
+                                _ => window.min_height,
+                            };
                             node.width = Val::Px((w + on_drag.delta.x).max(window.min_width));
                             node.height = Val::Px((h + on_drag.delta.y).max(window.min_height));
-                        },
+                        }
                         ResizeSide::Right => {
-                            let w = match node.width { Val::Px(v) => v, _ => window.min_width };
+                            let w = match node.width {
+                                Val::Px(v) => v,
+                                _ => window.min_width,
+                            };
                             node.width = Val::Px((w + on_drag.delta.x).max(window.min_width));
-                        },
+                        }
                         ResizeSide::Bottom => {
-                            let h = match node.height { Val::Px(v) => v, _ => window.min_height };
+                            let h = match node.height {
+                                Val::Px(v) => v,
+                                _ => window.min_height,
+                            };
                             node.height = Val::Px((h + on_drag.delta.y).max(window.min_height));
-                        },
+                        }
                         _ => {}
                     }
                 }
@@ -382,8 +409,7 @@ pub struct UiAtlasWindowPlugin;
 
 impl Plugin for UiAtlasWindowPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<UiWindowFocused>()
+        app.init_resource::<UiWindowFocused>()
             .init_resource::<UiWindowZCounter>()
             .add_message::<UiWindowsStatusChangeRequest>()
             .add_observer(on_window_click_focus)
@@ -391,12 +417,15 @@ impl Plugin for UiAtlasWindowPlugin {
             .add_observer(on_window_titlebar_drag_end)
             .add_observer(on_window_titlebar_drag_start)
             .add_observer(window_resize_system)
-            .add_systems(Update, (
-                minimize_windows,
-                apply_window_state_change,
-                maximize_windows,
-                close_windows,
-            ));
+            .add_systems(
+                Update,
+                (
+                    minimize_windows,
+                    apply_window_state_change,
+                    maximize_windows,
+                    close_windows,
+                ),
+            );
     }
 }
 
@@ -424,27 +453,31 @@ pub struct UiAtlasWindowBuilder {
 
 impl UiAtlasWindowBuilder {
     /// create the builder
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `title` - the title of the window
     /// * `window_type` - type  of the window
     /// * `theme` - the theme to use
     /// * `skins` - the (asset) skins to use
-    pub fn new(title: String, window_type: UiWindowType, theme: &UiTheme, skins: &Assets<WindowSkin>) -> Self {
+    pub fn new(
+        title: String,
+        window_type: UiWindowType,
+        theme: &UiTheme,
+        skins: &Assets<WindowSkin>,
+    ) -> Self {
         //let image_node = ImageNode::default();
         let skin_handle = theme.get_window_skin(window_type).unwrap().clone();
-        let window_skin  = skins.get(&skin_handle).unwrap();
+        let window_skin = skins.get(&skin_handle).unwrap();
 
-        let initial_image_node  = 
-            ImageNode::from_atlas_image(
-                    window_skin.image.clone(),
-                    TextureAtlas {
-                        index: window_skin.atlas_index,
-                        layout: window_skin.atlas.clone(),
-                    },
-            )
-            .with_mode(NodeImageMode::Sliced(window_skin.atlas_slicer.clone()));
+        let initial_image_node = ImageNode::from_atlas_image(
+            window_skin.image.clone(),
+            TextureAtlas {
+                index: window_skin.atlas_index,
+                layout: window_skin.atlas.clone(),
+            },
+        )
+        .with_mode(NodeImageMode::Sliced(window_skin.atlas_slicer.clone()));
         Self {
             window_type: UiWindowType::Standard,
             title,
@@ -475,7 +508,8 @@ impl UiAtlasWindowBuilder {
         (
             UiAtlasWindow {
                 window_type: self.window_type.clone(),
-                skin: self.skin.clone(),                min_width: self.min_width,
+                skin: self.skin.clone(),
+                min_width: self.min_width,
                 min_height: self.min_height,
                 content_main: Entity::PLACEHOLDER,
                 content_status_bar: None,
@@ -500,7 +534,6 @@ impl UiAtlasWindowBuilder {
             },
             self.initial_image_node.clone(),
             GlobalZIndex(self.z_index),
-
             Transform::default(),
             GlobalTransform::default(),
             Visibility::Inherited,
@@ -508,7 +541,7 @@ impl UiAtlasWindowBuilder {
     }
 
     pub fn build(
-        self, 
+        self,
         commands: &mut Commands,
         theme: &UiTheme,
         button_skins: &Assets<ButtonSkin>,
@@ -518,60 +551,67 @@ impl UiAtlasWindowBuilder {
         let mut statusbar: Option<Entity> = None;
         let result = commands.spawn(self.window_main_node()).id();
 
-        commands.entity(result)
-            .with_children(|parent| {
-                parent.spawn(ui_titlebar_bundle(
-                        self.title,
-                        theme,
-                        self.window_type,
-                        button_skins,
-                        window_skins));
-                parent.spawn((
-                    Node {
-                        width: Val::Percent(100.),
-                        height: Val::Percent(100.),
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Row,
-                        ..default()
-                    },
-                )).with_children(|mainbody| {
-                    window_main =
-                    mainbody.spawn((
-                        UiWindowMain,
-                        Node {
-                            width: Val::Percent(100.),
-                            height: Val::Percent(100.),
-                            ..default()
-                        },
-                    )).id();
+        commands.entity(result).with_children(|parent| {
+            parent.spawn(ui_titlebar_bundle(
+                self.title,
+                theme,
+                self.window_type,
+                button_skins,
+                window_skins,
+            ));
+            parent
+                .spawn((Node {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    ..default()
+                },))
+                .with_children(|mainbody| {
+                    window_main = mainbody
+                        .spawn((
+                            UiWindowMain,
+                            Node {
+                                width: Val::Percent(100.),
+                                height: Val::Percent(100.),
+                                ..default()
+                            },
+                        ))
+                        .id();
                     mainbody.spawn((
                         Node {
                             width: px(5.),
                             height: Val::Percent(100.),
                             ..default()
                         },
-                        UiWindowResizeHandle { side: ResizeSide::Right },
+                        UiWindowResizeHandle {
+                            side: ResizeSide::Right,
+                        },
                     ));
                 });
-                parent.spawn((
-                    Node {
-                        width: Val::Percent(100.),
-                        height: px(5.),
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Row,
-                        ..default()
-                    },
-                )).with_children(|mainbody| {
-                    statusbar =  Some(
-                        mainbody.spawn((
+            parent
+                .spawn((Node {
+                    width: Val::Percent(100.),
+                    height: px(5.),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    ..default()
+                },))
+                .with_children(|mainbody| {
+                    statusbar = Some(
+                        mainbody
+                            .spawn((
                                 Node {
                                     width: Val::Percent(100.),
                                     height: px(5.),
                                     ..default()
                                 },
-                                UiWindowResizeHandle { side: ResizeSide::Bottom },
+                                UiWindowResizeHandle {
+                                    side: ResizeSide::Bottom,
+                                },
                                 UiWindowStatusBar,
-                            )).id()
+                            ))
+                            .id(),
                     );
                     mainbody.spawn((
                         Node {
@@ -579,10 +619,12 @@ impl UiAtlasWindowBuilder {
                             height: px(5.),
                             ..default()
                         },
-                        UiWindowResizeHandle { side: ResizeSide::BottomRight },
+                        UiWindowResizeHandle {
+                            side: ResizeSide::BottomRight,
+                        },
                     ));
                 });
-            });
+        });
 
         // 👇 now update component on root
         commands.entity(result).insert(UiAtlasWindow {
@@ -593,7 +635,7 @@ impl UiAtlasWindowBuilder {
             content_main: window_main,
             content_status_bar: statusbar,
         });
-        
+
         result
     }
 
@@ -729,8 +771,12 @@ pub fn spawn_ui_window(
     button_skins: &Assets<ButtonSkin>,
     window_skins: &Assets<WindowSkin>,
 ) -> Entity {
-    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins)
-        .build(commands, theme, button_skins, window_skins)
+    UiAtlasWindowBuilder::new(title, window_type, theme, window_skins).build(
+        commands,
+        theme,
+        button_skins,
+        window_skins,
+    )
 }
 
 pub fn spawn_ui_window_with_z_index(
@@ -783,4 +829,3 @@ pub fn spawn_ui_window_with_z_index(
 //         .with_z_index(&mut z_index)
 //         .build_with_theme(theme, button_skins, window_skins)
 // }
-
