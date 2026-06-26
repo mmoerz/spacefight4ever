@@ -1,13 +1,9 @@
-use bevy::prelude::*;
-use crate::ui::button::UiWindowType;
-use crate::ui::assets::{
-    theme::UiTheme,
-    atlasbuttonskin::ButtonSkin,
-    windowsskin::WindowSkin,
-};
-use crate::ui::button::UiWindowState;
+use crate::ui::assets::{atlasbuttonskin::ButtonSkin, theme::UiTheme, windowsskin::WindowSkin};
 use crate::ui::atlasbutton::ui_thematic_button_bundle;
 use crate::ui::button::UiButtonType;
+use crate::ui::button::UiWindowState;
+use crate::ui::button::UiWindowType;
+use bevy::prelude::*;
 
 /// Component for a titlebar that uses a TitlebarSkin atlas
 #[derive(Component, Clone)]
@@ -53,9 +49,7 @@ impl Plugin for UiTitleBarPlugin {
     fn build(&self, app: &mut App) {
         app
             // assets are initialized in the assets plugin
-            .add_systems(Update, 
-                titlebar_update_system
-            );
+            .add_systems(Update, titlebar_update_system);
     }
 }
 
@@ -70,9 +64,18 @@ pub struct UiTitleBarBuilder {
 }
 
 impl UiTitleBarBuilder {
-    pub fn new(title: String, theme: &UiTheme, window_type: UiWindowType, window_skins: &Assets<WindowSkin>, ) -> Self {
-        let help = theme.get_window_skin(window_type).expect("Missing window skin in theme");
-        let window_skin = window_skins.get(help).expect("Window skin handle not loaded");
+    pub fn new(
+        title: String,
+        theme: &UiTheme,
+        window_type: UiWindowType,
+        window_skins: &Assets<WindowSkin>,
+    ) -> Self {
+        let help = theme
+            .get_window_skin(window_type)
+            .expect("Missing window skin in theme");
+        let window_skin = window_skins
+            .get(help)
+            .expect("Window skin handle not loaded");
 
         // Prefill the image and atlas for immediate display
         let image = window_skin.image.clone();
@@ -103,19 +106,23 @@ impl UiTitleBarBuilder {
             top: Val::ZERO,
             bottom: Val::ZERO,
         }
-    }            
+    }
 
     pub fn build_with_theme(
         self,
         theme: &UiTheme,
         window_type: UiWindowType,
         button_skins: &Assets<ButtonSkin>,
-        window_skins: &Assets<WindowSkin>
+        window_skins: &Assets<WindowSkin>,
     ) -> impl Bundle {
         let b_margin = self.button_margin();
-        let help = theme.get_window_skin(window_type).expect("Missing window skin in theme");
-        let window_skin = window_skins.get(help).expect("Window skin handle not loaded");
-        
+        let help = theme
+            .get_window_skin(window_type)
+            .expect("Missing window skin in theme");
+        let window_skin = window_skins
+            .get(help)
+            .expect("Window skin handle not loaded");
+
         // TODO: calculate text title size and report that back to the window
         // TODO: add slicer to properly use and align the pattern free parts of the image in the corners for the buttons
         (
@@ -141,42 +148,70 @@ impl UiTitleBarBuilder {
                 is_hoverable: true,
                 ..default()
             },
-            children![(
-            // Menu button
-                ui_thematic_button_bundle(UiButtonType::Menu, theme, self.height, b_margin, button_skins),
-            ),
-            // Title text
-            (
-                Node {
-                    height: Val::Px(self.height),
-                    justify_content: JustifyContent::Stretch,
-                    align_self: AlignSelf::Stretch,
-                    ..default()
-                },
-                Text::new(self.title),
-                TextFont {
-                    font: window_skin.titlebar.font.clone(),
-                    font_size: window_skin.titlebar.font_size.clone(),
-                    ..default()
-                },
-                TextColor(window_skin.titlebar.font_color.clone()),
-                Visibility::Inherited,
-            ),
-            // Right buttons (minimize, maximize, close)
-            (
-                Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    margin: UiRect { left: Val::Auto, ..default() },
-                    ..default()
-                },
-                Visibility::Inherited,
-                children![
-                    ui_thematic_button_bundle(UiButtonType::Minimize, theme, self.height, b_margin, button_skins),
-                    ui_thematic_button_bundle(UiButtonType::Maximize, theme, self.height, b_margin, button_skins),
-                    ui_thematic_button_bundle(UiButtonType::Close, theme, self.height, b_margin, button_skins),
-                ],
-            )
+            children![
+                (
+                    // Menu button
+                    ui_thematic_button_bundle(
+                        UiButtonType::Menu,
+                        theme,
+                        self.height,
+                        b_margin,
+                        button_skins
+                    ),
+                ),
+                // Title text
+                (
+                    Node {
+                        height: Val::Px(self.height),
+                        justify_content: JustifyContent::Stretch,
+                        align_self: AlignSelf::Stretch,
+                        ..default()
+                    },
+                    Text::new(self.title),
+                    TextFont {
+                        font: window_skin.titlebar.font.clone(),
+                        font_size: window_skin.titlebar.font_size.clone(),
+                        ..default()
+                    },
+                    TextColor(window_skin.titlebar.font_color.clone()),
+                    Visibility::Inherited,
+                ),
+                // Right buttons (minimize, maximize, close)
+                (
+                    Node {
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Row,
+                        margin: UiRect {
+                            left: Val::Auto,
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    Visibility::Inherited,
+                    children![
+                        ui_thematic_button_bundle(
+                            UiButtonType::Minimize,
+                            theme,
+                            self.height,
+                            b_margin,
+                            button_skins
+                        ),
+                        ui_thematic_button_bundle(
+                            UiButtonType::Maximize,
+                            theme,
+                            self.height,
+                            b_margin,
+                            button_skins
+                        ),
+                        ui_thematic_button_bundle(
+                            UiButtonType::Close,
+                            theme,
+                            self.height,
+                            b_margin,
+                            button_skins
+                        ),
+                    ],
+                )
             ],
         )
     }
@@ -189,12 +224,18 @@ pub fn spawn_ui_titlebar(
     theme: &UiTheme,
     window_type: UiWindowType,
     button_skins: &Assets<ButtonSkin>,
-    window_skins: &Assets<WindowSkin>
+    window_skins: &Assets<WindowSkin>,
 ) -> Entity {
-    commands.spawn(
-        UiTitleBarBuilder::new(title, theme, window_type, window_skins)
-            .build_with_theme(theme, window_type, button_skins, window_skins)
-    ).id()
+    commands
+        .spawn(
+            UiTitleBarBuilder::new(title, theme, window_type, window_skins).build_with_theme(
+                theme,
+                window_type,
+                button_skins,
+                window_skins,
+            ),
+        )
+        .id()
 }
 
 // Spawn a titlebar using a `UiTheme`

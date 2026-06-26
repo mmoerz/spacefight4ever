@@ -29,6 +29,7 @@
 ///     );
 /// }
 /// ```
+use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 
 use crate::ui::assets::atlasbuttonskin::ButtonSkin;
@@ -371,6 +372,23 @@ pub fn spawn_message_dialog(
 // Dialog Button Interaction System
 // ============================================================================
 
+// helper function to retrieve the parent UiAtlasWindow entity
+/// is used when dragging a titlebar, to obtain the parent window
+pub fn get_dialog_node(
+    windows: &Query<Entity, With<UiDialog>>,
+    mut current: Entity,
+    parents: &Query<&ChildOf>,
+) -> Option<Entity> {
+    while let Ok(parent) = parents.get(current) {
+        if windows.contains(current) {
+            return Some(current);
+        }
+        current = parent.get();
+    }
+
+    windows.contains(current).then_some(current)
+}
+
 /// System that handles dialog button interactions.
 ///
 /// When a button with `UiButtonType` component inside a dialog is pressed,
@@ -378,21 +396,21 @@ pub fn spawn_message_dialog(
 /// the dialog entity.
 pub fn dialog_button_interaction_system(
     mut q: Query<
-        (&UiButtonType, &Interaction, &ChildOf),
+        (Entity, &UiButtonType, &Interaction),
         (Changed<Interaction>, With<UiDialogButton>),
     >,
-    dialog_query: Query<(&ChildOf, &UiDialog)>,
-    parent_query: Query<&ChildOf>,
+    parents: Query<&ChildOf>,
+    dialogs: Query<Entity, With<UiDialog>>,
     mut events: MessageWriter<UiDialogEvent>,
 ) {
     // Find all pressed dialog buttons
-    for (button_type, interaction, button_container) in &mut q {
+    for (button_entity, button_type, interaction) in &mut q {
         if *interaction == Interaction::Pressed {
-            if let Ok(dialog) = parent_query.get(button_container.get()) {
+            if let Some(dialog) = get_dialog_node(&dialogs, button_entity, &parents) {
                 // Found the parent dialog entity
                 events.write(UiDialogEvent {
                     action: *button_type,
-                    dialog_entity: (dialog.get()),
+                    dialog_entity: (dialog),
                 });
             }
         }

@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 
-use crate::ui::button::UiButtonType;
-use super::button::ButtonState;
 use super::assets::atlasbuttonskin::ButtonSkin;
 use super::assets::theme::UiTheme;
+use super::button::ButtonState;
+use crate::ui::button::UiButtonType;
 
 /// Ui Atlas Button
-/// 
+///
 /// is a image based button that utilizes an atlas for
 /// different button states
 #[derive(Component, Clone)]
@@ -45,7 +45,7 @@ impl UiAtlasButton {
 }
 
 /// system for responding to button interactions
-/// 
+///
 pub fn button_interaction_system(
     skins: Res<Assets<ButtonSkin>>,
     mut query: Query<(&Interaction, &mut UiAtlasButton, &mut ImageNode), Changed<Interaction>>,
@@ -83,7 +83,7 @@ pub fn button_update_atlas_on_event(
 ) {
     for event in events.read() {
         match event {
-            AssetEvent::Modified {id, ..} | AssetEvent::Added{id} => {
+            AssetEvent::Modified { id, .. } | AssetEvent::Added { id } => {
                 for (button, mut image_node) in &mut query {
                     if &button.skin.id() == id {
                         if let Some(skin) = skins.get(*id) {
@@ -96,7 +96,7 @@ pub fn button_update_atlas_on_event(
                     }
                 }
             }
-            _  => {}
+            _ => {}
         }
     }
 }
@@ -108,21 +108,21 @@ impl Plugin for UiAtlasButtonPlugin {
     fn build(&self, app: &mut App) {
         app
             // assets are initialized in the assets plugin
-            .add_systems(Update, (
-                button_interaction_system,
-                button_update_atlas_on_event,
-            ));
+            .add_systems(
+                Update,
+                (button_interaction_system, button_update_atlas_on_event),
+            );
     }
 }
 
 /// Builder for creating Ui buttons.
-/// 
+///
 /// ## Example with Bevy 0.18
-/// 
+///
 /// ```no_run
 /// use bevy::prelude::*;
 /// use spacefight4ever_ui::prelude::*;
-/// 
+///
 /// fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 ///     )
 /// ```
@@ -139,7 +139,10 @@ pub struct UiAtlasButtonBuilder {
 
 impl UiAtlasButtonBuilder {
     /// create a new button builder
-    pub fn new(skin: Handle<ButtonSkin>, size: f32, margin: UiRect,
+    pub fn new(
+        skin: Handle<ButtonSkin>,
+        size: f32,
+        margin: UiRect,
         skins: &Assets<ButtonSkin>, // <- pass assets
     ) -> Self {
         let mut image = Handle::default();
@@ -220,10 +223,9 @@ pub fn spawn_ui_button(
     margin: UiRect,
     skins: &Assets<ButtonSkin>, // <- pass assets
 ) -> Entity {
-    commands.spawn(
-        UiAtlasButtonBuilder::new(skin, size, margin, skins)
-        .build()
-    ).id()
+    commands
+        .spawn(UiAtlasButtonBuilder::new(skin, size, margin, skins).build())
+        .id()
 }
 
 /// Spawn a material button using the `children!` macro pattern
@@ -248,8 +250,7 @@ pub fn ui_button_bundle(
     margin: UiRect,
     skins: &Assets<ButtonSkin>, // <- pass assets
 ) -> impl Bundle {
-    UiAtlasButtonBuilder::new(skin, size, margin, skins)
-        .build()
+    UiAtlasButtonBuilder::new(skin, size, margin, skins).build()
 }
 
 pub fn ui_thematic_button_bundle(
@@ -308,6 +309,13 @@ impl ChildButtonSpawner for ChildSpawnerCommands<'_> {
         margin: UiRect,
         skins: &Assets<ButtonSkin>,
     ) -> Entity {
-        self.spawn(ui_thematic_button_bundle(button_type, theme, size, margin, skins)).id()
+        self.spawn(ui_thematic_button_bundle(
+            button_type,
+            theme,
+            size,
+            margin,
+            skins,
+        ))
+        .id()
     }
 }
