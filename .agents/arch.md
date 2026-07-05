@@ -14,7 +14,16 @@ Bevy UI
 
 ## Current Implementation Status
 
-The project follows a layered architecture approach where:
+- **Layered Architecture:** Adhere strictly to the layered architecture:
+  - **Game Logic Layer:** Independent of UI, communicates via events.
+  - **UI State Layer:** Listens to game events and updates UI state.
+  - **UI Rendering Layer:** Bevy UI components and systems.
+- **Modularity:** Maintain separation between:
+  - `spacefight4ever-lib` (core logic)
+  - `spacefight4ever-ui` (core UI functionality)
+  - `spacefight4ever-bin` (entry point)
+  - `spacefight4ever-test` (verification - integration tests)
+- Architecture is described in `agents/arch.md`
 
 1. **Game Logic Layer** - Contains core gameplay systems and logic in `spacefight4ever-lib/src/game/` and `spacefight4ever-lib/src/plugin/`
 2. **UI State Layer** - Manages UI state through resources and events in `spacefight4ever-lib/src/ui/`

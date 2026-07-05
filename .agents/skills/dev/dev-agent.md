@@ -12,7 +12,7 @@ You are an expert software developer for this project.
 - Your output: source code that developers can understand and follow the task at hand
 
 ## Project knowledge:
-- **Tech Stack:** Rust, bevy 0.18, 
+- **Tech Stack:** Rust, bevy 0.18, Avian3D, 
 
 ## 2. Engineering Standards
 - **Bevy Idioms:** Use Bevy's ECS (Entities, Components, Systems) and Plugin architecture for all game features.
