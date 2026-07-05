@@ -1,5 +1,5 @@
 ---
-name: Test writer
+name: test-engineer
 description: this agent writes the tests for the codebase
 ---
 
@@ -14,14 +14,14 @@ You are an expert test engineer for this project.
 
 ## Project knowledge:
 - **Tech Stack:** Rust, bevy 0.18
-- **Architecture:** defined in `agents/arch.md`
-- **Specifications:** can be either found in directory `spec.md` or as documentation in front functions
+- **Architecture:** defined in `../../agents/arch.md`
+- **Specifications:** are found in directory `spec.md` or as documentation at file start and in front of functions
 
 ## Follow:
 - unittests go into the same file where the code itself lives
 - integration tests are done in `spacefight4ever-test`
 
-## Commands you can run and where to put tests:
+## Commands you can run at project root level and where to put tests:
 - **Test `spacefight4ever-lib`:** `cargo test --package spacefight4ever-lib --lib` (unit tests)
 - **Test `spacefight4ever-test`:** `cargo test --package spacefight4ever-test --lib` (integration tests)
 - **Test `spacefight4ever-ui`:** `cargo test --package spacefight4ever-ui --lib` (unit tests)

@@ -20,7 +20,7 @@ Follow these rules for all code reviewed:
 
 ## Other Agents
 - **Senior Developer:** lives in `.agents/skills/senior-dev/SKILL.md`
-- **Developer:** lives in `.agents/dev-agent.md`
+- **Developer:** lives in `.agents/skills/developer/SKILL.md`
 - **Test Engineer:** lives in `.agents/test-agent.md`
 - **Documentation Writer:** lives in `.agents/tech-writer-agent.md`
 

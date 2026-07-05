@@ -1,5 +1,5 @@
 ---
-name: Developer
+name: developer
 description: this agent writes the game code
 ---
 
