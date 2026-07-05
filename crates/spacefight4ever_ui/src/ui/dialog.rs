@@ -434,7 +434,7 @@ pub fn dialog_close_system(
     mut events: MessageWriter<UiDialogClosed>,
     query: Query<(Entity, Ref<UiDialog>)>,
 ) {
-    for (entity, refDlg) in &query {
+    for (entity, _ref_dlg) in &query {
         events.write(UiDialogClosed {
             dialog_entity: entity,
         });
@@ -464,4 +464,216 @@ impl Plugin for UiDialogPlugin {
                 ),
             );
     }
+}
+
+// ============================================================================
+// Tests
+// ============================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- UiDialogSeverity ---
+
+    #[test]
+    fn test_severity_info_color() {
+        let color = UiDialogSeverity::Info.to_color();
+        assert_eq!(color, Color::srgb(0.1, 0.1, 0.1));
+    }
+
+    #[test]
+    fn test_severity_warning_color() {
+        let color = UiDialogSeverity::Warning.to_color();
+        assert_eq!(color, Color::srgb(0.8, 0.5, 0.1));
+    }
+
+    #[test]
+    fn test_severity_error_color() {
+        let color = UiDialogSeverity::Error.to_color();
+        assert_eq!(color, Color::srgb(0.8, 0.1, 0.1));
+    }
+
+    #[test]
+    fn test_severity_colors_are_distinct() {
+        let info = UiDialogSeverity::Info.to_color();
+        let warning = UiDialogSeverity::Warning.to_color();
+        let error = UiDialogSeverity::Error.to_color();
+        assert_ne!(info, warning);
+        assert_ne!(warning, error);
+        assert_ne!(info, error);
+    }
+
+    // --- UiDialog ---
+
+    #[test]
+    fn test_dialog_new_defaults() {
+        let dialog = UiDialog::new("Test".to_string(), UiDialogSeverity::Info);
+        assert_eq!(dialog.title, "Test");
+        assert_eq!(dialog.severity, UiDialogSeverity::Info);
+        assert!(dialog.is_modal);
+    }
+
+    #[test]
+    fn test_dialog_modal_false() {
+        let dialog = UiDialog::new("Test".to_string(), UiDialogSeverity::Info).modal(false);
+        assert!(!dialog.is_modal);
+    }
+
+    #[test]
+    fn test_dialog_clone() {
+        let dialog = UiDialog::new("Test".to_string(), UiDialogSeverity::Error);
+        let clone = dialog.clone();
+        assert_eq!(clone.title, dialog.title);
+        assert_eq!(clone.severity, dialog.severity);
+        assert_eq!(clone.is_modal, dialog.is_modal);
+    }
+
+    #[test]
+    fn test_dialog_severity_all_variants() {
+        let info_dialog = UiDialog::new("Info".to_string(), UiDialogSeverity::Info);
+        let warn_dialog = UiDialog::new("Warn".to_string(), UiDialogSeverity::Warning);
+        let err_dialog = UiDialog::new("Err".to_string(), UiDialogSeverity::Error);
+
+        assert_eq!(info_dialog.severity, UiDialogSeverity::Info);
+        assert_eq!(warn_dialog.severity, UiDialogSeverity::Warning);
+        assert_eq!(err_dialog.severity, UiDialogSeverity::Error);
+    }
+
+    // --- UiDialogEvents ---
+
+    #[test]
+    fn test_dialog_event_creation() {
+        let entity = Entity::from_bits(42);
+        let event = UiDialogEvent {
+            action: UiButtonType::Yes,
+            dialog_entity: entity,
+        };
+        assert_eq!(event.action, UiButtonType::Yes);
+        assert_eq!(event.dialog_entity, entity);
+    }
+
+    #[test]
+    fn test_dialog_opened_event() {
+        let entity = Entity::from_bits(7);
+        let event = UiDialogOpened {
+            dialog_entity: entity,
+        };
+        assert_eq!(event.dialog_entity, entity);
+    }
+
+    #[test]
+    fn test_dialog_closed_event() {
+        let entity = Entity::from_bits(99);
+        let event = UiDialogClosed {
+            dialog_entity: entity,
+        };
+        assert_eq!(event.dialog_entity, entity);
+    }
+
+    // --- UiDialogBuilder ---
+
+    #[test]
+    fn test_dialog_builder_default_size() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        );
+        assert_eq!(builder.width, 400.0);
+        assert_eq!(builder.height, 250.0);
+    }
+
+    #[test]
+    fn test_dialog_builder_default_severity() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        );
+        assert_eq!(builder.dialog.severity, UiDialogSeverity::Info);
+    }
+
+    #[test]
+    fn test_dialog_builder_size() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        )
+        .size(600.0, 400.0);
+        assert_eq!(builder.width, 600.0);
+        assert_eq!(builder.height, 400.0);
+    }
+
+    #[test]
+    fn test_dialog_builder_severity_override() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        )
+        .severity(UiDialogSeverity::Error);
+        assert_eq!(builder.dialog.severity, UiDialogSeverity::Error);
+    }
+
+    #[test]
+    fn test_dialog_builder_message_override() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        )
+        .message("New message".to_string());
+        assert_eq!(builder.dialog_message, "New message");
+    }
+
+    #[test]
+    fn test_dialog_builder_actions_override() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        )
+        .actions(vec![UiButtonType::Yes, UiButtonType::No]);
+        assert_eq!(builder.dialog_buttons.len(), 2);
+        assert!(builder.dialog_buttons.contains(&UiButtonType::Yes));
+        assert!(builder.dialog_buttons.contains(&UiButtonType::No));
+    }
+
+    #[test]
+    fn test_dialog_builder_chain() {
+        let builder = UiDialogBuilder::new(
+            "Title".to_string(),
+            "Message".to_string(),
+            vec![UiButtonType::Ok],
+            UiWindowType::Standard,
+        )
+        .size(500.0, 350.0)
+        .severity(UiDialogSeverity::Warning)
+        .message("Chained message".to_string())
+        .actions(vec![
+            UiButtonType::Yes,
+            UiButtonType::No,
+            UiButtonType::Cancel,
+        ]);
+
+        assert_eq!(builder.width, 500.0);
+        assert_eq!(builder.height, 350.0);
+        assert_eq!(builder.dialog.severity, UiDialogSeverity::Warning);
+        assert_eq!(builder.dialog_message, "Chained message");
+        assert_eq!(builder.dialog_buttons.len(), 3);
+    }
+
+    // --- get_dialog_node ---
+    //
+    // Note: get_dialog_node takes Query references which are only constructable
+    // inside Bevy system contexts. Tests that verify parent-traversal logic
+    // are placed in the integration-test crate instead.
 }

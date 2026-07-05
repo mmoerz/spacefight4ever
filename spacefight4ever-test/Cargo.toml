@@ -9,3 +9,4 @@ spacefight4ever-lib = { path = "../spacefight4ever-lib", features = [ "debug" ] 
 bevy = { workspace = true, features = [ "debug" ] }
 bevy_prototype_lyon = { workspace = true, features = [] }
 avian3d = { version = "0.6.0", features = ["simd"] }
+spacefight4ever_ui = { path = "../crates/spacefight4ever_ui" }

@@ -5640,6 +5640,7 @@ dependencies = [
  "bevy",
  "bevy_prototype_lyon",
  "spacefight4ever-lib",
+ "spacefight4ever_ui",
 ]
 
 [[package]]
