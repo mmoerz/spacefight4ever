@@ -1,21 +1,21 @@
-use serde::{Deserialize, Serialize};
 use bevy::{
-    asset::{io::Reader, AssetLoader, LoadContext},
+    asset::{AssetLoader, LoadContext, io::Reader},
     prelude::*,
     reflect::TypePath,
 };
+use serde::{Deserialize, Serialize};
 
-use crate::ui::{assets::asseterror::UiAssetLoadError};
 use super::atlasbuttonskin::DiskAtlasImage;
 use super::titlebarskin::{DiskTitlebarSkin, TitlebarSkin};
+use crate::ui::assets::asseterror::UiAssetLoadError;
 
 /// Disk window skin
 #[derive(TypePath, Debug, Deserialize, Serialize)]
 pub struct DiskWindowSkin {
-    pub window_atlas: DiskAtlasImage,           // main window image
+    pub window_atlas: DiskAtlasImage, // main window image
     pub window_atlas_index: usize,
-    pub slice_border: [Vec2;2],
-    pub titlebar: DiskTitlebarSkin,     // titlebar atlas & mapping
+    pub slice_border: [Vec2; 2],
+    pub titlebar: DiskTitlebarSkin, // titlebar atlas & mapping
     pub default_size: [u32; 2],
     pub min_size: [u32; 2],
     pub default_position: [u32; 2],
@@ -33,10 +33,10 @@ impl DiskWindowSkin {
 
         let image_handle = self.window_atlas.load_image(load_context);
         let layout = self.window_atlas.create_layout();
-        let layout_handle = 
-            load_context.add_labeled_asset(
-                format!("window_layout_{}", self.window_atlas.image_name), layout
-            );
+        let layout_handle = load_context.add_labeled_asset(
+            format!("window_layout_{}", self.window_atlas.image_name),
+            layout,
+        );
         let titlebar = self.titlebar.into_runtime(load_context)?;
 
         Ok(WindowSkin {
@@ -44,9 +44,9 @@ impl DiskWindowSkin {
             atlas: layout_handle,
             atlas_index: self.window_atlas_index,
             atlas_slicer: TextureSlicer {
-                border: BorderRect { 
-                    min_inset: self.slice_border[0], 
-                    max_inset: self.slice_border[1], 
+                border: BorderRect {
+                    min_inset: self.slice_border[0],
+                    max_inset: self.slice_border[1],
                 },
                 ..Default::default()
             },
@@ -134,10 +134,7 @@ mod tests {
         DiskWindowSkin {
             window_atlas: DiskAtlasImage {
                 image_name: "window.png".to_string(),
-                tile_size: UVec2::new(
-                    16,
-                    16,
-                ),
+                tile_size: UVec2::new(16, 16),
                 rows: 3,
                 cols: 3,
                 padding: UVec2::ZERO,
@@ -185,9 +182,14 @@ mod tests {
             height: 15.0,
             font: Handle::default(),
             font_size: 12.0,
-            font_color: Color::srgb(1.0, 0.,0.),
-            padding: UiRect { left: px(0), right: px(0), top: px(0), bottom: px(0) },
-            mapping: [0,1,2,3,4],
+            font_color: Color::srgb(1.0, 0., 0.),
+            padding: UiRect {
+                left: px(0),
+                right: px(0),
+                top: px(0),
+                bottom: px(0),
+            },
+            mapping: [0, 1, 2, 3, 4],
             buttons: 2,
         };
 
@@ -202,7 +204,7 @@ mod tests {
     fn titlebar_default() {
         let def = TitlebarSkin::default();
 
-        assert_eq!(def.mapping, [0;WINDOW_STATE_COUNT]);
+        assert_eq!(def.mapping, [0; WINDOW_STATE_COUNT]);
         assert_eq!(def.buttons, 0);
     }
 
@@ -216,13 +218,13 @@ mod tests {
 
     #[test]
     fn window_position_conversion() {
-    let disk = valid_window();
+        let disk = valid_window();
 
-    assert_eq!(UVec2::from_array(disk.default_size), UVec2::new(100, 50));
-    assert_eq!(UVec2::from_array(disk.default_position), UVec2::new(10, 20));
-    assert_eq!(
-        UVec2::from_array(disk.default_titlebar_position),
-        UVec2::new(0, 0)
-    );
-}
+        assert_eq!(UVec2::from_array(disk.default_size), UVec2::new(100, 50));
+        assert_eq!(UVec2::from_array(disk.default_position), UVec2::new(10, 20));
+        assert_eq!(
+            UVec2::from_array(disk.default_titlebar_position),
+            UVec2::new(0, 0)
+        );
+    }
 }

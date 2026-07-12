@@ -4,28 +4,41 @@ This document outlines the core development principles and architectural mandate
 
 ## Project Knowledge
 
-- **Tech Stack:** Rust, Bevy 0.18, `bevy_asset_loader` 0.26, Avian3D
-- **Layered Architecture:** Adhere strictly to the layered architecture defined in `.agents/arch.md`:
+- **Tech Stack:** in `.agents/tech-stack.md`
+- **Layered Architecture:** All new code must follow the layered architecture defined in `.agents/arch.md`.
 
 ## Build & Test Commands
 
 - **Build:** `cargo build --package spacefight4ever-bin`
 
 ## Standards
-
-Follow these rules for all code reviewed:
+These standards apply to all generated, modified, and reviewed code.
 
 - **Naming conventions:** Follow standard Rust naming conventions.
 - **Coding guidelines:** See `.agents/code.md`.
+- Prefer existing project patterns
+- Minimize the scope of changes.
 
-## Other Agents
+## Specialist Instructions
+When appropriate, consult:
+
 - **Senior Developer:** lives in `.agents/skills/senior-dev/SKILL.md`
 - **Developer:** lives in `.agents/skills/developer/SKILL.md`
-- **Test Engineer:** lives in `.agents/test-agent.md`
-- **Documentation Writer:** lives in `.agents/tech-writer-agent.md`
+- **Test Engineer:** lives in `.agents/skills/test-engineer/SKILL.md`
+- **Documentation Writer:** lives in `.agents/skills/tech-docu-writer/SKILL.md`
 
 ## Constraints
 
-- ✅ **Always:** Adhere to the existing directory structure.
-- ⚠️ **Ask first:** Directory structure changes, adding dependencies, modifying architecture.
-- 🚫 **Never:** Commit secrets or API keys.
+- ✅ **Always:** 
+  - Follow the existing directory structure.
+  - Preserve architectural boundaries.
+
+- ⚠️ **Ask first:** 
+  - Changing directory structure
+  - Adding dependencies
+  - Modifying architecture.
+  
+- 🚫 **Never:** 
+  - Commit secrets or API keys.
+  - Perform unrelated refactors
+  - Introduce new frameworks or build tooling without approval

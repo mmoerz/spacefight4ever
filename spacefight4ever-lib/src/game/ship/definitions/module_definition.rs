@@ -1,24 +1,22 @@
-use std::{
-    collections::HashMap,
-};
+use std::collections::HashMap;
 
 use bevy::{
-    asset::{io::Reader, AssetLoader, LoadContext},
+    asset::{AssetLoader, LoadContext, io::Reader},
     prelude::*,
     reflect::TypePath,
 };
 use serde::{Deserialize, Serialize};
 
 use super::{
-    load_error::AssetLoadError,
-    weapon_definition::WeaponDefinition,
-    shield_definition::ShieldDefinition,
     armor_definition::ArmorDefinition,
+    load_error::AssetLoadError,
+    propulsion_definition::{PropulsionDefinition, PropulsionView},
+    shield_definition::ShieldDefinition,
     support_definitions::SupportDefinition,
-    propulsion_definition::{PropulsionDefinition,PropulsionView,},
+    weapon_definition::WeaponDefinition,
 };
 
-#[derive(Default,Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum ModuleSize {
     #[default]
     Micro,
@@ -26,7 +24,7 @@ pub enum ModuleSize {
     Small,
     Medium,
     Large,
-    XLarge
+    XLarge,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -35,7 +33,7 @@ pub enum ModuleData {
     Weapon(WeaponDefinition),
     Shield(ShieldDefinition),
     Armor(ArmorDefinition),
-    Support(SupportDefinition)
+    Support(SupportDefinition),
 }
 
 impl Default for ModuleData {
@@ -142,16 +140,16 @@ pub fn build_module_definition_index_once_system(
             let id = ModuleId(def.name.clone());
             if index.index.insert(id, handle.clone()).is_some() {
                 warn!("Duplicate module definition name: {}", def.name);
-            } 
+            }
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use bevy::prelude::*;
     use super::*;
     use bevy::ecs::system::RunSystemOnce;
+    // use bevy::prelude::*;
 
     #[test]
     fn indexes_single_module() {
@@ -180,7 +178,7 @@ mod tests {
         world.insert_resource(ModuleDefinitionIndex::default());
 
         // Run system
-        world.run_system_once(build_module_definition_index_once_system);
+        _ = world.run_system_once(build_module_definition_index_once_system);
 
         // Check result
         let index = world.resource::<ModuleDefinitionIndex>();
@@ -202,7 +200,9 @@ mod tests {
             ..Default::default()
         });
 
-        index.index.insert(ModuleId("engine".to_string()), handle.clone());
+        index
+            .index
+            .insert(ModuleId("engine".to_string()), handle.clone());
 
         let result = index.get_str("engine").unwrap();
 
@@ -244,7 +244,7 @@ mod tests {
 
         world.insert_resource(ModuleDefinitionIndex::default());
 
-        world.run_system_once(build_module_definition_index_once_system);
+        _ = world.run_system_once(build_module_definition_index_once_system);
 
         let index = world.resource::<ModuleDefinitionIndex>();
         let result = index.get_str("dup").unwrap();
@@ -267,7 +267,7 @@ mod tests {
 
         world.insert_resource(ModuleDefinitionIndex::default());
 
-        world.run_system_once(build_module_definition_index_once_system);
+        _ = world.run_system_once(build_module_definition_index_once_system);
 
         let index = world.resource::<ModuleDefinitionIndex>();
         assert!(index.index.is_empty());
@@ -275,7 +275,6 @@ mod tests {
 
     #[test]
     fn running_twice_does_not_duplicate_entries() {
-
         let mut world = World::new();
 
         world.init_resource::<Assets<ModuleDefinition>>();
@@ -298,8 +297,8 @@ mod tests {
         let system = world.register_system(build_module_definition_index_once_system);
 
         // run twice
-        world.run_system(system);
-        world.run_system(system);
+        _ = world.run_system(system);
+        _ = world.run_system(system);
 
         let index = world.resource::<ModuleDefinitionIndex>();
 

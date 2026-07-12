@@ -1,3 +1,4 @@
+use bevy::ecs::system::RunSystemOnce;
 /// Integration tests for the UiDialog module.
 ///
 /// These tests require a Bevy App context and verify:
@@ -24,40 +25,37 @@ fn build_app() -> App {
 fn test_dialog_entity_has_correct_components() {
     let mut app = build_app();
 
-    let dialog_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                let dialog =
-                    UiDialog::new("Test Dialog".to_string(), UiDialogSeverity::Info).modal(true);
-                commands
-                    .spawn((
-                        dialog,
-                        Node {
-                            width: Val::Px(400.0),
-                            height: Val::Px(250.0),
-                            flex_direction: FlexDirection::Column,
-                            ..default()
-                        },
-                        BackgroundColor(UiDialogSeverity::Info.to_color()),
-                        Visibility::Visible,
-                    ))
-                    .id()
-            });
+    let dialog_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            let dialog =
+                UiDialog::new("Test Dialog".to_string(), UiDialogSeverity::Info).modal(true);
+            commands
+                .spawn((
+                    dialog,
+                    Node {
+                        width: Val::Px(400.0),
+                        height: Val::Px(250.0),
+                        flex_direction: FlexDirection::Column,
+                        ..default()
+                    },
+                    BackgroundColor(UiDialogSeverity::Info.to_color()),
+                    Visibility::Visible,
+                ))
+                .id()
+        })
+        .expect("Entity not returned.");
 
     // Verify UiDialog component
-    let dialog = app
-        .world()
-        .entity(dialog_entity)
-        .and_then(|e| e.get::<UiDialog>().cloned());
+    let dialog = app.world().entity(dialog_entity).get::<UiDialog>().cloned();
+
     assert!(dialog.is_some(), "entity should have UiDialog");
-    assert_eq!(dialog.unwrap().title, "Test Dialog");
-    assert!(dialog.unwrap().is_modal);
+    let dlg = dialog.unwrap();
+    assert_eq!(dlg.title, "Test Dialog");
+    assert!(dlg.is_modal);
 
     // Verify Node component
-    let node = app
-        .world()
-        .entity(dialog_entity)
-        .and_then(|e| e.get::<Node>().cloned());
+    let node = app.world().entity(dialog_entity).get::<Node>().cloned();
     assert!(node.is_some(), "entity should have Node");
     assert_eq!(node.unwrap().width, Val::Px(400.0));
 
@@ -65,9 +63,10 @@ fn test_dialog_entity_has_correct_components() {
     let bg_color = app
         .world()
         .entity(dialog_entity)
-        .and_then(|e| e.get::<BackgroundColor>().cloned());
+        .get::<BackgroundColor>()
+        .cloned();
     assert!(bg_color.is_some(), "entity should have BackgroundColor");
-    assert_eq!(bg_color.unwrap().color(), UiDialogSeverity::Info.to_color());
+    assert_eq!(bg_color.unwrap().0, UiDialogSeverity::Info.to_color());
 }
 
 #[test]
@@ -80,21 +79,19 @@ fn test_dialog_severity_affects_background_color() {
         UiDialogSeverity::Warning,
         UiDialogSeverity::Error,
     ] {
+        let sev = severity.clone();
         let entity: Entity = app
             .world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
+            .run_system_once(move |mut commands: Commands| -> Entity {
                 commands
-                    .spawn(UiDialog::new("Test".to_string(), severity))
-                    .with(BackgroundColor(severity.to_color()))
+                    .spawn(UiDialog::new("Test".to_string(), sev.clone()))
                     .id()
-            });
+            })
+            .expect("Entity not returned.");
 
-        let bg_color = app
-            .world()
-            .entity(entity)
-            .and_then(|e| e.get::<BackgroundColor>().cloned());
+        let bg_color = app.world().entity(entity).get::<BackgroundColor>().cloned();
         assert!(bg_color.is_some());
-        assert_eq!(bg_color.unwrap().color(), severity.to_color());
+        assert_eq!(bg_color.unwrap().0, severity.to_color());
     }
 }
 
@@ -102,32 +99,30 @@ fn test_dialog_severity_affects_background_color() {
 fn test_dialog_modal_flag() {
     let mut app = build_app();
 
-    let modal_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                commands
-                    .spawn(UiDialog::new("Modal".to_string(), UiDialogSeverity::Info))
-                    .id()
-            });
+    let modal_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            commands
+                .spawn(UiDialog::new("Modal".to_string(), UiDialogSeverity::Info))
+                .id()
+        })
+        .expect("Entity not returned.");
 
-    let non_modal_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                commands
-                    .spawn(
-                        UiDialog::new("Non-modal".to_string(), UiDialogSeverity::Info).modal(false),
-                    )
-                    .id()
-            });
+    let non_modal_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            commands
+                .spawn(UiDialog::new("Non-modal".to_string(), UiDialogSeverity::Info).modal(false))
+                .id()
+        })
+        .expect("Entity not returned.");
 
-    let modal_dialog = app
-        .world()
-        .entity(modal_entity)
-        .and_then(|e| e.get::<UiDialog>().cloned());
+    let modal_dialog = app.world().entity(modal_entity).get::<UiDialog>().cloned();
     let non_modal_dialog = app
         .world()
         .entity(non_modal_entity)
-        .and_then(|e| e.get::<UiDialog>().cloned());
+        .get::<UiDialog>()
+        .cloned();
 
     assert!(modal_dialog.unwrap().is_modal);
     assert!(!non_modal_dialog.unwrap().is_modal);
@@ -164,13 +159,14 @@ fn test_dialog_close_event_emitted_on_despawn() {
     let mut app = build_app();
 
     // Spawn a dialog
-    let dialog_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                commands
-                    .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
-                    .id()
-            });
+    let dialog_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            commands
+                .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
+                .id()
+        })
+        .expect("Entity not returned.");
 
     // Despawn it
     app.world_mut().entity_mut(dialog_entity).despawn();
@@ -188,33 +184,35 @@ fn test_dialog_button_emits_dialog_event() {
     let mut app = build_app();
 
     // Spawn a dialog with a button row containing an OK button
-    let dialog_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                let dialog_entity = commands
-                    .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
-                    .id();
+    let dialog_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            let dialog_entity = commands
+                .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
+                .id();
 
-                // Spawn a dialog button row with a button
-                commands.entity(dialog_entity).with_children(|parent| {
-                    parent
-                        .spawn((UiDialogButtonRow, Node::default()))
-                        .with_children(|button_row| {
-                            button_row
-                                .spawn((UiDialogButton, UiButtonType::Ok))
-                                .with(Interaction::Hovered);
-                        });
-                });
-
-                dialog_entity
+            // Spawn a dialog button row with a button
+            commands.entity(dialog_entity).with_children(|parent| {
+                parent
+                    .spawn((UiDialogButtonRow, Node::default()))
+                    .with_children(|button_row| {
+                        button_row
+                            .spawn((UiDialogButton, UiButtonType::Ok))
+                            .with(Interaction::Hovered);
+                    });
             });
+
+            dialog_entity
+        })
+        .expect("Entity not returned.");
 
     // Simulate pressing the button
-    let button_entity: Entity =
-        app.world_mut()
-            .run_system_once(|query: Query<Entity, With<UiDialogButton>>| -> Entity {
-                query.iter().next().unwrap()
-            });
+    let button_entity: Entity = app
+        .world_mut()
+        .run_system_once(|query: Query<Entity, With<UiDialogButton>>| -> Entity {
+            query.iter().next().unwrap()
+        })
+        .expect("Entity not returned.");
 
     app.world_mut()
         .entity_mut(button_entity)
@@ -241,42 +239,46 @@ fn test_dialog_button_event_contains_correct_action_type() {
     let mut app = build_app();
 
     // Spawn a dialog with Yes and No buttons
-    let dialog_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                let dialog_entity = commands
-                    .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
-                    .id();
+    let dialog_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            let dialog_entity = commands
+                .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
+                .id();
 
-                commands.entity(dialog_entity).with_children(|parent| {
-                    parent
-                        .spawn((UiDialogButtonRow, Node::default()))
-                        .with_children(|button_row| {
-                            button_row
-                                .spawn((UiDialogButton, UiButtonType::Yes))
-                                .with(Interaction::Hovered);
-                            button_row
-                                .spawn((UiDialogButton, UiButtonType::No))
-                                .with(Interaction::Hovered);
-                        });
-                });
-
-                dialog_entity
+            commands.entity(dialog_entity).with_children(|parent| {
+                parent
+                    .spawn((UiDialogButtonRow, Node::default()))
+                    .with_children(|button_row| {
+                        button_row
+                            .spawn((UiDialogButton, UiButtonType::Yes))
+                            .with(Interaction::Hovered);
+                        button_row
+                            .spawn((UiDialogButton, UiButtonType::No))
+                            .with(Interaction::Hovered);
+                    });
             });
 
+            dialog_entity
+        })
+        .expect("Entity not returned.");
+
     // Press the No button
-    let no_button_entity: Entity = app.world_mut().run_system_once(
-        |query: Query<Entity, (With<UiDialogButton>, With<UiButtonType>)>| -> Entity {
-            // Get the button with UiButtonType::No
-            let mut result = None;
-            for (entity, button_type) in query.iter() {
-                if button_type == UiButtonType::No {
-                    result = Some(entity);
+    let no_button_entity: Entity = app
+        .world_mut()
+        .run_system_once(
+            |query: Query<Entity, (With<UiDialogButton>, With<UiButtonType>)>| -> Entity {
+                // Get the button with UiButtonType::No
+                let mut result = None;
+                for (entity, button_type) in query.iter() {
+                    if button_type == UiButtonType::No {
+                        result = Some(entity);
+                    }
                 }
-            }
-            result.unwrap()
-        },
-    );
+                result.unwrap()
+            },
+        )
+        .expect("Entity not returned.");
 
     app.world_mut()
         .entity_mut(no_button_entity)
@@ -303,13 +305,17 @@ fn test_get_dialog_node_no_dialog_returns_none() {
 
     let entity: Entity = app
         .world_mut()
-        .run_system_once(|mut commands: Commands| -> Entity { commands.spawn(()).id() });
+        .run_system_once(|mut commands: Commands| -> Entity { commands.spawn(()).id() })
+        .expect("Entity not returned.");
 
-    let result: Option<Entity> = app.world_mut().run_system_once(
-        |dialogs: Query<Entity, With<UiDialog>>, parents: Query<&ChildOf>| -> Option<Entity> {
-            get_dialog_node(&dialogs, entity, &parents)
-        },
-    );
+    let result: Option<Entity> = app
+        .world_mut()
+        .run_system_once(
+            |dialogs: Query<Entity, With<UiDialog>>, parents: Query<&ChildOf>| -> Option<Entity> {
+                get_dialog_node(&dialogs, entity, &parents)
+            },
+        )
+        .expect("Entity not returned.");
 
     assert!(
         result.is_none(),
@@ -321,19 +327,23 @@ fn test_get_dialog_node_no_dialog_returns_none() {
 fn test_get_dialog_node_finds_direct_dialog() {
     let mut app = build_app();
 
-    let dialog_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                commands
-                    .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
-                    .id()
-            });
+    let dialog_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            commands
+                .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
+                .id()
+        })
+        .expect("Entity not returned.");
 
-    let result: Option<Entity> = app.world_mut().run_system_once(
-        |dialogs: Query<Entity, With<UiDialog>>, parents: Query<&ChildOf>| -> Option<Entity> {
-            get_dialog_node(&dialogs, dialog_entity, &parents)
-        },
-    );
+    let result: Option<Entity> = app
+        .world_mut()
+        .run_system_once(
+            |dialogs: Query<Entity, With<UiDialog>>, parents: Query<&ChildOf>| -> Option<Entity> {
+                get_dialog_node(&dialogs, dialog_entity, &parents)
+            },
+        )
+        .expect("Entity not returned.");
 
     assert_eq!(
         result,
@@ -346,27 +356,31 @@ fn test_get_dialog_node_finds_direct_dialog() {
 fn test_get_dialog_node_traverses_parent_chain() {
     let mut app = build_app();
 
-    let dialog_entity: Entity =
-        app.world_mut()
-            .run_system_once(|mut commands: Commands| -> Entity {
-                let dialog_entity = commands
-                    .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
-                    .id();
+    let dialog_entity: Entity = app
+        .world_mut()
+        .run_system_once(|mut commands: Commands| -> Entity {
+            let dialog_entity = commands
+                .spawn(UiDialog::new("Test".to_string(), UiDialogSeverity::Info))
+                .id();
 
-                // Create a child of the dialog
-                let child_entity = commands.spawn(()).id();
-                commands
-                    .entity_mut(dialog_entity)
-                    .add_children(&[child_entity]);
+            // Create a child of the dialog
+            let child_entity = commands.spawn(()).id();
+            commands
+                .entity_mut(dialog_entity)
+                .add_children(&[child_entity]);
 
-                dialog_entity
-            });
+            dialog_entity
+        })
+        .expect("Entity not returned.");
 
-    let result: Option<Entity> = app.world_mut().run_system_once(
-        |dialogs: Query<Entity, With<UiDialog>>, parents: Query<&ChildOf>| -> Option<Entity> {
-            get_dialog_node(&dialogs, dialog_entity, &parents)
-        },
-    );
+    let result: Option<Entity> = app
+        .world_mut()
+        .run_system_once(
+            |dialogs: Query<Entity, With<UiDialog>>, parents: Query<&ChildOf>| -> Option<Entity> {
+                get_dialog_node(&dialogs, dialog_entity, &parents)
+            },
+        )
+        .expect("Entity not returned.");
 
     assert_eq!(result, Some(dialog_entity));
 }

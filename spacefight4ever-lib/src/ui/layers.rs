@@ -1,11 +1,10 @@
-/// This module defines the different layers of the UI, 
+/// This module defines the different layers of the UI,
 /// such as the HUD, menu, dialog, and overlay layers.
 /// to ensure predictable Z-ordering and make it easier
 /// to manage Ui and prespawn the roots of each layer.
-
 use bevy::prelude::*;
 
-use crate::ui::systems::dialog;
+//use crate::ui::systems::dialog;
 
 use super::bundle::UiNode;
 use super::state::*;
@@ -39,37 +38,44 @@ pub struct UiLayers {
 }
 
 /// creates a layered node structure for ui
-pub fn spawn_ui_roots(
-    mut commands: Commands,
-    mut next_state: ResMut<NextState<UiInitState>>,
-) {
+pub fn spawn_ui_roots(mut commands: Commands, mut next_state: ResMut<NextState<UiInitState>>) {
     let mut hud_root: Entity = Entity::PLACEHOLDER;
     let mut menu_root = Entity::PLACEHOLDER;
     let mut window_root = Entity::PLACEHOLDER;
-    let mut dialog_root= Entity::PLACEHOLDER;
+    let mut dialog_root = Entity::PLACEHOLDER;
     let mut overlay_root = Entity::PLACEHOLDER;
 
     // Spawn UiRoot first
-    let ui_root = commands.spawn((
-        UiRoot, UiNode::new(
-            percent(100),
-            percent(100), Color::srgba(0.0, 0.0, 0.0, 0.0),
-            JustifyContent::Stretch,
-            AlignItems::Stretch
-        ), Name::new("UiRoot"))
-    ).with_children(|root| {
-        hud_root = root.spawn((
-            HudRoot, UiNode::default(), Name::new("HudRoot"))).id();
-        menu_root = root.spawn((
-            MenuRoot, UiNode::default(), Name::new("MenuRoot"))).id();
-        window_root = root.spawn((
-            WindowRoot, UiNode::default(), Name::new("WindowRoot"))).id();
-        dialog_root = root.spawn((
-            DialogRoot, UiNode::default(), Name::new("DialogRoot"))).id();
-        overlay_root = root.spawn((
-            OverlayRoot, UiNode::default(), Name::new("OverlayRoot"))).id();
-    })
-    .id();
+    let ui_root = commands
+        .spawn((
+            UiRoot,
+            UiNode::new(
+                percent(100),
+                percent(100),
+                Color::srgba(0.0, 0.0, 0.0, 0.0),
+                JustifyContent::Stretch,
+                AlignItems::Stretch,
+            ),
+            Name::new("UiRoot"),
+        ))
+        .with_children(|root| {
+            hud_root = root
+                .spawn((HudRoot, UiNode::default(), Name::new("HudRoot")))
+                .id();
+            menu_root = root
+                .spawn((MenuRoot, UiNode::default(), Name::new("MenuRoot")))
+                .id();
+            window_root = root
+                .spawn((WindowRoot, UiNode::default(), Name::new("WindowRoot")))
+                .id();
+            dialog_root = root
+                .spawn((DialogRoot, UiNode::default(), Name::new("DialogRoot")))
+                .id();
+            overlay_root = root
+                .spawn((OverlayRoot, UiNode::default(), Name::new("OverlayRoot")))
+                .id();
+        })
+        .id();
 
     // Store all layer roots in a resource
     commands.insert_resource(UiLayers {
@@ -83,4 +89,3 @@ pub fn spawn_ui_roots(
     // enable drawing of ui layers
     next_state.set(UiInitState::Ready)
 }
-

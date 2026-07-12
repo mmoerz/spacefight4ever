@@ -8,7 +8,9 @@ use crate::game::combat::ships::*;
 
 #[derive(Component, Clone, Copy)]
 pub struct ShipHealth {
+    /// current value
     pub values: LayeredHealth<i32>,
+    /// current value cannot exceed this
     pub values_max: LayeredHealth<i32>
 }
 

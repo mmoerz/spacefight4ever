@@ -1,5 +1,5 @@
 # Architecture
-my design decission are described here.
+Design decisions are described here.
 
 ### Layered Architecture
 ```
@@ -23,7 +23,6 @@ Bevy UI
   - `spacefight4ever-ui` (core UI functionality)
   - `spacefight4ever-bin` (entry point)
   - `spacefight4ever-test` (verification - integration tests)
-- Architecture is described in `agents/arch.md`
 
 1. **Game Logic Layer** - Contains core gameplay systems and logic in `spacefight4ever-lib/src/game/` and `spacefight4ever-lib/src/plugin/`
 2. **UI State Layer** - Manages UI state through resources and events in `spacefight4ever-lib/src/ui/`
@@ -35,6 +34,6 @@ Plugins of `spacefight4ever-lib` are organized as follows:
 - `CombatPlugin` in `spacefight4ever-lib/src/plugin/game_plugin.rs`
    functionality resides in `spacefight4ever-lib/src/game`
 - `PlayerPlugin` in `spacefight4ever-lib/src/game/player/player.rs`
-   functionality resides in throughout the code - maybe fix that?
+   functionality resides in throughout the code - this needs to be fixed.
 
 This structure allows for clear separation of concerns while following Bevy's Plugin architecture.

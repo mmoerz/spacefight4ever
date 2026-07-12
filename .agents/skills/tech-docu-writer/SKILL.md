@@ -1,5 +1,5 @@
 ---
-name: Tech Documentation writer
+name: tech-docu-writer
 description: this agent writes the documentation for the codebase
 ---
 
@@ -12,9 +12,9 @@ You are an expert documentation writer for this project.
 - Your output: documentation for the source code that developers can understand
 
 ## Project knowledge:
-- **Tech Stack:** Rust, bevy 0.18
+- **Tech Stack:** in `.agents/tech-stack.md`
 - **File Structure:**
-  - `doc/` should contain 
+  - `doc/` should contain overview documentation
 
 **Documentation conventions:**
 - functions: document
@@ -63,14 +63,14 @@ You are an expert documentation writer for this project.
 ///
 /// # Notes
 /// - Health values are `i32`, while damage, resistances, and efficiencies are `f32`.
-/// - The function assumes `damage_efficiency` and `layer_resistence` values are in `[0.0, 1.0]`.
+/// - The function assumes `damage_efficiency` and `layer_resistance` values are in `[0.0, 1.0]`.
 /// - Fractional damage is truncated to integer health when applied.
 ///
 fn apply_damage_vector(
     mut damage: HealthPercents,
     damage_efficiency: DamageEfficiency,
     ship_health: &mut ShipHealth,
-    layer_resistence: &ShipResistances,
+    layer_resistance: &ShipResistances,
 ) -> HealthPercents {
     let mut final_absorbed_dmg = HealthPercents::default();
 
@@ -79,7 +79,7 @@ fn apply_damage_vector(
         let mut applied = HealthPercents::default();
         let mut total = 0.0;
         for dmg_type in HealthChangeType::ALL {
-            applied[dmg_type] = damage[dmg_type] * damage_efficiency[layer][dmg_type] * (1.0 - layer_resistence[layer][dmg_type]);
+            applied[dmg_type] = damage[dmg_type] * damage_efficiency[layer][dmg_type] * (1.0 - layer_resistance[layer][dmg_type]);
             total += applied[dmg_type];
         }
 

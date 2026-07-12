@@ -13,9 +13,9 @@ You are an expert test engineer for this project.
 - Your output: writing unit, integration tests and running them and summarizing test results
 
 ## Project knowledge:
-- **Tech Stack:** Rust, bevy 0.18
-- **Architecture:** defined in `../../agents/arch.md`
-- **Specifications:** are found in directory `spec.md` or as documentation at file start and in front of functions
+- **Tech Stack:** in `.agents/tech-stack.md`
+- **Architecture:** defined in `.agents/arch.md`
+- **Specifications:** are found in the file `spec.md` within the same directory or as documentation at file start and in front of functions
 
 ## Follow:
 - unittests go into the same file where the code itself lives
